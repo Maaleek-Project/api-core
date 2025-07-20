@@ -15,6 +15,7 @@ datasource db {
 
 model Account {
   id         Int      @id @default(autoincrement())
+  entity_id  Int
   user_id    Int
   login      String
   password   String
@@ -28,12 +29,14 @@ model Account {
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
   country Country @relation(fields: [country_id], references: [id], onDelete: Cascade)
+  entity Entity @relation(fields: [entity_id], references: [id], onDelete: Cascade)
 
 
   @@unique([login, country_id])
 
   @@map("accounts")
   Token Token[]
+  Assignment Assignment[]
 }
 
 
@@ -59,8 +62,9 @@ model User {
   civility   String
   name       String
   surname    String
-  picture    String
-  birthdate  DateTime
+  picture    String?
+  birthdate  DateTime?
+  number     String
 
 
   created_at DateTime @default(now())
@@ -77,11 +81,15 @@ model Otp{
   value      String
   country_id Int
   state      String   @default("waiting")
+  attempt    Int      @default(1)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   country    Country @relation(fields: [country_id], references: [id], onDelete: Cascade)
+
+  @@unique([type, country_id, value])
+
 
   @@map("otps")
 }
@@ -91,10 +99,9 @@ model Token{
   token      String
   type       String
   account_id Int
-  state      String   @default("in progress")
 
   created_at DateTime @default(now())
-  
+  expired_at DateTime @updatedAt
   updated_at DateTime @updatedAt
 
   account Account @relation(fields: [account_id], references: [id], onDelete: Cascade)
@@ -111,4 +118,30 @@ model Entity{
   updated_at DateTime @updatedAt
 
   @@map("entities")
+  Account Account[]
+}
+
+model Role {
+  id         Int      @id @default(autoincrement())
+  libelle    String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("roles")
+  Assignment Assignment[]
+}
+
+model Assignment {
+  id         Int      @id @default(autoincrement())
+  role_id    Int
+  account_id Int
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  role Role @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  account Account @relation(fields: [account_id], references: [id], onDelete: Cascade)
+
+  @@map("assignments")
 }

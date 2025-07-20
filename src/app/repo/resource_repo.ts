@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { CountryModel } from "src/core/domain/models/country.model";
+import { EntityModel } from "src/core/domain/models/entity.model";
 import { IResourceRepo } from "src/core/interfaces/i_resource_repo";
 import { PrismaService } from "src/prisma.service";
 
@@ -15,8 +16,37 @@ export class ResourceRepo implements IResourceRepo {
         return countries.map(this.toCountry);
     }
 
+    async getEntities(): Promise<EntityModel[]> {
+        const entities = await this.prisma.entity.findMany();
+        return entities.map(this.toEntity);
+    }
+
+    async findCountry(country_id: number): Promise<CountryModel | null> {
+        const country = await this.prisma.country.findUnique({
+            where: {id : country_id}
+        })
+        return country ? this.toCountry(country) : null;
+    }
+
+    async findEntity(entity_id: number): Promise<EntityModel | null> {
+        const entity = await this.prisma.entity.findUnique({
+            where: {id : entity_id}
+        })
+        return entity ? this.toEntity(entity) : null;
+    }
 
 
+    // private function to transform the entity from the database to the DTO
+
+    private toEntity(entity: any): EntityModel  {
+        return {
+            id: entity.id,
+            libelle: entity.libelle,
+            code: entity.code,
+            created_at: entity.created_at,
+            updated_at: entity.updated_at,
+        };
+    }
 
     private toCountry(country : any) : CountryModel {
         return {
@@ -26,6 +56,8 @@ export class ResourceRepo implements IResourceRepo {
             alias: country.alias,
             flag: country.flag,
             currency: country.currency,
+            created_at: country.created_at,
+            updated_at: country.updated_at,
         };
     }
 

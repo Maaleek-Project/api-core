@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ResourceModule } from './api/controllers/resources/resource.module';
+import { AuthentificationModule } from './api/controllers/authentification/authentification.module';
 
 @Module({
   imports: [
@@ -9,6 +10,7 @@ import { ResourceModule } from './api/controllers/resources/resource.module';
       isGlobal: true
     }),
     ResourceModule,
+    AuthentificationModule
   ],
   controllers: [],
   providers: [],
