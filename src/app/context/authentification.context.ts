@@ -19,3 +19,9 @@ export interface SignUpContext {
     surname : string;
     entity_id : number;
 }
+
+export interface SignInContext {
+    login : string;
+    password : string;
+    country_id : number;
+}

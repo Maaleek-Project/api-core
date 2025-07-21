@@ -1,5 +1,5 @@
 import { Body, Controller, Post, Req, Res } from "@nestjs/common";
-import { InitiatedContext, SignUpContext, ValidateCodeContext } from "src/app/context/authentification.context";
+import { InitiatedContext, SignInContext, SignUpContext, ValidateCodeContext } from "src/app/context/authentification.context";
 import { AuthentificationFeature } from "src/app/features/authentification.feature";
 import { Response } from "express";
 
@@ -48,5 +48,17 @@ export class AuthentificationController {
         return res.status(status).json(validation);
     }
 
+    @Post('sign-in')
+    async signIn(@Req() req: Request, @Body() context: SignInContext, @Res() res: Response) {
+        const signIn = await this.feature.signIn(context);
+        const statusMap: Record<string, number> = {
+            success: 200,
+            not_found: 404,
+            internal_error: 500,
+            conflict : 409,
+        };
+        const status = statusMap[signIn.code] ;
+        return res.status(status).json(signIn);
+    }
 
 }
