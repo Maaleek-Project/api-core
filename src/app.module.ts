@@ -1,7 +1,9 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ResourceModule } from './api/controllers/resources/resource.module';
 import { AuthentificationModule } from './api/controllers/authentification/authentification.module';
+import { AuthMiddleware } from './api/middlewares/auth.middlewares';
+import { AuthentificationController } from './api/controllers/authentification/authentification.controller';
 
 @Module({
   imports: [
@@ -15,4 +17,10 @@ import { AuthentificationModule } from './api/controllers/authentification/authe
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(AuthMiddleware)
+      .forRoutes({path : 'auth/(.*)' , method : RequestMethod.DELETE});
+  }
+}

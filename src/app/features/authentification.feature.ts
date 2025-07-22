@@ -16,6 +16,8 @@ import { UserModel } from "src/core/domain/models/user.model";
 import { UserRepo } from "../repo/user_repo";
 import { AccountDtm } from "src/core/domain/dtms/account.dtm";
 import { AuthentificationService } from "src/core/services/authenfication.service";
+import { TokenRepo } from "../repo/token_repo";
+import { TokenModel } from "src/core/domain/models/token.model";
 
 @Injectable()
 export class AuthentificationFeature {
@@ -25,6 +27,7 @@ export class AuthentificationFeature {
         private readonly accountRepo : AccountRepo,
         private readonly resourceRepo : ResourceRepo,
         private readonly userRepo : UserRepo,
+        private readonly tokenRepo : TokenRepo,
         private readonly authentificationService : AuthentificationService,
     ) {}
 
@@ -105,6 +108,7 @@ export class AuthentificationFeature {
                 }
 
                 account.status = "processing";
+
                 await this.accountRepo.save(account);
 
                 return ApiResponseUtil.ok(UserOrCodeDtm.fromUser(UserDtm.fromUserDtm(account.user)), 'Good 🎉, enter your pin code .');
@@ -145,13 +149,18 @@ export class AuthentificationFeature {
 
 
             const password = await this.authentificationService.hashPassword(context.password);
+            
 
-            const account : AccountModel = { id : 1, login : context.login, password : password, user : user, country : country!, entity : entity};
-            await this.accountRepo.save(account);
+            const account : AccountModel = { id : 1, login : context.login, password : password, user : user, country : country!, entity : entity, status : 'connected'};
 
+            const token = await this.authentificationService.generateToken(AccountDtm.fromAccountDtm(account));
+            const model : TokenModel = { id : 1, token : token, type : 'to_connect', account_id : account.id, expired_at : SharedUtil.addDaysToNow(1)};
+                
+            await this.tokenRepo.save(model);
+            const saved = await this.accountRepo.save(account);
             await this.otpRepo.remove(action);
 
-            return ApiResponseUtil.ok(AccountDtm.fromAccountDtm(account), 'Account created 🎉 .');
+            return ApiResponseUtil.ok({...AccountDtm.fromAccountDtm(saved), token : token}, 'Account created 🎉 .');
 
         }catch(e){
             return ApiResponseUtil.error(e.message, 'internal_error');
@@ -179,10 +188,35 @@ export class AuthentificationFeature {
             return ApiResponseUtil.error('Incorrect password .', 'conflict');
         }
 
-        account.status = "connected";
-        await this.accountRepo.save(account);
+        const token = await this.authentificationService.generateToken(AccountDtm.fromAccountDtm(account));
+        const model : TokenModel = { id : 1, token : token, type : 'to_connect', account_id : account.id, expired_at : SharedUtil.addDaysToNow(1)};
+        await this.tokenRepo.save(model);
 
-        return ApiResponseUtil.ok(AccountDtm.fromAccountDtm(account), 'Good 🎉, welcome back .');
+        account.status = "connected";
+        const saved = await this.accountRepo.save(account);
+
+        return ApiResponseUtil.ok({...AccountDtm.fromAccountDtm(saved), token : token}, 'Good 🎉, welcome back .');
+    }
+
+    async signOut(dtm : AccountDtm ) : Promise<ApiResponse<AccountDtm>> {
+
+        const account = await this.accountRepo.fetchByLogin(dtm.user.number, dtm.country.id);
+
+        if(account == null)
+        {
+            return ApiResponseUtil.error('Account not found .', 'not_found');
+        }
+
+        if(account.status != 'connected')
+        {
+            return ApiResponseUtil.error('Account not connected .', 'unauthorized');
+        }
+
+        account.status = "unconnected";
+        const saved = await this.accountRepo.save(account);
+        await this.tokenRepo.remove(dtm.id);
+
+        return ApiResponseUtil.ok(AccountDtm.fromAccountDtm(saved), 'Good 🎉, you are now disconnected .');
     }
 
 }

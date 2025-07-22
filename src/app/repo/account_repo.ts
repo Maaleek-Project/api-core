@@ -62,7 +62,8 @@ export class AccountRepo implements IAccountRepo {
             password: account.password,
             user_id: account.user.id,
             country_id : account.country.id,
-            entity_id : account.entity.id
+            entity_id : account.entity.id,
+            status: account.status
         }
     }
 

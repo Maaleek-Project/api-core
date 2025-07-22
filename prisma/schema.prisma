@@ -35,8 +35,8 @@ model Account {
   @@unique([login, country_id])
 
   @@map("accounts")
-  Token Token[]
-  Assignment Assignment[]
+  token Token[]
+  assignment Assignment[]
 }
 
 
@@ -44,7 +44,7 @@ model Country {
   id        Int      @id @default(autoincrement())
   libelle   String
   code      String
-  alias     String
+  alias     String   @unique
   flag      String
   currency  String
 
@@ -53,8 +53,8 @@ model Country {
   
 
   @@map("countries")
-  Account Account[]
-  Otp Otp[]
+  account Account[]
+  otp Otp[]
 }
 
 model User {
@@ -71,7 +71,7 @@ model User {
   updated_at DateTime @updatedAt
 
   @@map("users")
-  Account Account[]
+  account Account[]
 }
 
 model Otp{
@@ -96,9 +96,9 @@ model Otp{
 
 model Token{
   id         Int      @id @default(autoincrement())
-  token      String
+  token      String   @unique
   type       String
-  account_id Int
+  account_id Int      @unique
 
   created_at DateTime @default(now())
   expired_at DateTime @updatedAt
@@ -118,7 +118,7 @@ model Entity{
   updated_at DateTime @updatedAt
 
   @@map("entities")
-  Account Account[]
+  account Account[]
 }
 
 model Role {
@@ -129,7 +129,7 @@ model Role {
   updated_at DateTime @updatedAt
 
   @@map("roles")
-  Assignment Assignment[]
+  assignment Assignment[]
 }
 
 model Assignment {

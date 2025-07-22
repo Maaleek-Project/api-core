@@ -1,6 +1,7 @@
 import { AccountModel } from "../models/account.model";
 import { CountryDtm } from "./country.dtm";
 import { EntityDtm } from "./entity.dtm";
+import { TokenDtm } from "./token.dtm";
 import { UserDtm } from "./user.dtm";
 
 export class AccountDtm {

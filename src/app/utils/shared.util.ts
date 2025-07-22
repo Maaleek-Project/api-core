@@ -16,4 +16,8 @@ export class SharedUtil {
         return  diff > time * 1000 * 60;
     }
 
+    static addDaysToNow(days: number): Date {
+        return new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+    }
+
 }

@@ -3,10 +3,16 @@ import { AuthentificationService } from "src/core/services/authenfication.servic
 import { AuthentificationController } from "./authentification.controller";
 import { RepoModule } from "src/app/repo/repo.module";
 import { AuthentificationFeature } from "src/app/features/authentification.feature";
+import { JwtModule } from "@nestjs/jwt";
 
 @Module({
     imports: [
-        RepoModule
+        RepoModule,
+        JwtModule.register({
+            global: true,
+            secret: process.env.JWT_SECRET,
+            signOptions: { expiresIn: '1d' },
+        }),
     ],
     controllers: [
         AuthentificationController

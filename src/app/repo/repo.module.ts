@@ -4,6 +4,7 @@ import { ResourceRepo } from "./resource_repo";
 import { OtpRepo } from "./otp_repo";
 import { AccountRepo } from "./account_repo";
 import { UserRepo } from "./user_repo";
+import { TokenRepo } from "./token_repo";
 
 @Module({
     imports: [
@@ -16,6 +17,7 @@ import { UserRepo } from "./user_repo";
         OtpRepo,
         AccountRepo,
         UserRepo,
+        TokenRepo,
         PrismaService
     ],
     exports: [
@@ -23,6 +25,7 @@ import { UserRepo } from "./user_repo";
         OtpRepo,
         UserRepo,
         AccountRepo,
+        TokenRepo
     ],
 })
 export class RepoModule {}
