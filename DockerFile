@@ -4,6 +4,8 @@ RUN apk --no-cache add dumb-init
 RUN mkdir -p /home/node/app && chown -R node:node /home/node/app
 WORKDIR /home/node/app
 
+ENV NODE_ENV=production
+
 USER node
 
 FROM build-stage AS dependencies
