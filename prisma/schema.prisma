@@ -73,7 +73,7 @@ model User {
 
   @@map("users")
   account Account[]
-  BusinessCard BusinessCard[]
+  businessCard BusinessCard[]
 }
 
 model Otp{
