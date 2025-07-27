@@ -32,6 +32,7 @@ export class UserRepo implements IUserRepo {
             number: user.number,
             created_at: user.created_at,
             updated_at: user.updated_at,
+            businessCard: user.card
         }
     }
 

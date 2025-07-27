@@ -28,6 +28,9 @@ export class AuthMiddleware implements NestMiddleware {
         if (!token || !token.startsWith('Bearer ')) {
             return res.status(401).json({
                 message: 'You must be authenticated to access this resource.',
+                code : 'unauthorized',
+                success : false,
+                content : null
             });
         }
         const key = token.split(' ')[1];
@@ -39,11 +42,17 @@ export class AuthMiddleware implements NestMiddleware {
             {
                 return res.status(401).json({
                     message: 'You must be authenticated to access this resource .',
+                    code : 'unauthorized',
+                    success : false,
+                    content : null
                 });
             }
         }catch(e){
             return res.status(401).json({
                 message: 'Session expired .',
+                code : 'unauthorized',
+                success : false,
+                content : null
             });
         }
 
@@ -61,7 +70,15 @@ export class AuthMiddleware implements NestMiddleware {
                     id : model.account_id
                 },
                 include : {
-                    user : true,
+                    user: {
+                            include: {
+                                businessCard : {
+                                    include: {
+                                        offer : true
+                                    }
+                                }
+                            }
+                        },
                     country : true,
                     entity : true
                 }
@@ -74,6 +91,9 @@ export class AuthMiddleware implements NestMiddleware {
 
         return res.status(401).json({
                 message: 'You must be authenticated to access this resource.',
+                code : 'unauthorized',
+                success : false,
+                content : null
         });
         
        

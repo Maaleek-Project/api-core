@@ -1,25 +1,31 @@
 import { PrismaClient } from '@prisma/client';
+import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient();
 
 export default async function EntitySeeder() {
     const entities = [
         {
-            id: 1,
+            id: uuidv4(),
             libelle: 'Particulier',
             code: 'Customer',
         },
         {
-            id: 2,
+            id: uuidv4(),
             libelle: 'Entreprise',
             code: 'Company',
+        },
+        {
+            id: uuidv4(),
+            libelle: 'Gestionnaire',
+            code: 'Manager',
         }
     ]
 
     for (const entity of entities) {
         await prisma.entity.upsert({
-            where: { id: entity.id },
-            update: entity,
+            where: { code : entity.code },
+            update: {},
             create: entity
         })
     }

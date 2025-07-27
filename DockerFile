@@ -1,0 +1,26 @@
+ARG NODE_VERSION=21.7.3
+FROM node:${NODE_VERSION}-alpine AS build-stage
+RUN apk --no-cache add dumb-init
+RUN mkdir -p /home/node/app && chown -R node:node /home/node/app
+WORKDIR /home/node/app
+
+USER node
+
+FROM build-stage AS dependencies
+COPY --chown=node:node package.json package-lock.json ./
+RUN npm install
+COPY --chown=node:node . . 
+
+FROM dependencies AS build
+RUN npm run build  --ignore-ts-errors
+
+FROM build-stage AS production
+
+COPY --chown=node:node package.json package-lock.json ./
+RUN npm install --omit=dev
+COPY --chown=node:node --from=build /home/node/app/dist .
+COPY --chown=node:node ../prisma ./prisma
+
+RUN npx prisma generate
+
+EXPOSE $PORT

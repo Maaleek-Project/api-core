@@ -27,7 +27,7 @@ export class OtpRepo implements IOtpRepo {
     }
 
     
-    async fetchByValue(value: string, country_id: number): Promise<any | null> {
+    async fetchByValue(value: string, country_id: string): Promise<any | null> {
         const otp = await this.prisma.otp.findFirst({
             where : {value , country_id}
         })
@@ -35,7 +35,7 @@ export class OtpRepo implements IOtpRepo {
         return otp ? this.toOtp(otp) : null;
     }
 
-    async findAction(type: string, state :string, value: string, country_id: number): Promise<OtpModel | null> {
+    async findAction(type: string, state :string, value: string, country_id: string): Promise<OtpModel | null> {
         const otp = await this.prisma.otp.findFirst({
             where : {type , state , value , country_id}
         })

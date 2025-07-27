@@ -14,12 +14,12 @@ datasource db {
 }
 
 model Account {
-  id         Int      @id @default(autoincrement())
-  entity_id  Int
-  user_id    Int
-  login      String
+  id         String      @id @default(uuid())
+  entity_id  String
+  user_id    String
+  login      String      @unique
   password   String
-  country_id Int
+  country_id String
   status     String   @default("unconnected")
   state      String   @default("waiting")
   locked     Boolean  @default(false)
@@ -41,7 +41,7 @@ model Account {
 
 
 model Country {
-  id        Int      @id @default(autoincrement())
+  id        String      @id @default(uuid())
   libelle   String
   code      String
   alias     String   @unique
@@ -58,13 +58,14 @@ model Country {
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
+  id         String      @id @default(uuid())
   civility   String
   name       String
   surname    String
   picture    String?
   birthdate  DateTime?
-  number     String
+  number     String      @unique
+  email      String?     @unique
 
 
   created_at DateTime @default(now())
@@ -72,14 +73,15 @@ model User {
 
   @@map("users")
   account Account[]
+  BusinessCard BusinessCard[]
 }
 
 model Otp{
-  id         Int      @id @default(autoincrement())
+  id         String      @id @default(uuid())
   code       String
   type       String
   value      String
-  country_id Int
+  country_id String
   state      String   @default("waiting")
   attempt    Int      @default(1)
 
@@ -95,10 +97,10 @@ model Otp{
 }
 
 model Token{
-  id         Int      @id @default(autoincrement())
+  id         String   @id @default(uuid())
   token      String   @unique
   type       String
-  account_id Int      @unique
+  account_id String      @unique
 
   created_at DateTime @default(now())
   expired_at DateTime @updatedAt
@@ -110,9 +112,9 @@ model Token{
 }
 
 model Entity{
-  id         Int      @id @default(autoincrement())
+  id         String      @id @default(uuid())
   libelle    String
-  code       String
+  code       String      @unique
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -122,8 +124,8 @@ model Entity{
 }
 
 model Role {
-  id         Int      @id @default(autoincrement())
-  libelle    String
+  id         String      @id @default(uuid())
+  libelle    String      @unique
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -133,9 +135,9 @@ model Role {
 }
 
 model Assignment {
-  id         Int      @id @default(autoincrement())
-  role_id    Int
-  account_id Int
+  id         String      @id @default(uuid())
+  role_id    String
+  account_id String
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -144,4 +146,54 @@ model Assignment {
   account Account @relation(fields: [account_id], references: [id], onDelete: Cascade)
 
   @@map("assignments")
+}
+
+model Company{
+  id         String      @id @default(uuid())
+  account_id String
+  number     String      @unique
+  email      String      @unique
+  name       String
+  address    String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("companies")
+  BusinessCard BusinessCard[]
+}
+
+
+model BusinessCard{
+  id         String      @id @default(uuid())
+  user_id    String @unique
+  offer_id   String 
+  number     String      @unique
+  email      String?     @unique
+  job        String?
+  company_id String? 
+  
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  company Company? @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  offer Offer @relation(fields: [offer_id], references: [id], onDelete: Cascade)
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("business_cards")
+}
+
+model Offer {
+  id         String      @id @default(uuid())
+  libelle    String
+  sharing_number Int
+  code       String      @unique
+
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("offers")
+  BusinessCard BusinessCard[]
 }

@@ -1,5 +1,5 @@
 export interface CountryModel {
-    id: number;
+    id: string;
     libelle: string;
     code: string;
     alias: string;

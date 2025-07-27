@@ -21,14 +21,14 @@ export class ResourceRepo implements IResourceRepo {
         return entities.map(this.toEntity);
     }
 
-    async findCountry(country_id: number): Promise<CountryModel | null> {
+    async findCountry(country_id: string): Promise<CountryModel | null> {
         const country = await this.prisma.country.findUnique({
             where: {id : country_id}
         })
         return country ? this.toCountry(country) : null;
     }
 
-    async findEntity(entity_id: number): Promise<EntityModel | null> {
+    async findEntity(entity_id: string): Promise<EntityModel | null> {
         const entity = await this.prisma.entity.findUnique({
             where: {id : entity_id}
         })

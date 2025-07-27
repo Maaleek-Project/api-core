@@ -1,11 +1,11 @@
 import { EntityModel } from "../models/entity.model";
 
 export class EntityDtm {
-    id: number;
+    id: string;
     libelle: string;
     code: string;
 
-    constructor(id: number, libelle: string, code: string) {
+    constructor(id: string, libelle: string, code: string) {
         this.id = id;
         this.libelle = libelle;
         this.code = code;

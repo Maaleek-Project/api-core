@@ -16,7 +16,15 @@ export class AccountRepo implements IAccountRepo {
             update: this.toDatabase(model),
             create: this.toDatabase(model),
             include: {
-                user: true,
+                user: {
+                    include: {
+                        businessCard : {
+                            include: {
+                                offer : true
+                            }
+                        }
+                    }
+                },
                 country: true,
                 entity: true
             }
@@ -25,17 +33,50 @@ export class AccountRepo implements IAccountRepo {
         return this.toAccount(account);
     }
 
-    async fetchByLogin(login: string, country_id: number): Promise<AccountModel | null> {
+    async fetchByLogin(login: string, country_id: string): Promise<AccountModel | null> {
         const account = await this.prisma.account.findFirst({
             where: {login , country_id},
             include: {
-                user: true,
+                user: {
+                    include: {
+                        businessCard : {
+                            include: {
+                                offer : true
+                            }
+                        }
+                    }
+                },
                 country: true,
                 entity: true
             }
         })
         
         return account ? this.toAccount(account) : null;
+    }
+
+    async findAllCustomer() : Promise<AccountModel[]> {
+        const accounts = await this.prisma.account.findMany({
+            where: {
+                entity : {
+                    code : 'Customer'
+                }
+            },
+            include: {
+                user: {
+                    include: {
+                        businessCard : {
+                            include: {
+                                offer : true
+                            }
+                        }
+                    }
+                },
+                country: true,
+                entity: true
+            }
+        })
+
+        return accounts.map(account => this.toAccount(account));
     }
 
 

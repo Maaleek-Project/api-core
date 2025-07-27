@@ -1,23 +1,28 @@
 import { PrismaClient } from '@prisma/client';
+import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient();
 
 export default async function RoleSeeder() {
     const roles = [
         {
-            id: 1,
+            id: uuidv4(),
             libelle: 'Administrateur',
         },
         {
-            id: 2,
-            libelle: 'Utilisateur',
+            id: uuidv4(),
+            libelle: 'Comptable',
+        },
+        {
+            id: uuidv4(),
+            libelle : 'Relation clientelle'
         }
     ]
 
     for (const role of roles) {
         await prisma.role.upsert({
-            where: { id: role.id },
-            update: role,
+            where: { libelle: role.libelle },
+            update: {},
             create: role
         })
     }

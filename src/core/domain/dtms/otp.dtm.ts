@@ -1,12 +1,12 @@
 import { OtpModel } from "../models/otp.model";
 
 export class OtpDtm {
-    id: number;
+    id: string;
     type: string;
     value: string;
-    country_id: number;
+    country_id: string;
 
-    constructor(id: number, type: string, value: string, country_id: number) {
+    constructor(id: string, type: string, value: string, country_id: string) {
         this.id = id;
         this.type = type;
         this.value = value;

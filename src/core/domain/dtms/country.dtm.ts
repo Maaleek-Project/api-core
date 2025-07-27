@@ -1,14 +1,14 @@
 import { CountryModel } from "../models/country.model";
 
 export class CountryDtm {
-    id: number;
+    id: string;
     libelle: string;
     code: string;
     alias: string;
     flag: string;
     currency: string;
 
-    constructor(id: number, libelle: string, code: string, alias: string, flag: string, currency: string) {
+    constructor(id: string, libelle: string, code: string, alias: string, flag: string, currency: string) {
         this.id = id;
         this.libelle = libelle;
         this.code = code;

@@ -1,14 +1,14 @@
 import { TokenModel } from "../models/token.model";
 
 export class TokenDtm {
-    id : number;
+    id : string;
     token : string;
     type : string;
-    account_id : number;
+    account_id : string;
     expired_at : Date;
     created_at? : Date;
 
-    constructor(id : number, token : string, type : string, account_id : number, expired_at : Date, created_at? : Date) {
+    constructor(id : string, token : string, type : string, account_id : string, expired_at : Date, created_at? : Date) {
         this.id = id;
         this.token = token;
         this.type = type;

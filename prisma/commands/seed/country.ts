@@ -1,11 +1,12 @@
 import { PrismaClient } from '@prisma/client';
+import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient();
 
 export default async function CountrySeeder() {
     const countries = [
         {
-            id: 1,
+            id: uuidv4(),
             libelle: 'Côte d\'Ivoire',
             code: '225',
             alias: 'CI',
@@ -13,7 +14,7 @@ export default async function CountrySeeder() {
             currency: 'XOF',
         },
         {
-            id: 2,
+            id: uuidv4(),
             libelle: 'Senegal',
             code: '221',
             alias: 'SN',
@@ -24,8 +25,8 @@ export default async function CountrySeeder() {
 
     for (const country of countries) {
         await prisma.country.upsert({
-            where: { id: country.id },
-            update: country,
+            where: { alias: country.alias },
+            update: {},
             create: country
         })
     }

@@ -1,10 +1,9 @@
-import { TokenDtm } from "../dtms/token.dtm";
 import { CountryModel } from "./country.model";
 import { EntityModel } from "./entity.model";
 import { UserModel } from "./user.model";
 
 export interface AccountModel {
-    id: number;
+    id: string;
     login: string;
     password: string;
     user: UserModel;

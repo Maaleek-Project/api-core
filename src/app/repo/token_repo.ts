@@ -26,7 +26,7 @@ export class TokenRepo implements ITokenRepo {
         return this.toTokenModel(saved);
     }
 
-    async remove(accoun_id : number) : Promise<TokenModel> {
+    async remove(accoun_id : string) : Promise<TokenModel> {
         const deleted = await this.prisma.token.delete({
             where: {account_id : accoun_id}
         });

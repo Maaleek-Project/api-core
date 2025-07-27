@@ -18,6 +18,7 @@ import { AccountDtm } from "src/core/domain/dtms/account.dtm";
 import { AuthentificationService } from "src/core/services/authenfication.service";
 import { TokenRepo } from "../repo/token_repo";
 import { TokenModel } from "src/core/domain/models/token.model";
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class AuthentificationFeature {
@@ -89,7 +90,7 @@ export class AuthentificationFeature {
 
                     // ---------------------------------
 
-                    const otp : OtpModel = { id : 1, type : 'verified_number', value : context.login, country_id : context.country_id, state : 'waiting', attempt : 1 ,  code}
+                    const otp : OtpModel = { id :uuidv4(), type : 'verified_number', value : context.login, country_id : context.country_id, state : 'waiting', attempt : 1 ,  code}
                     await this.otpRepo.save(otp);
 
                     return ApiResponseUtil.ok(UserOrCodeDtm.fromCode(OtpDtm.fromOtpDtm(otp)), 'Code sent');
@@ -144,17 +145,17 @@ export class AuthentificationFeature {
                 return ApiResponseUtil.error('Time elapsed, try again .', 'conflict');
             }
 
-            const user : UserModel = { id : 1, civility : context.civility, name : context.name, surname : context.surname, number : context.login };
+            const user : UserModel = { id : uuidv4(), civility : context.civility, name : context.name, surname : context.surname, number : context.login };
             await this.userRepo.save(user);
 
 
             const password = await this.authentificationService.hashPassword(context.password);
             
 
-            const account : AccountModel = { id : 1, login : context.login, password : password, user : user, country : country!, entity : entity, status : 'connected'};
+            const account : AccountModel = { id : uuidv4(), login : context.login, password : password, user : user, country : country!, entity : entity, status : 'connected'};
 
             const token = await this.authentificationService.generateToken(AccountDtm.fromAccountDtm(account));
-            const model : TokenModel = { id : 1, token : token, type : 'to_connect', account_id : account.id, expired_at : SharedUtil.addDaysToNow(1)};
+            const model : TokenModel = { id : uuidv4(), token : token, type : 'to_connect', account_id : account.id, expired_at : SharedUtil.addDaysToNow(1)};
                 
             await this.tokenRepo.save(model);
             const saved = await this.accountRepo.save(account);
@@ -189,7 +190,7 @@ export class AuthentificationFeature {
         }
 
         const token = await this.authentificationService.generateToken(AccountDtm.fromAccountDtm(account));
-        const model : TokenModel = { id : 1, token : token, type : 'to_connect', account_id : account.id, expired_at : SharedUtil.addDaysToNow(1)};
+        const model : TokenModel = { id : uuidv4(), token : token, type : 'to_connect', account_id : account.id, expired_at : SharedUtil.addDaysToNow(1)};
         await this.tokenRepo.save(model);
 
         account.status = "connected";
@@ -200,7 +201,7 @@ export class AuthentificationFeature {
 
     async signOut(dtm : AccountDtm ) : Promise<ApiResponse<AccountDtm>> {
 
-        const account = await this.accountRepo.fetchByLogin(dtm.user.number, dtm.country.id);
+        const account = await this.accountRepo.fetchByLogin(dtm.login, dtm.country.id);
 
         if(account == null)
         {

@@ -1,6 +1,10 @@
 import { PrismaClient } from '@prisma/client';
+import { v4 as uuidv4 } from 'uuid';
+import { AuthentificationService } from '../../../src/core/services/authenfication.service';
+import { JwtService } from "@nestjs/jwt";
 
 const prisma = new PrismaClient();
+const authentificationService = new AuthentificationService(new JwtService());
 
 export default async function UserSeeder() {
 
@@ -8,37 +12,57 @@ export default async function UserSeeder() {
         where: { alias : 'CI' }
     })
 
+    const entity = await prisma.entity.findUnique({
+        where: { code : 'Manager' }
+    })
+
     const users = [
         {
-            id: 1,
+            id: uuidv4(),
             civility: 'Mr',
             name: 'Djie',
             surname: 'Fabrice',
             number: '0779312475',
+            login : 'louisfabrice1@gmail.com',
+            password : '12563'
         },
         {
-            id: 2,
+            id: uuidv4(),
             civility: 'Mr',
             name: 'Ofaby',
             surname: 'Oscar',
             number: '0777002625',
+            login : 'fabriceo.kouame@gmail.com',
+            password : '78564'
         }
     ]
 
     for (const user of users) {
+
+        const password = await authentificationService.hashPassword(user.password);
+
         const saved = await prisma.user.upsert({
-            where: { id: user.id },
-            update: user,
-            create: user
+            where: { email : user.login },
+            update: {},
+            create: {
+                id : user.id,
+                civility : user.civility,
+                name: user.name,                
+                surname: user.surname,
+                number: user.number,
+                email: user.login,
+            }
         })
 
-        await prisma.account.create({
-            data: {
-                login: user.number,
-                password: '$2b$10$NpWVLok/Y3LzCTJyGQ6ZwuRsLIKAacbw8Rvxf3zkwCwaoUd9.jNkW',
+        await prisma.account.upsert({
+            where : { login : user.login },
+            update: {},
+            create: {
+                login: user.login,
+                password: password,
                 user_id: saved.id,
                 country_id: country!.id,
-                entity_id: 1,
+                entity_id: entity!.id,
                 status: 'unconnected'
             }
         })
