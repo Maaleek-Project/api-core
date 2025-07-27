@@ -5,6 +5,9 @@ RUN mkdir -p /home/node/app && chown -R node:node /home/node/app
 WORKDIR /home/node/app
 
 ENV NODE_ENV=production
+ENV PORT=3384
+ENV DATABASE_URL="postgresql://postgres:jzzPfIIyScIVBSSTZnArDBGfjZvTcPLW@gondola.proxy.rlwy.net:28647/railway"
+ENV JWT_SECRET = "DO NOT USE THIS VALUE. INSTEAD, CREATE A COMPLEX SECRET AND KEEP IT SAFE OUTSIDE OF THE SOURCE CODE."
 
 USER node
 
