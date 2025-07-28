@@ -19,6 +19,14 @@ export class UserRepo implements IUserRepo {
         return this.toUser(user);
     }
 
+    async findByEmail(email: string): Promise<UserModel | null> {
+        const user = await this.prisma.user.findFirst({
+            where : {email : email}
+        })
+
+        return user ? this.toUser(user) : null ;
+    }
+
     // private function to transform the entity from the database to the DTO
 
     private toUser(user : any) : UserModel {
@@ -30,6 +38,7 @@ export class UserRepo implements IUserRepo {
             picture: user.picture,
             birthdate: user.birthdate,
             number: user.number,
+            email : user.email,
             created_at: user.created_at,
             updated_at: user.updated_at,
             businessCard: user.card
@@ -44,7 +53,8 @@ export class UserRepo implements IUserRepo {
             surname: user.surname,
             picture: user.picture,
             birthdate: user.birthdate,
-            number: user.number
+            number: user.number,
+            email : user.email
         }
     }
 

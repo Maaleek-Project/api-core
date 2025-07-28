@@ -6,6 +6,7 @@ export interface UserModel {
     name : string;
     surname : string;
     number : string;
+    email? : string;
     businessCard? : CardModel;
     picture? : string;
     birthdate? : Date;

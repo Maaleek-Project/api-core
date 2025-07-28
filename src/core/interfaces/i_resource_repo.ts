@@ -7,4 +7,6 @@ export interface IResourceRepo {
 
     findCountry(country_id: string): Promise<CountryModel | null>;
     findEntity(entity_id: string): Promise<EntityModel | null>;
+
+    findEntityByCode(code: string): Promise<EntityModel | null>;
 }

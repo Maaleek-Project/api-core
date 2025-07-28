@@ -35,6 +35,13 @@ export class ResourceRepo implements IResourceRepo {
         return entity ? this.toEntity(entity) : null;
     }
 
+    async findEntityByCode(code: string): Promise<EntityModel | null> {
+        const entity = await this.prisma.entity.findUnique({
+            where: {code : code}
+        })
+        return entity ? this.toEntity(entity) : null;
+    }
+
 
     // private function to transform the entity from the database to the DTO
 
