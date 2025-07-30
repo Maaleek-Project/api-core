@@ -7,6 +7,7 @@ import { ManagementModule } from './api/controllers/management/management.module
 import { CustomerController } from './api/controllers/management/customer.controller';
 import { APP_GUARD } from '@nestjs/core';
 import { EntityTypeGuard } from './core/guards/entity_type.guard';
+import { CompanyController } from './api/controllers/management/company.controller';
 
 @Module({
   imports: [
@@ -28,5 +29,7 @@ export class AppModule {
       .forRoutes({path : 'auth/(.*)' , method : RequestMethod.DELETE})
       .apply(AuthMiddleware)
       .forRoutes(CustomerController)
+      .apply(AuthMiddleware)
+      .forRoutes(CompanyController)
   }
 }

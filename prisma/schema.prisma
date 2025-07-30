@@ -37,6 +37,7 @@ model Account {
   @@map("accounts")
   token Token[]
   assignment Assignment[]
+  Company Company[]
 }
 
 
@@ -159,6 +160,8 @@ model Company{
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
+  account Account @relation(fields: [account_id], references: [id], onDelete: Cascade)
+
   @@map("companies")
   BusinessCard BusinessCard[]
 }
@@ -166,7 +169,7 @@ model Company{
 
 model BusinessCard{
   id         String      @id @default(uuid())
-  user_id    String @unique
+  user_id    String      @unique
   offer_id   String 
   number     String      @unique
   email      String?     @unique
