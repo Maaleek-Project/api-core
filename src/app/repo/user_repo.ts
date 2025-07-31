@@ -27,6 +27,14 @@ export class UserRepo implements IUserRepo {
         return user ? this.toUser(user) : null ;
     }
 
+    async findByNumber(number: string): Promise<UserModel | null> {
+        const user = await this.prisma.user.findFirst({
+            where : {number : number}
+        })
+
+        return user ? this.toUser(user) : null ;
+    }
+
     // private function to transform the entity from the database to the DTO
 
     private toUser(user : any) : UserModel {

@@ -44,10 +44,17 @@ export class CustomerFeature {
 
             if (account == null)
             {
-                const user : UserModel | null = await this.userRepo.findByEmail(context.email);
+                const find_email : UserModel | null = await this.userRepo.findByEmail(context.email);
 
-                if(user == null)
+                if(find_email == null)
                 {
+                    const find_number : UserModel | null = await this.userRepo.findByNumber(context.number);
+
+                    if(find_number != null)
+                    {
+                        return ApiResponseUtil.error('This number is already used .', 'conflict');
+                    }
+
                     const user : UserModel = { id : uuidv4(), civility : context.civility, name : context.name, surname : context.surname, number : context.number , email : context.email };
                     await this.userRepo.save(user);
 

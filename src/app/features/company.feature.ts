@@ -56,6 +56,13 @@ export class CompanyFeature {
 
                 if(user == null)
                 {
+                    const find_number : UserModel | null = await this.userRepo.findByNumber(context.manager_number);
+
+                    if(find_number != null)
+                    {
+                        return ApiResponseUtil.error('This number is already used .', 'conflict');
+                    }
+
                     const user : UserModel = { id : uuidv4(), civility : context.manager_civility, name : context.manager_email, surname : context.manager_surname, number : context.manager_number , email : context.manager_email };
                     await this.userRepo.save(user);
 
