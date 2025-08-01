@@ -19,6 +19,19 @@ export class UserRepo implements IUserRepo {
         return this.toUser(user);
     }
 
+    async findByEmailOrNumber(email: string, number: string): Promise<UserModel | null> {
+        const user = await this.prisma.user.findFirst({
+            where : {
+                OR : [
+                    {email},
+                    {number}
+                ]
+            }
+        })
+
+        return user ? this.toUser(user) : null ;
+    }
+
     async findByEmail(email: string): Promise<UserModel | null> {
         const user = await this.prisma.user.findFirst({
             where : {email : email}

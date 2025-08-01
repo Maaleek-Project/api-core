@@ -37,7 +37,8 @@ model Account {
   @@map("accounts")
   token Token[]
   assignment Assignment[]
-  Company Company[]
+  company Company[]
+  worker Worker[]
 }
 
 
@@ -71,6 +72,8 @@ model User {
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+
+  @@unique([email, number])
 
   @@map("users")
   account Account[]
@@ -163,7 +166,8 @@ model Company{
   account Account @relation(fields: [account_id], references: [id], onDelete: Cascade)
 
   @@map("companies")
-  BusinessCard BusinessCard[]
+  businessCard BusinessCard[]
+  worker Worker[]
 }
 
 
@@ -198,5 +202,23 @@ model Offer {
   updated_at DateTime @updatedAt
 
   @@map("offers")
-  BusinessCard BusinessCard[]
+  businessCard BusinessCard[]
+}
+
+model Worker {
+  id         String      @id @default(uuid())
+  account_id String 
+  company_id String
+  state      String   @default("in_office")
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  account Account @relation(fields: [account_id], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [company_id], references: [id], onDelete: Cascade)
+
+
+  @@unique([account_id, company_id])
+
+  @@map("workers")
 }

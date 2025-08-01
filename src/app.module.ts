@@ -8,6 +8,8 @@ import { CustomerController } from './api/controllers/management/customer.contro
 import { APP_GUARD } from '@nestjs/core';
 import { EntityTypeGuard } from './core/guards/entity_type.guard';
 import { CompanyController } from './api/controllers/management/company.controller';
+import { CorporateModule } from './api/controllers/corporation/corporation.module';
+import { WorkerController } from './api/controllers/corporation/worker.controller';
 
 @Module({
   imports: [
@@ -17,7 +19,8 @@ import { CompanyController } from './api/controllers/management/company.controll
     }),
     ResourceModule,
     AuthentificationModule,
-    ManagementModule
+    ManagementModule,
+    CorporateModule
   ],
   controllers: [],
   providers: [],
@@ -31,5 +34,7 @@ export class AppModule {
       .forRoutes(CustomerController)
       .apply(AuthMiddleware)
       .forRoutes(CompanyController)
+      .apply(AuthMiddleware)
+      .forRoutes(WorkerController)
   }
 }

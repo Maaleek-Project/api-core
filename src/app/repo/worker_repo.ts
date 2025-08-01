@@ -1,18 +1,19 @@
 import { Injectable } from "@nestjs/common";
-import { CompanyModel } from "src/core/domain/models/company.model";
-import { ICompanyRepo } from "src/core/interfaces/i_company_repo";
+import { WorkerModel } from "src/core/domain/models/worker.model";
+import { IWorkerRepo } from "src/core/interfaces/i_worker_repo";
 import { PrismaService } from "src/prisma.service";
 
 @Injectable()
-export class CompanyRepo implements ICompanyRepo {
+export class WorkerRepo implements IWorkerRepo {
 
     constructor(
             private readonly prisma: PrismaService,
-        ) {}
+        ) { }
     
-    async findByAccount(account_id : string) : Promise<CompanyModel | null> {
-        const company = await this.prisma.company.findFirst({
-            where : {account_id : account_id},
+    async findWorkerByCompany(company_id : string) : Promise<WorkerModel[]> {
+        const workers = await this.prisma.worker.findMany({
+            where: {company_id : company_id
+            },
             include : {
                 account : {
                     include : {
@@ -31,12 +32,14 @@ export class CompanyRepo implements ICompanyRepo {
                 }
             }
         });
-        return company ? this.toCompany(company) : null;
+        return workers.map(worker => this.toWorkerModel(worker));
     }
-    
-    async findCompany(id : string) : Promise<CompanyModel | null> {
-        const company = await this.prisma.company.findUnique({
-            where : {id : id},
+
+    async findWorker(account_id : string) : Promise<WorkerModel | null> {
+        const worker = await this.prisma.worker.findFirst({
+            where: {account_id : account_id,
+                state : 'in_office'
+            },
             include : {
                 account : {
                     include : {
@@ -55,11 +58,15 @@ export class CompanyRepo implements ICompanyRepo {
                 }
             }
         });
-        return company ? this.toCompany(company) : null;
+        return worker ? this.toWorkerModel(worker) : null;
     }
     
-    async findAllCompanies(): Promise<CompanyModel[]> {
-        const companies = await this.prisma.company.findMany({
+
+    async save (worker : WorkerModel) : Promise<WorkerModel> {
+        const saved = await this.prisma.worker.upsert({
+            where: {id : worker.id},
+            update: this.toDatabase(worker),
+            create: this.toDatabase(worker),
             include : {
                 account : {
                     include : {
@@ -77,40 +84,12 @@ export class CompanyRepo implements ICompanyRepo {
                     }
                 }
             }
-        })
-
-        return companies.map(company => this.toCompany(company));
-    }
-        
-    async save(company: CompanyModel): Promise<CompanyModel> {
-        const saved = await this.prisma.company.upsert({
-            where: {id : company.id},
-            update: this.toDatabase(company),
-            create: this.toDatabase(company),
-            include : {
-                 account : {
-                    include : {
-                        user : {
-                            include : {
-                                businessCard : {
-                                    include : {
-                                        offer : true
-                                    }
-                                }
-                            }
-                        },
-                        country : true,
-                        entity : true
-                    }
-                }
-            }
-        })
-        return this.toCompany(saved);
+        });
+        return this.toWorkerModel(saved);
     }
 
-    async findByNumerOrEmail(number: string, email: string): Promise<CompanyModel | null> {
-        const company = await this.prisma.company.findFirst({
-            where: {number , email},
+    async findAllWorkers() : Promise<WorkerModel[]> {
+        const workers = await this.prisma.worker.findMany({
             include : {
                 account : {
                     include : {
@@ -127,33 +106,52 @@ export class CompanyRepo implements ICompanyRepo {
                         entity : true
                     }
                 }
-
             }
-        })
-        return company ? this.toCompany(company) : null;
+        });
+        return workers.map(worker => this.toWorkerModel(worker));
     }
 
+    async findByCompany(company_id : string) : Promise<WorkerModel[]> {
+        const workers = await this.prisma.worker.findMany({
+            where: {company_id : company_id},
+            include : {
+                account : {
+                    include : {
+                        user : {
+                            include : {
+                                businessCard : {
+                                    include : {
+                                        offer : true
+                                    }
+                                }
+                            }
+                        },
+                        country : true,
+                        entity : true
+                    }
+                }
+            }
+        });
+        return workers.map(worker => this.toWorkerModel(worker));
+    }
 
-    private toDatabase(company : CompanyModel ) : any {
+    private toWorkerModel(worker : any) : WorkerModel {
         return {
-            id : company.id,
-            name : company.name,
-            number : company.number,
-            email : company.email,
-            account_id : company.account.id,
-            address : company.address
+            id: worker.id,
+            account : worker.account,
+            company : worker.company,
+            state: worker.state,
+            created_at: worker.created_at,
+            updated_at: worker.updated_at,
         }
     }
 
-    private toCompany(company : any) : CompanyModel {
+    private toDatabase(worker : WorkerModel) : any {
         return {
-            id : company.id,
-            name : company.name,
-            number : company.number,
-            email : company.email,
-            account : company.account,
-            address : company.address,
-            created_at : company.created_at
+            id: worker.id,
+            account_id: worker.account.id,
+            company_id: worker.company.id,
+            state: worker.state,
         }
     }
 }
