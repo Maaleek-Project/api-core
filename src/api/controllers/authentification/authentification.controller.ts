@@ -1,8 +1,8 @@
 import { Body, Controller, Delete, Post, Req, Res } from "@nestjs/common";
 import { InitiatedContext, SignInContext, SignUpContext, ValidateCodeContext } from "src/app/context/authentification.context";
-import { AuthentificationFeature } from "src/app/features/authentification.feature";
 import { Response } from "express";
 import { AccountDtm } from "src/core/domain/dtms/account.dtm";
+import { AuthentificationFeature } from "src/app/features/shared/authentification.feature";
 
 @Controller('auth')
 export class AuthentificationController {

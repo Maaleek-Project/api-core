@@ -1,11 +1,11 @@
 import { AccountDtm } from "src/core/domain/dtms/account.dtm";
-import { UserRepo } from "../repo/user_repo";
-import { ApiResponse, ApiResponseUtil } from "../utils/api-response.util";
+import { UserRepo } from "src/app/repo/user_repo";
+import { ApiResponse, ApiResponseUtil } from "src/app/utils/api-response.util";
 import { v4 as uuidv4 } from 'uuid';
 import { Injectable } from "@nestjs/common";
-import { AccountRepo } from "../repo/account_repo";
-import { CreateCustomerContext } from "../context/customer.context";
-import { ResourceRepo } from "../repo/resource_repo";
+import { AccountRepo } from "src/app/repo/account_repo";
+import { CreateCustomerContext } from "src/app/context/customer.context";
+import { ResourceRepo } from "src/app/repo/resource_repo";
 import { CountryModel } from "src/core/domain/models/country.model";
 import { AccountModel } from "src/core/domain/models/account.model";
 import { UserModel } from "src/core/domain/models/user.model";

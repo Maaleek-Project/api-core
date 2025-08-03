@@ -11,6 +11,29 @@ export class ResourceRepo implements IResourceRepo {
         private readonly prisma: PrismaService,
     ) {}
 
+    async searchCountry(alias : string, libelle : string, code : string , flag: string) : Promise<CountryModel | null> {
+        const country = await this.prisma.country.findFirst({
+            where : {
+                OR : [
+                    {alias},
+                    {libelle},
+                    {code},
+                    {flag}
+                ]
+            }
+        })
+        return country ? this.toCountry(country) : null;
+    }
+
+    async saveCountry(country : CountryModel) : Promise<CountryModel> {
+        const saved = await this.prisma.country.upsert({
+            where: {alias : country.alias},
+            update: this.toDatabase(country),
+            create: this.toDatabase(country)
+        })
+        return this.toCountry(saved);
+    }
+
     async getCountries(): Promise<CountryModel[]> {
         const countries = await this.prisma.country.findMany();
         return countries.map(this.toCountry);
@@ -66,6 +89,18 @@ export class ResourceRepo implements IResourceRepo {
             created_at: country.created_at,
             updated_at: country.updated_at,
         };
+    }
+
+
+    private toDatabase(country : CountryModel) : any {
+        return {
+            id : country.id,
+            libelle : country.libelle,
+            code : country.code,
+            alias : country.alias,
+            flag : country.flag,
+            currency : country.currency,
+        }
     }
 
 }

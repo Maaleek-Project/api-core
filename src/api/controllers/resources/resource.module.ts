@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { ResourceController } from "./resource.controller";
-import { ResourceFeature } from "src/app/features/resource.feature";
 import { RepoModule } from "src/app/repo/repo.module";
+import { ResourceFeature } from "src/app/features/shared/resource.feature";
 
 @Module({
     imports: [

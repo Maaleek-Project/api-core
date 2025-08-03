@@ -222,3 +222,17 @@ model Worker {
 
   @@map("workers")
 }
+
+model PaymentProvider {
+  id         String      @id @default(uuid())
+  libelle    String      @unique
+  activated   Boolean    @default(false)
+  cover       String
+  description String
+  
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("payment_providers")
+}

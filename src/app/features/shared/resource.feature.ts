@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { ResourceRepo } from "../repo/resource_repo";
-import { ApiResponse, ApiResponseUtil } from "../utils/api-response.util";
+import { ResourceRepo } from "src/app/repo/resource_repo";
+import { ApiResponse, ApiResponseUtil } from "src/app/utils/api-response.util";
 import { CountryDtm } from "src/core/domain/dtms/country.dtm";
 import { EntityDtm } from "src/core/domain/dtms/entity.dtm";
 

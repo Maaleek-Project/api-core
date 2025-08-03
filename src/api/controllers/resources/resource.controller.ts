@@ -1,6 +1,6 @@
 import { Controller, Get, Res } from "@nestjs/common";
-import { ResourceFeature } from "src/app/features/resource.feature";
 import { Response } from "express";
+import { ResourceFeature } from "src/app/features/shared/resource.feature";
 
 @Controller('resource')
 export class ResourceController {

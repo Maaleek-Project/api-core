@@ -1,9 +1,9 @@
 import { Controller, Post, Res, UseGuards, Req, Body, Get } from "@nestjs/common";
-import { CompanyFeature } from "src/app/features/company.feature";
 import { EntityType } from "src/core/decorators/entity_type.decorator";
 import { EntityTypeGuard } from "src/core/guards/entity_type.guard";
 import { Response } from "express";
 import { CreateCompanyContext } from "src/app/context/company.context";
+import { CompanyFeature } from "src/app/features/administrator/user/company.feature";
 
 @UseGuards(EntityTypeGuard)
 @Controller('company')

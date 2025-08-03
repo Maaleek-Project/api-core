@@ -10,6 +10,7 @@ import { EntityTypeGuard } from './core/guards/entity_type.guard';
 import { CompanyController } from './api/controllers/management/company.controller';
 import { CorporateModule } from './api/controllers/corporation/corporation.module';
 import { WorkerController } from './api/controllers/corporation/worker.controller';
+import { SetupController } from './api/controllers/management/setup.controller';
 
 @Module({
   imports: [
@@ -36,5 +37,7 @@ export class AppModule {
       .forRoutes(CompanyController)
       .apply(AuthMiddleware)
       .forRoutes(WorkerController)
+      .apply(AuthMiddleware)
+      .forRoutes(SetupController)
   }
 }

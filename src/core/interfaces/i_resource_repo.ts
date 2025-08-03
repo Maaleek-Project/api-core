@@ -9,4 +9,8 @@ export interface IResourceRepo {
     findEntity(entity_id: string): Promise<EntityModel | null>;
 
     findEntityByCode(code: string): Promise<EntityModel | null>;
+
+    saveCountry(country : CountryModel) : Promise<CountryModel>;
+
+    searchCountry(alias : string, libelle : string, code : string , flag: string) : Promise<CountryModel | null>;
 }
