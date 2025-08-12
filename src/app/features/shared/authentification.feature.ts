@@ -146,19 +146,20 @@ export class AuthentificationFeature {
             }
 
             const user : UserModel = { id : uuidv4(), civility : context.civility, name : context.name, surname : context.surname, number : context.login };
-            await this.userRepo.save(user);
+            const userSaved = await this.userRepo.save(user);
 
 
             const password = await this.authentificationService.hashPassword(context.password);
             
 
-            const account : AccountModel = { id : uuidv4(), login : context.login, password : password, user : user, country : country!, entity : entity, status : 'connected'};
+            const account : AccountModel = { id : uuidv4(), login : context.login, password : password, user : userSaved, country : country!, entity : entity, status : 'connected'};
 
             const token = await this.authentificationService.generateToken(AccountDtm.fromAccountDtm(account));
             const model : TokenModel = { id : uuidv4(), token : token, type : 'to_connect', account_id : account.id, expired_at : SharedUtil.addDaysToNow(1)};
                 
-            await this.tokenRepo.save(model);
+            ;
             const saved = await this.accountRepo.save(account);
+            await this.tokenRepo.save(model)
             await this.otpRepo.remove(action);
 
             return ApiResponseUtil.ok({...AccountDtm.fromAccountDtm(saved), token : token}, 'Account created 🎉 .');

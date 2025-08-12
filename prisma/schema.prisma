@@ -17,7 +17,7 @@ model Account {
   id         String      @id @default(uuid())
   entity_id  String
   user_id    String
-  login      String      @unique
+  login      String      
   password   String
   country_id String
   status     String   @default("unconnected")

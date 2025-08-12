@@ -55,7 +55,12 @@ export default async function UserSeeder() {
         })
 
         await prisma.account.upsert({
-            where : { login : user.login },
+            where: {
+                login_country_id : {
+                    login : user.login,
+                    country_id : country!.id
+                }
+            },
             update: {},
             create: {
                 login: user.login,

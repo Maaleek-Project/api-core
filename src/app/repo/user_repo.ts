@@ -14,7 +14,14 @@ export class UserRepo implements IUserRepo {
         const user = await this.prisma.user.upsert({
             where: {id : model.id},
             update: this.toDatabase(model),
-            create: this.toDatabase(model)
+            create: this.toDatabase(model),
+            include :{
+                businessCard : {
+                    include: {
+                        offer : true
+                    }
+                }
+            }
         })
         return this.toUser(user);
     }
@@ -26,6 +33,12 @@ export class UserRepo implements IUserRepo {
                     {email},
                     {number}
                 ]
+            },include :{
+                businessCard : {
+                    include: {
+                        offer : true
+                    }
+                }
             }
         })
 
@@ -34,7 +47,14 @@ export class UserRepo implements IUserRepo {
 
     async findByEmail(email: string): Promise<UserModel | null> {
         const user = await this.prisma.user.findFirst({
-            where : {email : email}
+            where : {email : email},
+            include :{
+                businessCard : {
+                    include: {
+                        offer : true
+                    }
+                }
+            }
         })
 
         return user ? this.toUser(user) : null ;
@@ -62,7 +82,7 @@ export class UserRepo implements IUserRepo {
             email : user.email,
             created_at: user.created_at,
             updated_at: user.updated_at,
-            businessCard: user.card
+            businessCard: user.businessCard
         }
     }
 
