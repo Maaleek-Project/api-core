@@ -82,7 +82,7 @@ export class AuthentificationFeature {
             if (account == null) 
             {
                 const action = await this.otpRepo.findAction('verified_number', 'waiting', context.login, context.country_id);
-                const code = SharedUtil.generateOtp(5) ;
+                const code = SharedUtil.generateOtp(4) ;
 
                 if(action == null)
                 {
@@ -116,7 +116,7 @@ export class AuthentificationFeature {
             }
 
         }catch(e){
-            return ApiResponseUtil.error(e.message, 'internal_error');
+            return ApiResponseUtil.error("An error occurred during your identification,  Please try again later .", 'internal_error');
         }
 
     }
