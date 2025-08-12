@@ -162,7 +162,7 @@ export class AuthentificationFeature {
             await this.tokenRepo.save(model)
             await this.otpRepo.remove(action);
 
-            return ApiResponseUtil.ok({...AccountDtm.fromAccountDtm(saved), token : token}, 'Account created 🎉 .');
+            return ApiResponseUtil.ok({...AccountDtm.fromAccountDtm(saved), token : token , expired_at : model.expired_at}, 'Account created 🎉 .');
 
         }catch(e){
             return ApiResponseUtil.error(e.message, 'internal_error');
