@@ -43,9 +43,6 @@ export class SignUpContext {
 
     @IsNotEmpty({ message: 'Surname is required .' })
     surname : string;
-
-    @IsNotEmpty({ message: 'Entity is required .' })
-    entity_id : string;
 }
 
 export class SignInContext {

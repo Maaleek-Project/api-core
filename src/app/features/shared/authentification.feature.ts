@@ -123,7 +123,7 @@ export class AuthentificationFeature {
 
     async signUp(context : SignUpContext) : Promise<ApiResponse<AccountDtm>> {
         try{
-            const entity : EntityModel | null = await this.resourceRepo.findEntity(context.entity_id);
+            const entity : EntityModel | null = await this.resourceRepo.findEntityByCode('Customer');
             const country : CountryModel | null = await this.resourceRepo.findCountry(context.country_id);
 
             if(entity == null)
