@@ -197,7 +197,7 @@ export class AuthentificationFeature {
         account.status = "connected";
         const saved = await this.accountRepo.save(account);
 
-        return ApiResponseUtil.ok({...AccountDtm.fromAccountDtm(saved), token : token}, 'Good 🎉, welcome back .');
+        return ApiResponseUtil.ok({...AccountDtm.fromAccountDtm(saved), token : token , expired_at : model.expired_at}, 'Good 🎉, welcome back .');
     }
 
     async signOut(dtm : AccountDtm ) : Promise<ApiResponse<AccountDtm>> {
