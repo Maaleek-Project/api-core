@@ -82,7 +82,7 @@ export class AuthentificationFeature {
             if (account == null) 
             {
                 const action = await this.otpRepo.findAction('verified_number', 'waiting', context.login, context.country_id);
-                const code = SharedUtil.generateOtp(4) ;
+                const code = "1234" // SharedUtil.generateOtp(4) ;
 
                 if(action == null)
                 {
@@ -145,11 +145,11 @@ export class AuthentificationFeature {
                 return ApiResponseUtil.error('Time elapsed, try again .', 'conflict');
             }
 
-            const user : UserModel = { id : uuidv4(), civility : context.civility, name : context.name, surname : context.surname, number : context.login };
+            const user : UserModel = { id : uuidv4(), civility : context.civility, name : context.name.trim(), surname : context.surname.trim(), number : context.login.trim() };
             const userSaved = await this.userRepo.save(user);
 
 
-            const password = await this.authentificationService.hashPassword(context.password);
+            const password = await this.authentificationService.hashPassword(context.password.trim());
             
 
             const account : AccountModel = { id : uuidv4(), login : context.login, password : password, user : userSaved, country : country!, entity : entity, status : 'connected'};
