@@ -60,6 +60,21 @@ export class UserRepo implements IUserRepo {
         return user ? this.toUser(user) : null ;
     }
 
+    async findById(id: string): Promise<UserModel | null> {
+        const user = await this.prisma.user.findFirst({
+            where : {id : id},
+            include :{
+                businessCard : {
+                    include: {
+                        offer : true
+                    }
+                }
+            }
+        })
+
+        return user ? this.toUser(user) : null ;
+    }
+
     async findByNumber(number: string): Promise<UserModel | null> {
         const user = await this.prisma.user.findFirst({
             where : {number : number}

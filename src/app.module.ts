@@ -11,6 +11,8 @@ import { CompanyController } from './api/controllers/management/company.controll
 import { CorporateModule } from './api/controllers/corporation/corporation.module';
 import { WorkerController } from './api/controllers/corporation/worker.controller';
 import { SetupController } from './api/controllers/management/setup.controller';
+import { UserModule } from './api/controllers/customer/customer.module';
+import { UserController } from './api/controllers/customer/user.controller';
 
 @Module({
   imports: [
@@ -21,7 +23,8 @@ import { SetupController } from './api/controllers/management/setup.controller';
     ResourceModule,
     AuthentificationModule,
     ManagementModule,
-    CorporateModule
+    CorporateModule,
+    UserModule
   ],
   controllers: [],
   providers: [],
@@ -39,5 +42,7 @@ export class AppModule {
       .forRoutes(WorkerController)
       .apply(AuthMiddleware)
       .forRoutes(SetupController)
+      .apply(AuthMiddleware)
+      .forRoutes(UserController)
   }
 }

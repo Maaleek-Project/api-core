@@ -10,14 +10,14 @@ import { EntityType } from "src/core/decorators/entity_type.decorator";
 export class WorkerController {
 
     constructor(
-        private readonly workerFeature : WorkerFeature,
+        private readonly feature : WorkerFeature,
     ) {}
 
     @EntityType(['Company'])
     @Post('added')
     async addWorker(@Body() context : CreateWorkerContext,@Req() req: Request, @Res() res: Response) {
         const account = req['user'] 
-        const worker = await this.workerFeature.addWorker(context , account);
+        const worker = await this.feature.addWorker(context , account);
         const statusMap: Record<string, number> = {
             success: 200,
             not_found: 404,
@@ -32,7 +32,7 @@ export class WorkerController {
     @Get('listing')
     async listingWorkers(@Req() req: Request, @Res() res: Response) {
         const account = req['user'] 
-        const listing = await this.workerFeature.listingWorkers(account);
+        const listing = await this.feature.listingWorkers(account);
         const statusMap: Record<string, number> = {
             success: 200,
             unauthorized: 401,

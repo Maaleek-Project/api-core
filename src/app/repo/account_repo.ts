@@ -10,6 +10,27 @@ export class AccountRepo implements IAccountRepo {
         private readonly prisma: PrismaService,
     ) {}
 
+    async findById(id: string): Promise<AccountModel | null> {
+        const account = await this.prisma.account.findFirst({
+            where : {id : id},
+            include: {
+                user: {
+                    include: {
+                        businessCard : {
+                            include: {
+                                offer : true
+                            }
+                        }
+                    }
+                },
+                country: true,
+                entity: true
+            }
+        })
+
+        return account ? this.toAccount(account) : null ;
+    }
+
     async save(model : AccountModel) : Promise<AccountModel> {
         const account = await this.prisma.account.upsert({
             where: {id : model.id},
