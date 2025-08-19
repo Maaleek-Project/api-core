@@ -1,4 +1,4 @@
-import { Controller, Post, Res, UseGuards, Req, Body, Get } from "@nestjs/common";
+import { Controller,  Res, UseGuards, Req, Body, Put } from "@nestjs/common";
 import { UpdateCustomerContext, UpdatePasswordContext } from "src/app/context/setting.context";
 import { Response } from "express";
 import { SettingFeature } from "src/app/features/customer/setting.feature";
@@ -16,7 +16,7 @@ export class UserController {
 
 
     @EntityType(['Customer'])
-    @Post('update-password')
+    @Put('update-password')
     async updatePassword(@Req() req: Request, @Body() context: UpdatePasswordContext, @Res() res: Response) {
         const update = await this.feature.updatePassword(AccountDtm.fromAccountDtm(req['user']), context);
         const statusMap: Record<string, number> = {
@@ -30,7 +30,7 @@ export class UserController {
     }
 
     @EntityType(['Customer'])
-    @Post('update-customer-info')
+    @Put('update-info')
     async updateCustomer(@Req() req: Request, @Body() context: UpdateCustomerContext, @Res() res: Response) {
         const update = await this.feature.updateCustomerInfo(AccountDtm.fromAccountDtm(req['user']), context);
         const statusMap: Record<string, number> = {
