@@ -9,6 +9,7 @@ export interface AccountModel {
     user: UserModel;
     country : CountryModel;
     entity : EntityModel;
+    fcm_token : string;
     status? : string;
     state? : string;
     locked? : boolean;

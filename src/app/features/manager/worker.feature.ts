@@ -51,12 +51,12 @@ export class WorkerFeature {
 
             if(country == null)
             {
-                return ApiResponseUtil.error('Country not found .', 'not_found');
+                return ApiResponseUtil.error('','Country not found .', 'not_found');
             }
 
             if(company == null)
             {
-                return ApiResponseUtil.error('Company not found .', 'not_found');
+                return ApiResponseUtil.error('','Company not found .', 'not_found');
             }
 
             if(context.type == 'already_exist' )
@@ -64,7 +64,7 @@ export class WorkerFeature {
 
                 if (account == null)
                 {
-                    return ApiResponseUtil.error('Account not found .', 'not_found');
+                    return ApiResponseUtil.error('','Account not found .', 'not_found');
                 }
 
                 const find_worker : WorkerModel | null = await this.workerRepo.findWorker(account.id);
@@ -72,7 +72,7 @@ export class WorkerFeature {
 
                 if(find_worker != null)
                 {
-                    return ApiResponseUtil.error('This worker is already registered .', 'conflict');
+                    return ApiResponseUtil.error('','This worker is already registered .', 'conflict');
                 }
 
                 const to_saved : WorkerModel = { id : uuidv4(), account : account, company : company};
@@ -82,14 +82,14 @@ export class WorkerFeature {
             {
                 if(account != null)
                 {
-                    return ApiResponseUtil.error('Account already exists .', 'conflict');
+                    return ApiResponseUtil.error('','Account already exists .', 'conflict');
                 }
 
                 const find_user : UserModel | null = await this.userRepo.findByEmailOrNumber(context.email, context.number);
 
                 if(find_user != null)
                 {
-                    return ApiResponseUtil.error('Number or email already used .', 'conflict');
+                    return ApiResponseUtil.error('','Number or email already used .', 'conflict');
                 }
 
                 const password = await this.authentificationService.hashPassword("12563");
@@ -99,18 +99,18 @@ export class WorkerFeature {
                 const user : UserModel = { id : uuidv4(), civility : context.civility, name : context.name, surname : context.surname, number : context.number , email : context.email };
                 await this.userRepo.save(user);
 
-                const user_account : AccountModel = { id : uuidv4(), login : context.email, password : password, user : user, country : country!, entity : entity};
+                const user_account : AccountModel = { id : uuidv4(), login : context.email, password : password, user : user, country : country!, entity : entity , fcm_token : `${context.number}@fcm.com` };
                 const saved = await this.accountRepo.save(user_account);
 
                 const to_saved : WorkerModel = { id : uuidv4(), account : saved, company : company};
                 worker = await this.workerRepo.save(to_saved);
             }
 
-            return ApiResponseUtil.ok({...WorkerDtm.fromWorkerDtm(worker)}, 'Worker created 🎉 .');
+            return ApiResponseUtil.ok({...WorkerDtm.fromWorkerDtm(worker)},'', 'Worker created 🎉 .');
 
         }catch(e){
             console.log(e)
-            return ApiResponseUtil.error("Failed to create worker .", "internal_error");
+            return ApiResponseUtil.error('',"Failed to create worker .", "internal_error");
         }
 
     }
@@ -120,12 +120,12 @@ export class WorkerFeature {
 
         if(company == null)
         {
-            return ApiResponseUtil.error('Company not found .', 'not_found');
+            return ApiResponseUtil.error('','Company not found .', 'not_found');
         }
 
         const workers = await this.workerRepo.findByCompany(company.id);
         const dtms = workers.map(worker => WorkerDtm.fromWorkerDtm(worker));
-        return ApiResponseUtil.ok(dtms, 'Workers listed 🎉 .');
+        return ApiResponseUtil.ok(dtms, '', 'Workers listed 🎉 .');
     }
 
 }

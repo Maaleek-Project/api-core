@@ -1,5 +1,6 @@
 export interface ApiResponse<T> {
   content: T | null;
+  title : string;
   message: string;
   success: boolean;
   code: string;
@@ -8,9 +9,10 @@ export interface ApiResponse<T> {
 
 export class ApiResponseUtil {
 
-    static ok<T>(data: T, message : string, success =true, code = 'success'): ApiResponse<T> {
+    static ok<T>(data: T, title : string, message : string, success =true, code = 'success'): ApiResponse<T> {
         return {
         content: data,
+        title,
         message,
         success,
         code,
@@ -18,6 +20,7 @@ export class ApiResponseUtil {
     }
 
     static error<T>(
+    title : string,
     message : string,
     code : string,
     success = false,
@@ -25,6 +28,7 @@ export class ApiResponseUtil {
     ): ApiResponse<T> {
         return {
         content: null,
+        title,
         message,
         success,
         code,

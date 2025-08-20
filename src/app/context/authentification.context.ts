@@ -43,6 +43,9 @@ export class SignUpContext {
 
     @IsNotEmpty({ message: 'Surname is required .' })
     surname : string;
+
+    @IsNotEmpty({ message: 'Fcm token is required .' })
+    fcm_token : string;
 }
 
 export class SignInContext {

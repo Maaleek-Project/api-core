@@ -40,28 +40,28 @@ export class AuthentificationFeature {
 
             if(action == null)
             {
-                return ApiResponseUtil.error('Action not initiated .', 'not_found');
+                return ApiResponseUtil.error('Aucune action trouvé','Vous n\'avez aucune validation en attente pour le moment, merci de reprendre la procédure .', 'not_found');
             }
 
             const time_up = SharedUtil.isTimeUp(action.updated_at!, 3);
 
             if(time_up)
             {
-                return ApiResponseUtil.error('Time elapsed, try again .', 'conflict');
+                return ApiResponseUtil.error('Temps écoulé','Le temps de validation est écoulé, merci de réessayer avec un nouveau code .', 'conflict');
             }
 
             if(action.code != context.code)
             {
-                return ApiResponseUtil.error('Incorrect code entered .', 'conflict');
+                return ApiResponseUtil.error('Code Incorrect','Le code de validation soumis est incorrect, merci de réessayer avec un code valide .', 'conflict');
             }
 
             action.state = 'done';
             await this.otpRepo.save(action);
 
-            return ApiResponseUtil.ok(OtpDtm.fromOtpDtm(action), 'Code validated 🎉 .');
+            return ApiResponseUtil.ok(OtpDtm.fromOtpDtm(action), 'Code validé', 'Votre code à été validé avec succès, merci de poursuivre votre procédure 🎉 .');
 
         }catch(e){
-            return ApiResponseUtil.error(e.message, 'internal_error');
+            return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
 
     }
@@ -74,7 +74,7 @@ export class AuthentificationFeature {
 
             if(country == null)
             {
-                return ApiResponseUtil.error('Country not found .', 'not_found');
+                return ApiResponseUtil.error('Pays inexistant','Désole, le pays selectionné semble ne pas exister, merci de bien vouloir réessayer avec un autre pays .', 'not_found');
             }
 
             const account = await this.accountRepo.fetchByLogin(context.login, context.country_id);
@@ -93,30 +93,30 @@ export class AuthentificationFeature {
                     const otp : OtpModel = { id :uuidv4(), type : 'verified_number', value : context.login, country_id : context.country_id, state : 'waiting', attempt : 1 ,  code}
                     await this.otpRepo.save(otp);
 
-                    return ApiResponseUtil.ok(UserOrCodeDtm.fromCode(OtpDtm.fromOtpDtm(otp)), 'Code sent');
+                    return ApiResponseUtil.ok(UserOrCodeDtm.fromCode(OtpDtm.fromOtpDtm(otp)), 'Code envoyé', 'Un code vous a été envoyé .');
                 }
                 else
                 {
                     const otp : OtpModel = await this.otpRepo.toValidate(action, code);
-                    return ApiResponseUtil.ok(UserOrCodeDtm.fromCode(OtpDtm.fromOtpDtm(otp)), 'Code sent');
+                    return ApiResponseUtil.ok(UserOrCodeDtm.fromCode(OtpDtm.fromOtpDtm(otp)),'Code envoyé', 'Un code vous a été envoyé .');
                 }
             }
             else
             {
                 if(account.locked)
                 {
-                    return ApiResponseUtil.error('Account locked, please try again .', 'conflict');
+                    return ApiResponseUtil.error('Compte bloqué', 'Votre compte est bloqué, merci de bien vouloir contacter notre service pour une vérification de votre identité .', 'conflict');
                 }
 
                 account.status = "processing";
 
                 await this.accountRepo.save(account);
 
-                return ApiResponseUtil.ok(UserOrCodeDtm.fromUser(UserDtm.fromUserDtm(account.user)), 'Good 🎉, enter your pin code .');
+                return ApiResponseUtil.ok(UserOrCodeDtm.fromUser(UserDtm.fromUserDtm(account.user)), 'Mot de passe requis', 'Bien 🎉, entez votre mon de passe .');
             }
 
         }catch(e){
-            return ApiResponseUtil.error("An error occurred during your identification,  Please try again later .", 'internal_error');
+            return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
 
     }
@@ -128,21 +128,21 @@ export class AuthentificationFeature {
 
             if(entity == null)
             {
-                return ApiResponseUtil.error('Entity not found .', 'not_found');
+                return ApiResponseUtil.error('Erreur interne','Une donnée indispensable à votre inscription est introuvable, merci de contactez l\'assistance si cela persiste .', 'not_found');
             }
 
             const action : OtpModel | null = await this.otpRepo.findAction('verified_number', 'done', context.login, context.country_id);
 
             if(action == null)
             {
-                return ApiResponseUtil.error('Action not initiated .', 'not_found');
+                return ApiResponseUtil.error('Aucune action trouvé','Vous n\'avez aucune validation en attente pour le moment, merci de reprendre la procédure .', 'not_found');
             }
 
             const time_up = SharedUtil.isTimeUp(action.updated_at!, 5);
 
             if(time_up)
             {
-                return ApiResponseUtil.error('Time elapsed, try again .', 'conflict');
+                return ApiResponseUtil.error('Temps écoulé','Le temps de validation est écoulé, merci de réessayer avec un nouveau code .', 'conflict');
             }
 
             const user : UserModel = { id : uuidv4(), civility : context.civility, name : context.name.trim(), surname : context.surname.trim(), number : context.login.trim() };
@@ -152,7 +152,7 @@ export class AuthentificationFeature {
             const password = await this.authentificationService.hashPassword(context.password.trim());
             
 
-            const account : AccountModel = { id : uuidv4(), login : context.login, password : password, user : userSaved, country : country!, entity : entity, status : 'connected'};
+            const account : AccountModel = { id : uuidv4(), login : context.login, password : password, user : userSaved, country : country!, entity : entity, status : 'connected' , fcm_token : context.fcm_token};
 
             const token = await this.authentificationService.generateToken(AccountDtm.fromAccountDtm(account));
             const model : TokenModel = { id : uuidv4(), token : token, type : 'to_connect', account_id : account.id, expired_at : SharedUtil.addDaysToNow(1)};
@@ -162,10 +162,10 @@ export class AuthentificationFeature {
             await this.tokenRepo.save(model)
             await this.otpRepo.remove(action);
 
-            return ApiResponseUtil.ok({...AccountDtm.fromAccountDtm(saved), token : token , expired_at : model.expired_at}, 'Account created 🎉 .');
+            return ApiResponseUtil.ok({...AccountDtm.fromAccountDtm(saved), token : token , expired_at : model.expired_at}, 'Compte créer', 'Bienvenue 🎉, votre compte a été créé avec succès, accéder à votre espace .');
 
         }catch(e){
-            return ApiResponseUtil.error(e.message, 'internal_error');
+            return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
     }
 
@@ -175,19 +175,19 @@ export class AuthentificationFeature {
 
         if (account == null) 
         {
-            return ApiResponseUtil.error('Account not found .', 'not_found');
+            return ApiResponseUtil.error('Compte inexistant','Votre compte n\'existe pas, merci de bien vouloir contacter notre service pour une vérification de votre identité .', 'conflict');
         }
 
         if(account.locked)
         {
-            return ApiResponseUtil.error('Account locked, please try again .', 'conflict');
+            return ApiResponseUtil.error('Compte bloqué', 'Votre compte est bloqué, merci de bien vouloir contacter notre service pour une vérification de votre identité .', 'conflict');
         }
 
         const password = await this.authentificationService.comparePassword(context.password, account.password);
 
         if(!password)
         {
-            return ApiResponseUtil.error('Incorrect password .', 'conflict');
+            return ApiResponseUtil.error('Accès réfusé','Le mot de passe fourni est incorrect, merci de réessayer avec le bon mot de passe .', 'conflict');
         }
 
         const token = await this.authentificationService.generateToken(AccountDtm.fromAccountDtm(account));
@@ -197,7 +197,7 @@ export class AuthentificationFeature {
         account.status = "connected";
         const saved = await this.accountRepo.save(account);
 
-        return ApiResponseUtil.ok({...AccountDtm.fromAccountDtm(saved), token : token , expired_at : model.expired_at}, 'Good 🎉, welcome back .');
+        return ApiResponseUtil.ok({...AccountDtm.fromAccountDtm(saved), token : token , expired_at : model.expired_at}, 'Session active', 'Bien 🎉, bon retour parmis nous, votre espace n\'attendais que vous.');
     }
 
     async signOut(dtm : AccountDtm ) : Promise<ApiResponse<AccountDtm>> {
@@ -206,19 +206,19 @@ export class AuthentificationFeature {
 
         if(account == null)
         {
-            return ApiResponseUtil.error('Account not found .', 'not_found');
+            return ApiResponseUtil.error('Compte introuvable', 'Votre compte semble ne pas existé réessayer, et si le problème persiste, merci de bien vouloir contacter notre service pour assistance .', 'not_found');
         }
 
         if(account.status != 'connected')
         {
-            return ApiResponseUtil.error('Account not connected .', 'unauthorized');
+            return ApiResponseUtil.error('Session inactive', 'Vous n\'avez pas de session active jusqu\'a présent, nous ne pouvons donnez suite à votre requête .', 'unauthorized');
         }
 
         account.status = "unconnected";
         const saved = await this.accountRepo.save(account);
         await this.tokenRepo.remove(dtm.id);
 
-        return ApiResponseUtil.ok(AccountDtm.fromAccountDtm(saved), 'Good 🎉, you are now disconnected .');
+        return ApiResponseUtil.ok(AccountDtm.fromAccountDtm(saved), 'Session désactivée', 'Bye 👋, vous avez été deconnecté avec succès, au plaisir de vous revoir très bien sur maaleek .');
     }
 
 }

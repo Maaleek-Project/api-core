@@ -23,6 +23,7 @@ model Account {
   status     String   @default("unconnected")
   state      String   @default("waiting")
   locked     Boolean  @default(false)
+  fcm_token  String   @unique
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

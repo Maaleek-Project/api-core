@@ -14,12 +14,12 @@ export class ResourceFeature {
 
     async getCountries(): Promise<ApiResponse<CountryDtm[]>> {
         const countries = await this.repo.getCountries();
-        return ApiResponseUtil.ok(countries.map(CountryDtm.fromCountryDtm), 'List of countries retrieved 🎉 .');
+        return ApiResponseUtil.ok(countries.map(CountryDtm.fromCountryDtm), '', 'List of countries retrieved 🎉 .');
     }
 
     async getEntities(): Promise<ApiResponse<EntityDtm[]>> {
         const entities = await this.repo.getEntities();
-        return ApiResponseUtil.ok(entities.map(EntityDtm.fromEntityDtm), 'List of entities retrieved 🎉 .');
+        return ApiResponseUtil.ok(entities.map(EntityDtm.fromEntityDtm),'', 'List of entities retrieved 🎉 .');
     }
 
 }

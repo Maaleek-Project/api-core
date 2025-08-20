@@ -27,7 +27,7 @@ export class CompanyFeature {
     async listing() : Promise<ApiResponse<CompanyDtm[]>> {
         const companies = await this.companyRepo.findAllCompanies();
         const dtos = companies.map(company => CompanyDtm.fromCompanyDtm(company));
-        return ApiResponseUtil.ok(dtos, 'Companies listed 🎉 .');
+        return ApiResponseUtil.ok(dtos,'', 'Companies listed 🎉 .');
     }
 
 
@@ -38,14 +38,14 @@ export class CompanyFeature {
 
             if(country == null)
             {
-                return ApiResponseUtil.error('Country not found .', 'not_found');
+                return ApiResponseUtil.error('','Country not found .', 'not_found');
             }
 
             const find_email_or_number : CompanyModel | null = await this.companyRepo.findByNumerOrEmail(context.company_number, context.company_email);
             
             if(find_email_or_number != null)
             {
-                return ApiResponseUtil.error('Company email or number is already used .', 'conflict');
+                return ApiResponseUtil.error('','Company email or number is already used .', 'conflict');
             }
 
             const account : AccountModel | null = await this.accountRepo.fetchByLogin(context.manager_number, context.country_id);
@@ -60,7 +60,7 @@ export class CompanyFeature {
 
                     if(find_number != null)
                     {
-                        return ApiResponseUtil.error('This number is already used .', 'conflict');
+                        return ApiResponseUtil.error('','This number is already used .', 'conflict');
                     }
 
                     const user : UserModel = { id : uuidv4(), civility : context.manager_civility, name : context.manager_email, surname : context.manager_surname, number : context.manager_number , email : context.manager_email };
@@ -70,7 +70,7 @@ export class CompanyFeature {
 
                     const entity : EntityModel | null = await this.resourceRepo.findEntityByCode("Company") as EntityModel;
 
-                    const account : AccountModel = { id : uuidv4(), login : context.manager_email, password : password, user : user, country : country!, entity : entity};
+                    const account : AccountModel = { id : uuidv4(), login : context.manager_email, password : password, user : user, country : country!, entity : entity , fcm_token : `${context.manager_number}@fcm`};
 
                     const saved = await this.accountRepo.save(account);
 
@@ -78,23 +78,22 @@ export class CompanyFeature {
 
                     const saved_company = await this.companyRepo.save(company);
 
-                    return ApiResponseUtil.ok({...CompanyDtm.fromCompanyDtm(saved_company)}, 'Company created 🎉 .');
+                    return ApiResponseUtil.ok({...CompanyDtm.fromCompanyDtm(saved_company)},'', 'Company created 🎉 .');
                     
                 }
                 else
                 {
-                    return ApiResponseUtil.error('Manager email is already used .', 'conflict');
+                    return ApiResponseUtil.error('','Manager email is already used .', 'conflict');
                 }
             }
             else
             {
-                return ApiResponseUtil.error('Manager number is already used .', 'conflict');
+                return ApiResponseUtil.error('','Manager number is already used .', 'conflict');
             }
 
 
         }catch(e){
-            console.log(e)
-            return ApiResponseUtil.error("Failed to create company .", "internal_error");
+            return ApiResponseUtil.error('',"Failed to create company .", "internal_error");
         }
     }
     

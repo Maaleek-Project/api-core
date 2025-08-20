@@ -16,7 +16,7 @@ export class OfferFeature {
 
     async getOffers() : Promise<ApiResponse<OfferDtm[]>> {
         const offers = await this.offerRepo.findAll();
-        return ApiResponseUtil.ok(offers.map(OfferDtm.fromOfferDtm), 'List of offers retrieved 🎉 .');
+        return ApiResponseUtil.ok(offers.map(OfferDtm.fromOfferDtm), '', 'List of offers retrieved 🎉 .');
     }
 
     async createOffer(context : CreateOfferContext) : Promise<ApiResponse<OfferDtm>> {
@@ -26,18 +26,18 @@ export class OfferFeature {
 
             if(searching != null)
             {
-                return ApiResponseUtil.error('Offer already exists .', 'conflict');
+                return ApiResponseUtil.error('','Offer already exists .', 'conflict');
             }
 
             const offer : OfferModel = { id : uuidv4(), libelle : context.libelle, sharing_number : parseInt(context.shared_number), code : context.code};
 
             const saved = await this.offerRepo.save(offer);
 
-            return ApiResponseUtil.ok(OfferDtm.fromOfferDtm(saved), 'Offer created 🎉 .');
+            return ApiResponseUtil.ok(OfferDtm.fromOfferDtm(saved),'', 'Offer created 🎉 .');
 
         }catch(e){
             console.log(e)
-            return ApiResponseUtil.error("Failed to create offer .", "internal_error");
+            return ApiResponseUtil.error('',"Failed to create offer .", "internal_error");
         }
 
     }

@@ -106,6 +106,7 @@ export class AccountRepo implements IAccountRepo {
             id: account.id,
             login: account.login,
             password: account.password,
+            fcm_token : account.fcm_token,
             user: account.user,
             country: account.country,
             entity: account.entity,
@@ -125,7 +126,8 @@ export class AccountRepo implements IAccountRepo {
             user_id: account.user.id,
             country_id : account.country.id,
             entity_id : account.entity.id,
-            status: account.status
+            status: account.status,
+            fcm_token : account.fcm_token
         }
     }
 

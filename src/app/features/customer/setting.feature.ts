@@ -25,7 +25,7 @@ export class SettingFeature {
 
             if(account == null)
             {
-                return ApiResponseUtil.error('Account not found, please connected .', 'unauthorized')
+                return ApiResponseUtil.error('Session inactive','Désolé, votre session a expiré, merci de bien vouloir vous reconnecter et réessayer .', 'unauthorized')
             }
 
             const isLastPassword : boolean = await this.authentificationService.comparePassword(updatePasswordContext.last_password, account.password);
@@ -35,14 +35,14 @@ export class SettingFeature {
                 account.password = await this.authentificationService.hashPassword(updatePasswordContext.password);
                 await this.accountRepo.save(account);
 
-                return ApiResponseUtil.ok('Password updated 🎉 .', 'Password updated 🎉 .');
+                return ApiResponseUtil.ok('Password updated 🎉 .','Mot de passe modifié', 'Votre mot de passe a belle et bien été mis à jour .');
             }
             else{
-                return ApiResponseUtil.error('Last password is not valid .', 'conflict')
+                return ApiResponseUtil.error('','Désolé, l\'ancien mot de passe fourni n\'est pas correct, merci de bien vouloir réessayer avec le bon .', 'conflict')
             }
 
         }catch(e){
-            return ApiResponseUtil.error("Failed to update password ." , "internal_error")
+            return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
     }
 
@@ -53,7 +53,7 @@ export class SettingFeature {
 
             if(user == null)
             {
-                return ApiResponseUtil.error('Account not found, please connected .', 'unauthorized')
+                return ApiResponseUtil.error('Session inactive','Désolé, votre session a expiré, merci de bien vouloir vous reconnecter et réessayer .', 'unauthorized')
             }
 
             user.civility = updateCustomerContext.civility
@@ -62,10 +62,10 @@ export class SettingFeature {
 
             await this.userRepo.save(user)
 
-            return ApiResponseUtil.ok(UserDtm.fromUserDtm(user), 'User updated 🎉 .')
+            return ApiResponseUtil.ok(UserDtm.fromUserDtm(user),'Profil mis à jour', 'Vos informations de profil ont belle et bien été mis à jour . .')
 
         }catch(e){
-            return ApiResponseUtil.error("Failed to update info ." , "internal_error")
+            return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
     }
 

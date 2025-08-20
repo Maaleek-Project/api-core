@@ -25,7 +25,7 @@ export class CustomerFeature {
     async listing() : Promise<ApiResponse<AccountDtm[]>> {
         const customers = await this.accountRepo.findAllCustomer();
         const account = customers.map(account => AccountDtm.fromAccountDtm(account));
-        return ApiResponseUtil.ok(account, 'Customers listed 🎉 .');
+        return ApiResponseUtil.ok(account,'', 'Customers listed 🎉 .');
     }
 
     async createCustomer(context : CreateCustomerContext) : Promise<ApiResponse<AccountDtm>> {
@@ -37,7 +37,7 @@ export class CustomerFeature {
 
             if(country == null)
             {
-                return ApiResponseUtil.error('Country not found .', 'not_found');
+                return ApiResponseUtil.error('','Country not found .', 'not_found');
             }
 
             const account : AccountModel | null = await this.accountRepo.fetchByLogin(context.number, context.country_id);
@@ -52,7 +52,7 @@ export class CustomerFeature {
 
                     if(find_number != null)
                     {
-                        return ApiResponseUtil.error('This number is already used .', 'conflict');
+                        return ApiResponseUtil.error('','This number is already used .', 'conflict');
                     }
 
                     const user : UserModel = { id : uuidv4(), civility : context.civility, name : context.name, surname : context.surname, number : context.number , email : context.email };
@@ -62,25 +62,25 @@ export class CustomerFeature {
 
                     const entity : EntityModel | null = await this.resourceRepo.findEntityByCode("Customer") as EntityModel;
 
-                    const account : AccountModel = { id : uuidv4(), login : context.number, password : password, user : user, country : country!, entity : entity};
+                    const account : AccountModel = { id : uuidv4(), login : context.number, password : password, user : user, country : country!, entity : entity , fcm_token : `${context.number}@fcm`};
 
                     const saved = await this.accountRepo.save(account);
 
-                    return ApiResponseUtil.ok({...AccountDtm.fromAccountDtm(saved)}, 'Customer created 🎉 .');
+                    return ApiResponseUtil.ok({...AccountDtm.fromAccountDtm(saved)},'', 'Customer created 🎉 .');
 
                 }
                 else
                 {
-                    return ApiResponseUtil.error('This email is already used .', 'conflict');
+                    return ApiResponseUtil.error('','This email is already used .', 'conflict');
                 }
             }
             else
             {
-                return ApiResponseUtil.error('Account already exists .', 'conflict');
+                return ApiResponseUtil.error('','Account already exists .', 'conflict');
             }
 
         }catch(e){
-            return ApiResponseUtil.error("Failed to create customer .", "internal_error");
+            return ApiResponseUtil.error('',"Failed to create customer .", "internal_error");
         }
 
     }

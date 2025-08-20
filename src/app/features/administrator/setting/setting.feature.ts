@@ -27,6 +27,6 @@ export class SettingFeature {
             countries : countries.map(CountryDtm.fromCountryDtm),
             providers : providers.map(ProviderDtm.fromProviderDtm),
             offers : offers.map(OfferDtm.fromOfferDtm)
-        }, 'Config retrieved 🎉 .');
+        },'', 'Config retrieved 🎉 .');
     }
 }

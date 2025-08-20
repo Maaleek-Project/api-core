@@ -64,6 +64,7 @@ export default async function UserSeeder() {
             update: {},
             create: {
                 login: user.login,
+                fcm_token : `${user.id}@fcm`,
                 password: password,
                 user_id: saved.id,
                 country_id: country!.id,

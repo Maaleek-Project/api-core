@@ -20,18 +20,18 @@ export class PaymentProviderFeature {
 
             if(searching != null)
             {
-                return ApiResponseUtil.error('Provider already exists .', 'conflict');
+                return ApiResponseUtil.error('','Provider already exists .', 'conflict');
             }
 
             const provider : ProviderModel = { id : uuidv4(), libelle : context.libelle, activated : false, cover : file.filename, description : context.description};
 
             const saved = await this.providerRepo.save(provider);
 
-            return ApiResponseUtil.ok(ProviderDtm.fromProviderDtm(saved), 'Provider created 🎉 .');
+            return ApiResponseUtil.ok(ProviderDtm.fromProviderDtm(saved),'', 'Provider created 🎉 .');
 
         }catch(e){
             console.log(e)
-            return ApiResponseUtil.error("Failed to create provider .", "internal_error");
+            return ApiResponseUtil.error('',"Failed to create provider .", "internal_error");
         }
     }
 

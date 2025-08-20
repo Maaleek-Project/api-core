@@ -20,18 +20,18 @@ export class CountryFeature {
 
             if(searching != null)
             {
-                return ApiResponseUtil.error('Country already exists .', 'conflict');
+                return ApiResponseUtil.error('','Country already exists .', 'conflict');
             }
 
             const country : CountryModel = { id : uuidv4(), libelle : context.libelle, code : context.indicatif, alias : context.alias, flag : context.flag, currency : context.currency};
 
             const saved = await this.countryRepo.saveCountry(country);
 
-            return ApiResponseUtil.ok(CountryDtm.fromCountryDtm(saved), 'Country created 🎉 .');
+            return ApiResponseUtil.ok(CountryDtm.fromCountryDtm(saved),'', 'Country created 🎉 .');
 
         }catch(e){
             console.log(e)
-            return ApiResponseUtil.error("Failed to create country .", "internal_error");
+            return ApiResponseUtil.error('',"Failed to create country .", "internal_error");
         }
     }
 }
