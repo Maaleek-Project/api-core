@@ -38,7 +38,7 @@ export class SettingFeature {
                 return ApiResponseUtil.ok('Password updated 🎉 .','Mot de passe modifié', 'Votre mot de passe a belle et bien été mis à jour .');
             }
             else{
-                return ApiResponseUtil.error('','Désolé, l\'ancien mot de passe fourni n\'est pas correct, merci de bien vouloir réessayer avec le bon .', 'conflict')
+                return ApiResponseUtil.error('Ancien de mot passe erroné','Désolé, l\'ancien mot de passe fourni n\'est pas correct, merci de bien vouloir réessayer avec le bon .', 'conflict')
             }
 
         }catch(e){
