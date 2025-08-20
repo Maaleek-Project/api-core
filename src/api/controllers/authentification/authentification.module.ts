@@ -4,6 +4,7 @@ import { AuthentificationController } from "./authentification.controller";
 import { RepoModule } from "src/app/repo/repo.module";
 import { JwtModule } from "@nestjs/jwt";
 import { AuthentificationFeature } from "src/app/features/shared/authentification.feature";
+import { FirebaseService } from "src/core/services/firebase.service";
 
 @Module({
     imports: [
@@ -19,7 +20,8 @@ import { AuthentificationFeature } from "src/app/features/shared/authentificatio
     ],
     providers: [
         AuthentificationFeature,
-        AuthentificationService
+        AuthentificationService,
+        FirebaseService
     ],
 })
 export class AuthentificationModule {}

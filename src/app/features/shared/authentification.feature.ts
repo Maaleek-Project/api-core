@@ -19,6 +19,7 @@ import { AuthentificationService } from "src/core/services/authenfication.servic
 import { TokenRepo } from "src/app/repo/token_repo";
 import { TokenModel } from "src/core/domain/models/token.model";
 import { v4 as uuidv4 } from 'uuid';
+import { FirebaseService } from "src/core/services/firebase.service";
 
 @Injectable()
 export class AuthentificationFeature {
@@ -30,6 +31,7 @@ export class AuthentificationFeature {
         private readonly userRepo : UserRepo,
         private readonly tokenRepo : TokenRepo,
         private readonly authentificationService : AuthentificationService,
+        private readonly firebaseService : FirebaseService,
     ) {}
 
     async validateCode(context : ValidateCodeContext) : Promise<ApiResponse<OtpDtm>> {
@@ -162,6 +164,15 @@ export class AuthentificationFeature {
             const saved = await this.accountRepo.save(account);
             await this.tokenRepo.save(model)
             await this.otpRepo.remove(action);
+
+            setTimeout(async () => {
+            await this.firebaseService.toPush(
+                account.fcm_token!,
+                "C’est parti 🚀",
+                "Super nouvelle 🎉 Vous avez déjà 10 cartes de visite prêtes à partager avec vos contacts .",
+            );
+            }, 5000);
+
 
             return ApiResponseUtil.ok({...AccountDtm.fromAccountDtm(saved), token : token , expired_at : model.expired_at}, 'Compte créer', 'Bienvenue 🎉, votre compte a été créé avec succès, accéder à votre espace .');
 

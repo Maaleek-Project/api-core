@@ -1,10 +1,12 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import * as admin from 'firebase-admin';
+import { google } from 'googleapis';
 
 @Injectable()
 export class FirebaseService implements OnModuleInit {
 
   private database: admin.firestore.Firestore;
+  private readonly MESSAGING_SCOPE: string = process.env.MESSAGING_SCOPE as string;
 
   constructor() {}
 
@@ -20,5 +22,48 @@ export class FirebaseService implements OnModuleInit {
     });
     this.database = admin.firestore();
   }
+
+   
+
+    async getAccessToken(): Promise<string | null> {
+        const auth = new google.auth.JWT({
+            email: process.env.FIREBASE_CLIENT_EMAIL,
+            key: process.env.FIREBASE_PRIVATE_KEY,
+            scopes: [this.MESSAGING_SCOPE],
+        })
+        return new Promise((resolve, reject) => {
+            auth.authorize(function (err, tokens) {
+                if(tokens)
+                {
+                  resolve(tokens.access_token!);
+                }
+                reject(err);
+            })
+        })
+    }
+
+    async toPush(deviceToken: string, title: string, body: string): Promise<any> {
+        const accessToken = await this.getAccessToken();
+        if (accessToken) {
+            const payload = {
+                message: {
+                    token: deviceToken,
+                    notification: {
+                        title: title,
+                        body: body
+                    }
+                }
+            }
+            const response = await fetch(process.env.PUSH_NOTIFICATION_URL!, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${accessToken}`
+                },
+                body: JSON.stringify(payload)
+            });
+            return response.json();
+        }
+    }
 
 }
