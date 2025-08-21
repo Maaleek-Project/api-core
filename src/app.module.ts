@@ -13,6 +13,7 @@ import { WorkerController } from './api/controllers/corporation/worker.controlle
 import { SetupController } from './api/controllers/management/setup.controller';
 import { UserModule } from './api/controllers/customer/customer.module';
 import { UserController } from './api/controllers/customer/user.controller';
+import { MainController } from './api/controllers/customer/main.controller';
 
 @Module({
   imports: [
@@ -31,18 +32,16 @@ import { UserController } from './api/controllers/customer/user.controller';
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
+     consumer
       .apply(AuthMiddleware)
-      .forRoutes({path : 'auth/(.*)' , method : RequestMethod.DELETE})
-      .apply(AuthMiddleware)
-      .forRoutes(CustomerController)
-      .apply(AuthMiddleware)
-      .forRoutes(CompanyController)
-      .apply(AuthMiddleware)
-      .forRoutes(WorkerController)
-      .apply(AuthMiddleware)
-      .forRoutes(SetupController)
-      .apply(AuthMiddleware)
-      .forRoutes(UserController)
+      .forRoutes(
+        { path: 'auth/(.*)', method: RequestMethod.DELETE },
+        CustomerController,
+        CompanyController,
+        WorkerController,
+        SetupController,
+        UserController,
+        MainController,
+      );
   }
 }

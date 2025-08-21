@@ -10,6 +10,16 @@ export class NotificationRepo implements INotificationRepo {
         private readonly prisma: PrismaService,
     ) {}
 
+    async findById(id : string) : Promise<NotificationModel | null> {
+        const notification = await this.prisma.notification.findUnique({
+            where : {id : id},
+            include : {
+                account : false
+            }
+        })
+        return notification ? this.toNotification(notification) : null;
+    }
+
     async save(notification : NotificationModel) : Promise<NotificationModel> {
         const saved = await this.prisma.notification.upsert({
             where: {id : notification.id},
