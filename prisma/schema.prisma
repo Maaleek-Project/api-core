@@ -13,6 +13,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum NotificationType {
+  OFFER
+  WELCOME
+  GIFT
+  APPROVAL
+  INVITATION
+  OTHER
+}
+
 model Account {
   id         String      @id @default(uuid())
   entity_id  String
@@ -40,6 +49,7 @@ model Account {
   assignment Assignment[]
   company Company[]
   worker Worker[]
+  Notification Notification[]
 }
 
 
@@ -236,4 +246,21 @@ model PaymentProvider {
   updated_at DateTime @updatedAt
 
   @@map("payment_providers")
+}
+
+model Notification {
+  id         String      @id @default(uuid())
+  account_id String
+  type       NotificationType @default(OTHER)
+  title       String
+  message    String
+  readed       Boolean    @default(false)
+  deleted    Boolean    @default(false)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  account Account @relation(fields: [account_id], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
 }

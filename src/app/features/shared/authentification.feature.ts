@@ -20,6 +20,8 @@ import { TokenRepo } from "src/app/repo/token_repo";
 import { TokenModel } from "src/core/domain/models/token.model";
 import { v4 as uuidv4 } from 'uuid';
 import { FirebaseService } from "src/core/services/firebase.service";
+import { NotificationRepo } from "src/app/repo/notification_repo";
+import { NotificationType } from "@prisma/client";
 
 @Injectable()
 export class AuthentificationFeature {
@@ -30,6 +32,7 @@ export class AuthentificationFeature {
         private readonly resourceRepo : ResourceRepo,
         private readonly userRepo : UserRepo,
         private readonly tokenRepo : TokenRepo,
+        private readonly notificationRepo : NotificationRepo,
         private readonly authentificationService : AuthentificationService,
         private readonly firebaseService : FirebaseService,
     ) {}
@@ -172,6 +175,14 @@ export class AuthentificationFeature {
                 "Super nouvelle 🎉 Vous avez déjà 10 cartes de visite prêtes à partager avec vos contacts .",
             );
             }, 5000);
+
+            await this.notificationRepo.save({
+                id : uuidv4(),
+                account : account,
+                type : NotificationType.WELCOME,
+                title : "Merci d'avoir rejoint maaleek 🎉",
+                message : "Nous sommes ravis de vous compter parmi nous. Ensemble, construisons un réseau solide et inspirant !",
+            });
 
 
             return ApiResponseUtil.ok({...AccountDtm.fromAccountDtm(saved), token : token , expired_at : model.expired_at}, 'Compte créer', 'Bienvenue 🎉, votre compte a été créé avec succès, accéder à votre espace .');
