@@ -8,6 +8,7 @@ import { AccountDtm } from "src/core/domain/dtms/account.dtm";
 import { NotificationDtm } from "src/core/domain/dtms/notification.dtm";
 import { AccountModel } from "src/core/domain/models/account.model";
 import { ExchangeRequestModel } from "src/core/domain/models/exchange_request.model";
+import { FirebaseService } from "src/core/services/firebase.service";
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
@@ -17,6 +18,7 @@ export class MainFeature {
         private readonly notificationRepo : NotificationRepo,
         private readonly accountRepo : AccountRepo,
         private readonly exchangeRequestRepo : ExchangeRequestRepo,
+        private readonly firebaseService : FirebaseService,
     ) {}
 
     async userNotifications(accounnt : AccountDtm) : Promise<ApiResponse<NotificationDtm[]>> {
@@ -27,11 +29,7 @@ export class MainFeature {
     async exchangeRequest(context : ExchangeRequestContext) : Promise<ApiResponse<AccountDtm>> {
         try{
             const sender : AccountModel | null = await this.accountRepo.findById(context.request_sender_id)
-            console.log(context.request_sender_id);
-            console.log(sender);
             const recipient : AccountModel | null = await this.accountRepo.findById(context.request_recipient_id)
-            console.log(context.request_recipient_id);
-            console.log(recipient);
 
             if(sender == null || recipient == null)
             {
@@ -43,6 +41,17 @@ export class MainFeature {
                 sender : sender,
                 recipient : recipient
             }
+
+            const data : any = await this.firebaseService.toSave('exchange_requests', {...exchange, 
+                user : {
+                    name : recipient.user.name,
+                    surname : recipient.user.surname,
+                    civility : recipient.user.civility,
+                    avatar : recipient.user.picture,
+                }
+            });
+
+            console.log(data);
 
             await this.exchangeRequestRepo.save(exchange);
 

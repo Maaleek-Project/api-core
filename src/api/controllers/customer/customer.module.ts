@@ -9,6 +9,7 @@ import { MainFeature } from "src/app/features/customer/main.feature";
 import { MainController } from "./main.controller";
 import { NotificationRepo } from "src/app/repo/notification_repo";
 import { ExchangeRequestRepo } from "src/app/repo/exchange_request_repo";
+import { FirebaseService } from "src/core/services/firebase.service";
 
 @Module({
     imports : [],
@@ -21,7 +22,8 @@ import { ExchangeRequestRepo } from "src/app/repo/exchange_request_repo";
         PrismaService,
         MainFeature,
         SettingFeature,
-        AuthentificationService
+        AuthentificationService,
+        FirebaseService
     ]
 })
 export class UserModule {}
