@@ -46,7 +46,7 @@ export class SettingFeature {
         }
     }
 
-    async updateCustomerInfo(accountDtm : AccountDtm, updateCustomerContext : UpdateCustomerContext) : Promise<ApiResponse<UserDtm>> {
+    async updateCustomerInfo(accountDtm : AccountDtm, updateCustomerContext : UpdateCustomerContext) : Promise<ApiResponse<AccountDtm>> {
         try {
 
             const user : UserModel | null = await this.userRepo.findById(accountDtm.user.id)
@@ -62,7 +62,7 @@ export class SettingFeature {
 
             await this.userRepo.save(user)
 
-            return ApiResponseUtil.ok(UserDtm.fromUserDtm(user),'Profil mis à jour', 'Vos informations de profil ont belle et bien été mis à jour . .')
+            return ApiResponseUtil.ok(accountDtm,'Profil mis à jour', 'Vos informations de profil ont belle et bien été mis à jour . .')
 
         }catch(e){
             return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
