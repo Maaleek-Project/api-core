@@ -72,9 +72,9 @@ export class FirebaseService implements OnModuleInit {
 
     async toSave(collection : string, data : any) : Promise<any> {
         return await this.database.collection(collection).add(data).then(function(docRef) {
-            return docRef;
+            return docRef.id
         }).catch(function(error) {
-            return error;
+            return null;
         });
     }
 

@@ -42,7 +42,12 @@ export class MainFeature {
                 recipient : recipient
             }
 
-            const data : any = await this.firebaseService.toSave('exchange_requests', {...exchange, 
+            const id : any = await this.firebaseService.toSave('exchange_requests', {
+                exchange : {
+                    sender : sender.id,
+                    recipient : recipient.id,
+                    created_at : new Date(),
+                }, 
                 user : {
                     name : recipient.user.name,
                     surname : recipient.user.surname,
@@ -51,11 +56,14 @@ export class MainFeature {
                 }
             });
 
-            console.log(data);
+            if(id)
+            {
+                await this.exchangeRequestRepo.save(exchange);
+                return ApiResponseUtil.ok(AccountDtm.fromAccountDtm(sender),'Demande d\'échange envoyée', 'Votre demande d\'échange a bien été envoyée, vous serez notifié dès que votre demande sera acceptée .');
+            }
 
-            await this.exchangeRequestRepo.save(exchange);
+            return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
 
-            return ApiResponseUtil.ok(AccountDtm.fromAccountDtm(sender),'Demande d\'échange envoyée', 'Votre demande d\'échange a bien été envoyée, vous serez notifié dès que votre demande sera acceptée .');
         }catch(e){
             return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
