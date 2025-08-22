@@ -27,7 +27,11 @@ export class MainFeature {
     async exchangeRequest(context : ExchangeRequestContext) : Promise<ApiResponse<AccountDtm>> {
         try{
             const sender : AccountModel | null = await this.accountRepo.findById(context.request_sender_id)
+            console.log(context.request_sender_id);
+            console.log(sender);
             const recipient : AccountModel | null = await this.accountRepo.findById(context.request_recipient_id)
+            console.log(context.request_recipient_id);
+            console.log(recipient);
 
             if(sender == null || recipient == null)
             {
