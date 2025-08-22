@@ -8,6 +8,7 @@ import { SettingFeature } from "src/app/features/customer/setting.feature";
 import { MainFeature } from "src/app/features/customer/main.feature";
 import { MainController } from "./main.controller";
 import { NotificationRepo } from "src/app/repo/notification_repo";
+import { ExchangeRequestRepo } from "src/app/repo/exchange_request_repo";
 
 @Module({
     imports : [],
@@ -16,6 +17,7 @@ import { NotificationRepo } from "src/app/repo/notification_repo";
         AccountRepo,
         UserRepo,
         NotificationRepo,
+        ExchangeRequestRepo,
         PrismaService,
         MainFeature,
         SettingFeature,

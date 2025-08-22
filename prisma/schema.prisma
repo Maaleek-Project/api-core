@@ -22,6 +22,12 @@ enum NotificationType {
   OTHER
 }
 
+enum ExchangeRequestStatus {
+  WAITING
+  ACCEPTED
+  REJECTED
+}
+
 model Account {
   id         String      @id @default(uuid())
   entity_id  String
@@ -49,7 +55,9 @@ model Account {
   assignment Assignment[]
   company Company[]
   worker Worker[]
-  Notification Notification[]
+  Notification Notification[] 
+  Sender ExchangeRequest[] @relation("sender_relation")
+  Recipient ExchangeRequest[] @relation("recipient_relation")
 }
 
 
@@ -263,4 +271,21 @@ model Notification {
   account Account @relation(fields: [account_id], references: [id], onDelete: Cascade)
 
   @@map("notifications")
+}
+
+model ExchangeRequest{
+  id         String      @id @default(uuid())
+  sender_id  String
+  recipient_id String
+  status     ExchangeRequestStatus @default(WAITING) 
+  
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  sender Account @relation("sender_relation",fields: [sender_id], references: [id], onDelete: Cascade)
+  recipient Account @relation("recipient_relation",fields: [recipient_id], references: [id], onDelete: Cascade)
+
+  @@unique([sender_id, recipient_id])
+
+  @@map("exchanges_requests")
 }
