@@ -23,6 +23,7 @@ import { ExchangeRequestRepo } from "./exchange_request_repo";
         NotificationRepo,
         ExchangeRequestRepo,
         PrismaService
+
     ],
     exports: [
         ResourceRepo,

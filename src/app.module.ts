@@ -5,8 +5,6 @@ import { AuthentificationModule } from './api/controllers/authentification/authe
 import { AuthMiddleware } from './api/middlewares/auth.middlewares';
 import { ManagementModule } from './api/controllers/management/management.module';
 import { CustomerController } from './api/controllers/management/customer.controller';
-import { APP_GUARD } from '@nestjs/core';
-import { EntityTypeGuard } from './core/guards/entity_type.guard';
 import { CompanyController } from './api/controllers/management/company.controller';
 import { CorporateModule } from './api/controllers/corporation/corporation.module';
 import { WorkerController } from './api/controllers/corporation/worker.controller';
@@ -28,7 +26,8 @@ import { MainController } from './api/controllers/customer/main.controller';
     UserModule
   ],
   controllers: [],
-  providers: [],
+  providers: [
+  ],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
