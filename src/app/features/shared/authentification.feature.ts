@@ -176,6 +176,12 @@ export class AuthentificationFeature {
             );
             }, 5000);
 
+            await this.firebaseService.toSave('business_card_trackings',{
+                account : account.id,
+                business_card : account.user.businessCard?.offer.sharing_number,
+                business_card_received : 0
+            })
+
             await this.notificationRepo.save({
                 id : uuidv4(),
                 account : account,

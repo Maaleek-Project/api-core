@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { ExchangeRequestContext } from "src/app/context/main.context";
+import { ExchangeRequestContext, RefreshTokenContext } from "src/app/context/main.context";
 import { AccountRepo } from "src/app/repo/account_repo";
 import { ExchangeRequestRepo } from "src/app/repo/exchange_request_repo";
 import { NotificationRepo } from "src/app/repo/notification_repo";
@@ -56,6 +56,8 @@ export class MainFeature {
                 }
             });
 
+            await this.firebaseService.toPush(sender.fcm_token, 'Demande de carte 🎉', 'Vous avez reçu une demande de carte, merci de bien vouloir accepter ou refuser la demande .');
+
             if(id)
             {
                 await this.exchangeRequestRepo.save(exchange);
@@ -63,6 +65,26 @@ export class MainFeature {
             }
 
             return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
+
+        }catch(e){
+            return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
+        }
+    }
+
+    async refreshToken(accountDtm : AccountDtm, context : RefreshTokenContext) : Promise<ApiResponse<String>> {
+        try{
+
+            const account : AccountModel | null = await this.accountRepo.findById(accountDtm.id);
+
+            if(account == null)
+            {
+                return ApiResponseUtil.error('Session inactive','Désolé, votre session a expiré, merci de bien vouloir vous reconnecter et réessayer .', 'unauthorized')
+            }
+
+            account.fcm_token = context.refresh_token;
+            await this.accountRepo.save(account);
+
+            return ApiResponseUtil.ok("",'Token refreshed', 'Votre token a bien été actualisé .');
 
         }catch(e){
             return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');

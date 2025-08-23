@@ -7,3 +7,8 @@ export class ExchangeRequestContext {
     @IsNotEmpty({ message: 'Request recipient id is required .' })
     request_recipient_id : string;
 }
+
+export class RefreshTokenContext {
+    @IsNotEmpty({ message: 'Refresh token is required .' })
+    refresh_token : string;
+}
