@@ -148,7 +148,7 @@ export class AuthentificationFeature {
 
             if(time_up)
             {
-                return ApiResponseUtil.error('Temps écoulé','Le temps de validation est écoulé, merci de réessayer avec un nouveau code .', 'conflict');
+                return ApiResponseUtil.error('Temps écoulé','Le temps d\'inscription est écoulé, merci de réessayer avec un nouveau code .', 'conflict');
             }
 
             const user : UserModel = { id : uuidv4(), civility : context.civility, name : context.name.trim(), surname : context.surname.trim(), number : context.login.trim() };
