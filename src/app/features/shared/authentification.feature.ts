@@ -178,7 +178,7 @@ export class AuthentificationFeature {
 
             await this.firebaseService.toSave('business_card_trackings',{
                 account : account.id,
-                business_card : account.user.businessCard?.offer.sharing_number,
+                business_card : 10,
                 business_card_received : 0
             })
 
