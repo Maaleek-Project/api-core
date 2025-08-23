@@ -36,13 +36,20 @@ export class MainFeature {
                 return ApiResponseUtil.error('Session inactive','Désolé, votre session a expiré, merci de bien vouloir vous reconnecter et réessayer .', 'unauthorized')
             }
 
+            if(context.request_recipient_id == context.request_sender_id)
+            {
+                return ApiResponseUtil.error('Même Identité','Désolé, vous ne pouvez pas envoyer une demande de carte à vous-même .', 'conflict');
+            }
+
             const exchange : ExchangeRequestModel = {
                 id : uuidv4(),
                 sender : sender,
                 recipient : recipient
             }
 
-            const id : any = await this.firebaseService.toSave('exchange_requests', {
+            await this.exchangeRequestRepo.save(exchange);
+
+            await this.firebaseService.toSave('exchange_requests', {
                 exchange : {
                     sender : sender.id,
                     recipient : recipient.id,
@@ -56,15 +63,10 @@ export class MainFeature {
                 }
             });
 
+
             await this.firebaseService.toPush(sender.fcm_token, 'Demande de carte 🎉', 'Vous avez reçu une demande de carte, merci de bien vouloir accepter ou refuser la demande .');
-
-            if(id)
-            {
-                await this.exchangeRequestRepo.save(exchange);
-                return ApiResponseUtil.ok(AccountDtm.fromAccountDtm(sender),'Demande d\'échange envoyée', 'Votre demande d\'échange a bien été envoyée, vous serez notifié dès que votre demande sera acceptée .');
-            }
-
-            return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
+                
+            return ApiResponseUtil.ok(AccountDtm.fromAccountDtm(sender),'Demande d\'échange envoyée', 'Votre demande d\'échange a bien été envoyée, vous serez notifié dès que votre demande sera acceptée .');
 
         }catch(e){
             return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');

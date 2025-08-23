@@ -31,6 +31,7 @@ export class MainController {
         const statusMap: Record<string, number> = {
             success: 200,
             unauthorized: 401,
+            conflict: 409,
             internal_error: 500,
         };
         const status = statusMap[exchangeRequest.code] ;
