@@ -45,7 +45,8 @@ export class MainFeature {
             const exchange : ExchangeRequestModel = {
                 id : uuidv4(),
                 sender : sender,
-                recipient : recipient
+                recipient : recipient,
+                status : ExchangeRequestStatus.WAITING
             }
 
             await this.exchangeRequestRepo.save(exchange);
