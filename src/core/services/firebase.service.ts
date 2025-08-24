@@ -78,4 +78,12 @@ export class FirebaseService implements OnModuleInit {
         });
     }
 
+    async toDelete(collection : string, id : string) : Promise<any> {
+        return await this.database.collection(collection).doc(id).delete().then(function(docRef) {
+            return docRef;
+        }).catch(function(error) {
+            return null;
+        });
+    }
+
 }

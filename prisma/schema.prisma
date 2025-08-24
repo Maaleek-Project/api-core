@@ -20,6 +20,7 @@ enum NotificationType {
   APPROVAL
   INVITATION
   OTHER
+  REJECTED
 }
 
 enum ExchangeRequestStatus {

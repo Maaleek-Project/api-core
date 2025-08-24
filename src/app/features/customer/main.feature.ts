@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { ExchangeRequestContext, RefreshTokenContext } from "src/app/context/main.context";
+import { ExchangeRequestStatus, NotificationType } from "@prisma/client";
+import { ExchangeRequestContext, ExchangeResponseContext, RefreshTokenContext } from "src/app/context/main.context";
 import { AccountRepo } from "src/app/repo/account_repo";
 import { ExchangeRequestRepo } from "src/app/repo/exchange_request_repo";
 import { NotificationRepo } from "src/app/repo/notification_repo";
@@ -51,6 +52,7 @@ export class MainFeature {
 
             await this.firebaseService.toSave('exchange_requests', {
                 exchange : {
+                    exchange_id : exchange.id,
                     sender : sender.id,
                     recipient : recipient.id,
                     created_at : new Date(),
@@ -69,7 +71,7 @@ export class MainFeature {
             return ApiResponseUtil.ok(AccountDtm.fromAccountDtm(sender),'Demande d\'échange envoyée', 'Votre demande d\'échange a bien été envoyée, vous serez notifié dès que votre demande sera acceptée .');
 
         }catch(e){
-            return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
+            return ApiResponseUtil.error('Carte déjà réçu','Désolé, vous avez déjà réçu la carte de cette personne .', 'internal_error');
         }
     }
 
@@ -87,6 +89,51 @@ export class MainFeature {
             await this.accountRepo.save(account);
 
             return ApiResponseUtil.ok("",'Token refreshed', 'Votre token a bien été actualisé .');
+
+        }catch(e){
+            return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
+        }
+    }
+
+    async responseExchangeRequest(accountDtm : AccountDtm, context : ExchangeResponseContext) : Promise<ApiResponse<String>> {
+        try{
+
+            const account : AccountModel | null = await this.accountRepo.findById(accountDtm.id);
+
+            if(account == null)
+            {
+                return ApiResponseUtil.error('Session inactive','Désolé, votre session a expiré, merci de bien vouloir vous reconnecter et réessayer .', 'unauthorized')
+            }
+
+            const exchangeRequest : ExchangeRequestModel | null = await this.exchangeRequestRepo.findById(context.exchange_id);
+
+            if(exchangeRequest == null)
+            {
+                return ApiResponseUtil.error('Demande inexistante','Désolé, cette demande de carte semble ne pas exister, merci de bien vouloir réessayer .', 'not_found')
+            }
+
+            if(exchangeRequest.sender.id != account.id || exchangeRequest.recipient.id != context.request_recipient_id)
+            {
+                return ApiResponseUtil.error('Demande invalide','Désolé, cette demande de carte semble ne pas exister, merci de bien vouloir réessayer .', 'not_found')
+            }
+
+            exchangeRequest.status = context.response ? ExchangeRequestStatus.ACCEPTED : ExchangeRequestStatus.REJECTED ;
+            await this.exchangeRequestRepo.save(exchangeRequest);
+
+            const recipient : AccountModel  = await this.accountRepo.findById(exchangeRequest.recipient.id) as AccountModel;
+
+            await this.firebaseService.toPush(recipient.fcm_token, context.response ? 'Carte reçue 📇' : 'Carte refusée ❌', context.response ? 'Vous avez reçu une nouvelle carte de visite dans votre réseau .' : 'Votre demande d’accès à une carte de visite n’a pas abouti.');
+            await this.firebaseService.toDelete('exchange_requests', context.exchange_id);
+
+            await this.notificationRepo.save({
+                id : uuidv4(),
+                account : recipient,
+                title : context.response ? 'Reception de Carte acceptée 👏' : 'Reception de Carte refusée 😔',
+                message : context.response ? 'Bonne nouvelle !! vous venez de recevoir une carte de visite de la part de '+ account.user.civility + ' ' + account.user.name + ' 🎉 .' : 'Désolé, une demande d\'accès à une carte de visite vous a été refusée par '+ account.user.civility + ' ' + account.user.name,
+                type : context.response ? NotificationType.APPROVAL : NotificationType.REJECTED,
+            });
+
+            return ApiResponseUtil.ok("",'Demande d\'échange répondue', 'Votre demande d\'échange a bien été répondue .');
 
         }catch(e){
             return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');

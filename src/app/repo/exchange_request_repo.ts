@@ -10,6 +10,17 @@ export class ExchangeRequestRepo implements IExchangeRequestRepo {
         private readonly prisma: PrismaService,
     ) {}
 
+    async findById(id : string) : Promise<ExchangeRequestModel> {
+        const exchangeRequest = await this.prisma.exchangeRequest.findUnique({
+            where : {id : id},
+            include : {
+                sender : true,
+                recipient : true
+            }
+        })
+        return this.toExchangeRequest(exchangeRequest);
+    }
+
     async findBySender(sender_id : string) : Promise<ExchangeRequestModel[]> {
         const exchangeRequests = await this.prisma.exchangeRequest.findMany({
             where : {sender_id : sender_id},
