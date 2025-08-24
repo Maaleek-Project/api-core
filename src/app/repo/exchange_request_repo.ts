@@ -14,7 +14,11 @@ export class ExchangeRequestRepo implements IExchangeRequestRepo {
         const exchangeRequest = await this.prisma.exchangeRequest.findUnique({
             where : {id : id},
             include : {
-                sender : true,
+                 sender : {
+                    include : {
+                        user : true
+                    }
+                },
                 recipient : true
             }
         })
@@ -25,7 +29,11 @@ export class ExchangeRequestRepo implements IExchangeRequestRepo {
         const exchangeRequests = await this.prisma.exchangeRequest.findMany({
             where : {sender_id : sender_id},
             include : {
-                sender : true,
+                 sender : {
+                    include : {
+                        user : true
+                    }
+                },
                 recipient : true
             }
         })
@@ -36,7 +44,11 @@ export class ExchangeRequestRepo implements IExchangeRequestRepo {
         const exchangeRequests = await this.prisma.exchangeRequest.findMany({
             where : {recipient_id : recipient_id},
             include : {
-                sender : true,
+                sender : {
+                    include : {
+                        user : true
+                    }
+                },
                 recipient : true
             }
         })
