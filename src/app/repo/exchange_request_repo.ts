@@ -57,6 +57,7 @@ export class ExchangeRequestRepo implements IExchangeRequestRepo {
             id : exchangeRequest.id,
             sender_id : exchangeRequest.sender.id,
             recipient_id : exchangeRequest.recipient.id,
+            status : exchangeRequest.status,
         };
     }
 
