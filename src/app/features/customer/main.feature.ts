@@ -145,7 +145,7 @@ export class MainFeature {
         }
     }
 
-    async businessCardReceived(accountDtm : AccountDtm) : Promise<ApiResponse<BusinessCardDtm[]>> {
+    async businessCardReceived(accountDtm : AccountDtm) : Promise<ApiResponse<any>> {
         try{
 
             const account : AccountModel | null = await this.accountRepo.findById(accountDtm.id);
@@ -157,11 +157,13 @@ export class MainFeature {
 
             const senders : ExchangeRequestModel[] = await this.exchangeRequestRepo.findByRecipient(account.id);
 
-            const ids = senders.map(sender => sender.sender.user.id);
+            // const ids = senders.map(sender => sender.sender.user.id);
 
-            const businessCards : BusinessCardModel[] = await this.businessCardRepo.haveTheBusinessCardsReceived(ids);
+            // const businessCards : BusinessCardModel[] = await this.businessCardRepo.haveTheBusinessCardsReceived(ids);
 
-            return ApiResponseUtil.ok(businessCards.map(BusinessCardDtm.fromBusinessCardDtm),'','Liste de cartes de visite reçues 🎉 .');
+            // businessCards.map(BusinessCardDtm.fromBusinessCardDtm)
+
+            return ApiResponseUtil.ok(senders,'','Liste de cartes de visite reçues 🎉 .');
 
         }catch(e){
             console.log(e)
