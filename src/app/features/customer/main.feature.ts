@@ -157,6 +157,8 @@ export class MainFeature {
 
             const senders : ExchangeRequestModel[] = await this.exchangeRequestRepo.findByRecipient(account.id);
 
+            console.log(senders);
+
             const ids = senders.map(sender => sender.sender.user.id);
 
             console.log(ids);
