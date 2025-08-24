@@ -31,7 +31,6 @@ export class BusinessCardRepo implements IBusinessCardRepo {
             number : businessCard.number,
             email : businessCard.email,
             job : businessCard.job,
-            company : businessCard.company,
             created_at : businessCard.created_at,
         };
     }

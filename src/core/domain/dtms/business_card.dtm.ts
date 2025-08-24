@@ -17,6 +17,7 @@ export class BusinessCardDtm {
     }
 
     static fromBusinessCardDtm(businessCard : BusinessCardModel) : BusinessCardDtm {
+        console.log(businessCard);
         return new BusinessCardDtm(businessCard.id, UserDtm.fromUserDtm(businessCard.user), businessCard.number, businessCard.email, businessCard.job);
     }
 }

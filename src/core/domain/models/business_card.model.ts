@@ -7,6 +7,5 @@ export interface BusinessCardModel {
     number : string;
     email : string;
     job : string;
-    company? : CompanyModel;
     created_at? : Date;
 }
