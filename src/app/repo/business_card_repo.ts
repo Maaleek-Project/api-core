@@ -20,6 +20,7 @@ export class BusinessCardRepo implements IBusinessCardRepo {
                 company : true
             }
         })
+        console.log(businessCards);
         return businessCards.map(businessCard => this.toBusinessCard(businessCard));
     }
 
