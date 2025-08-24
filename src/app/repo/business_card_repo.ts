@@ -18,7 +18,11 @@ export class BusinessCardRepo implements IBusinessCardRepo {
             include : {
                 user : {
                     include : {
-                        businessCard : true
+                        businessCard : {
+                            include : {
+                                offer : true
+                            }
+                        }
                     }
                 },
                 company : true

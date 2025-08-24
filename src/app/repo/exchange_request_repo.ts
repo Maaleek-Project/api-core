@@ -18,7 +18,11 @@ export class ExchangeRequestRepo implements IExchangeRequestRepo {
                     include : {
                         user : {
                             include : {
-                                businessCard : true
+                                businessCard : {
+                                    include : {
+                                        offer : true
+                                    }
+                                }
                             }
                         }
                     }
@@ -37,7 +41,11 @@ export class ExchangeRequestRepo implements IExchangeRequestRepo {
                     include : {
                         user : {
                             include : {
-                                businessCard : true
+                                businessCard : {
+                                    include : {
+                                        offer : true
+                                    }
+                                }
                             }
                         }
                     }
@@ -56,7 +64,11 @@ export class ExchangeRequestRepo implements IExchangeRequestRepo {
                     include : {
                         user : {
                             include : {
-                                businessCard : true
+                                businessCard : {
+                                    include : {
+                                        offer : true
+                                    }
+                                }
                             }
                         }
                     }

@@ -157,13 +157,11 @@ export class MainFeature {
 
             const senders : ExchangeRequestModel[] = await this.exchangeRequestRepo.findByRecipient(account.id);
 
-            // const ids = senders.map(sender => sender.sender.user.id);
+            const ids = senders.map(sender => sender.sender.user.id);
 
-            // const businessCards : BusinessCardModel[] = await this.businessCardRepo.haveTheBusinessCardsReceived(ids);
+            const businessCards : BusinessCardModel[] = await this.businessCardRepo.haveTheBusinessCardsReceived(ids);
 
-            // businessCards.map(BusinessCardDtm.fromBusinessCardDtm)
-
-            return ApiResponseUtil.ok(senders,'','Liste de cartes de visite reçues 🎉 .');
+            return ApiResponseUtil.ok(businessCards.map(BusinessCardDtm.fromBusinessCardDtm),'','Liste de cartes de visite reçues 🎉 .');
 
         }catch(e){
             console.log(e)
