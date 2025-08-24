@@ -123,7 +123,7 @@ export class MainFeature {
             const recipient : AccountModel  = await this.accountRepo.findById(exchangeRequest.recipient.id) as AccountModel;
 
             await this.firebaseService.toPush(recipient.fcm_token, context.response ? 'Carte reçue 📇' : 'Carte refusée ❌', context.response ? 'Vous avez reçu une nouvelle carte de visite dans votre réseau .' : 'Votre demande d’accès à une carte de visite n’a pas abouti.');
-            await this.firebaseService.toDelete('exchange_requests', context.exchange_id);
+            await this.firebaseService.toDelete('exchange_requests', context.document_id);
 
             await this.notificationRepo.save({
                 id : uuidv4(),
