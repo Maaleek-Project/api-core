@@ -159,6 +159,8 @@ export class MainFeature {
 
             const ids = senders.map(sender => sender.sender.id);
 
+            console.log(ids);
+
             const businessCards : BusinessCardModel[] = await this.businessCardRepo.haveTheBusinessCardsReceived(ids);
 
             return ApiResponseUtil.ok(businessCards.map(BusinessCardDtm.fromBusinessCardDtm),'','Liste de cartes de visite reçues 🎉 .');
