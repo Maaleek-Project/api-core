@@ -2,12 +2,15 @@ import { Injectable } from "@nestjs/common";
 import { ExchangeRequestStatus, NotificationType } from "@prisma/client";
 import { ExchangeRequestContext, ExchangeResponseContext, RefreshTokenContext } from "src/app/context/main.context";
 import { AccountRepo } from "src/app/repo/account_repo";
+import { BusinessCardRepo } from "src/app/repo/business_card_repo";
 import { ExchangeRequestRepo } from "src/app/repo/exchange_request_repo";
 import { NotificationRepo } from "src/app/repo/notification_repo";
 import { ApiResponse, ApiResponseUtil } from "src/app/utils/api-response.util";
 import { AccountDtm } from "src/core/domain/dtms/account.dtm";
+import { BusinessCardDtm } from "src/core/domain/dtms/business_card.dtm";
 import { NotificationDtm } from "src/core/domain/dtms/notification.dtm";
 import { AccountModel } from "src/core/domain/models/account.model";
+import { BusinessCardModel } from "src/core/domain/models/business_card.model";
 import { ExchangeRequestModel } from "src/core/domain/models/exchange_request.model";
 import { FirebaseService } from "src/core/services/firebase.service";
 import { v4 as uuidv4 } from 'uuid';
@@ -20,6 +23,7 @@ export class MainFeature {
         private readonly accountRepo : AccountRepo,
         private readonly exchangeRequestRepo : ExchangeRequestRepo,
         private readonly firebaseService : FirebaseService,
+        private readonly businessCardRepo : BusinessCardRepo,
     ) {}
 
     async userNotifications(accounnt : AccountDtm) : Promise<ApiResponse<NotificationDtm[]>> {
@@ -137,6 +141,30 @@ export class MainFeature {
             return ApiResponseUtil.ok("",'Demande d\'échange répondue', 'Votre demande d\'échange a bien été répondue .');
 
         }catch(e){
+            return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
+        }
+    }
+
+    async businessCardReceived(accountDtm : AccountDtm) : Promise<ApiResponse<BusinessCardDtm[]>> {
+        try{
+
+            const account : AccountModel | null = await this.accountRepo.findById(accountDtm.id);
+
+            if(account == null)
+            {
+                return ApiResponseUtil.error('Session inactive','Désolé, votre session a expiré, merci de bien vouloir vous reconnecter et réessayer .', 'unauthorized')
+            }
+
+            const senders : ExchangeRequestModel[] = await this.exchangeRequestRepo.findByRecipient(account.id);
+
+            const ids = senders.map(sender => sender.sender.id);
+
+            const businessCards : BusinessCardModel[] = await this.businessCardRepo.haveTheBusinessCardsReceived(ids);
+
+            return ApiResponseUtil.ok(businessCards.map(BusinessCardDtm.fromBusinessCardDtm),'','Liste de cartes de visite reçues 🎉 .');
+
+        }catch(e){
+            console.log(e)
             return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
     }

@@ -64,4 +64,17 @@ export class MainController {
         const status = statusMap[responseExchangeRequest.code] ;
         return res.status(status).json(responseExchangeRequest);
     }
+
+    @EntityType(['Customer'])
+    @Get('business-card-received')
+    async businessCardReceived(@Req() req: Request, @Res() res: Response) {
+        const businessCardReceived = await this.feature.businessCardReceived(AccountDtm.fromAccountDtm(req['user']));
+        const statusMap: Record<string, number> = {
+            success: 200,
+            unauthorized: 401,
+            internal_error: 500,
+        };
+        const status = statusMap[businessCardReceived.code] ;
+        return res.status(status).json(businessCardReceived);
+    }
 }
