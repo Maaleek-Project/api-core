@@ -16,11 +16,14 @@ export class BusinessCardRepo implements IBusinessCardRepo {
                 in : senders_id
             }},
             include : {
-                user : true,
+                user : {
+                    include : {
+                        businessCard : true
+                    }
+                },
                 company : true
             }
         })
-        console.log(businessCards);
         return businessCards.map(businessCard => this.toBusinessCard(businessCard));
     }
 
