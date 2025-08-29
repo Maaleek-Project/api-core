@@ -145,7 +145,7 @@ export class MainFeature {
         }
     }
 
-    async businessCardReceived(accountDtm : AccountDtm) : Promise<ApiResponse<any>> {
+    async businessCardReceived(accountDtm : AccountDtm) : Promise<ApiResponse<BusinessCardDtm[]>> {
         try{
 
             const account : AccountModel | null = await this.accountRepo.findById(accountDtm.id);
@@ -164,7 +164,6 @@ export class MainFeature {
             return ApiResponseUtil.ok(businessCards.map(BusinessCardDtm.fromBusinessCardDtm),'','Liste de cartes de visite reçues 🎉 .');
 
         }catch(e){
-            console.log(e)
             return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
     }
