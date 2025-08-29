@@ -1,5 +1,5 @@
 import { Controller,  Res, UseGuards, Req, Body, Put } from "@nestjs/common";
-import { UpdateCustomerContext, UpdatePasswordContext } from "src/app/context/setting.context";
+import { UpdateBusinessCardContext, UpdateCustomerContext, UpdatePasswordContext } from "src/app/context/setting.context";
 import { Response } from "express";
 import { SettingFeature } from "src/app/features/customer/setting.feature";
 import { EntityType } from "src/core/decorators/entity_type.decorator";
@@ -33,6 +33,20 @@ export class UserController {
     @Put('update-info')
     async updateCustomer(@Req() req: Request, @Body() context: UpdateCustomerContext, @Res() res: Response) {
         const update = await this.feature.updateCustomerInfo(AccountDtm.fromAccountDtm(req['user']), context);
+        const statusMap: Record<string, number> = {
+            success: 200,
+            not_found: 404,
+            conflict: 409,
+            internal_error: 500,
+        };
+        const status = statusMap[update.code] ;
+        return res.status(status).json(update);
+    }
+
+    @EntityType(['Customer'])
+    @Put('update-business-card')
+    async updateBusinessCard(@Req() req: Request, @Body() context: UpdateBusinessCardContext, @Res() res: Response) {
+        const update = await this.feature.updateBusinessCardInfo(AccountDtm.fromAccountDtm(req['user']), context);
         const statusMap: Record<string, number> = {
             success: 200,
             not_found: 404,

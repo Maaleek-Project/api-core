@@ -22,3 +22,14 @@ export class UpdatePasswordContext {
     password : string;
 
 }
+
+export class UpdateBusinessCardContext {
+    @IsNotEmpty({ message: 'Number is required .' })
+    number : string;
+
+    @IsNotEmpty({ message: 'Email is required .' })
+    email : string;
+
+    @IsNotEmpty({ message: 'Job is required .' })
+    job : string;
+}

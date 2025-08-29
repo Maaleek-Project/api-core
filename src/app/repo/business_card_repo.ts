@@ -10,6 +10,88 @@ export class BusinessCardRepo implements IBusinessCardRepo {
         private readonly prisma: PrismaService,
     ) {}
 
+    async save(businessCard : BusinessCardModel) : Promise<BusinessCardModel> {
+        const saved = await this.prisma.businessCard.upsert({
+            where: {id : businessCard.id},
+            update: this.toDatabase(businessCard),
+            create: this.toDatabase(businessCard),
+            include : {
+                 user : {
+                    include : {
+                        businessCard : {
+                            include : {
+                                offer : true
+                            }
+                        }
+                    }
+                },
+                company : true
+            }
+        })
+        return this.toBusinessCard(saved);
+    }
+
+    async findByUserId(user_id : string) : Promise<BusinessCardModel | null> {
+        const businessCard = await this.prisma.businessCard.findFirst({
+            where : {user_id : user_id},
+            include : {
+                user : {
+                    include : {
+                        businessCard : {
+                            include : {
+                                offer : true
+                            }
+                        }
+                    }
+                }
+            } 
+        })
+       return businessCard ? this.toBusinessCard(businessCard) : null;
+    }
+
+    async findByEmailOrNumber(email : string, number : string) : Promise<BusinessCardModel | null> {
+        const businessCard = await this.prisma.businessCard.findFirst({
+            where : {
+                OR : [
+                    {email},
+                    {number}
+                ]
+            },
+            include : {
+                user : {
+                    include : {
+                        businessCard : {
+                            include : {
+                                offer : true
+                            }
+                        }
+                    }
+                }
+            } 
+        })
+        return businessCard ? this.toBusinessCard(businessCard) : null;
+    }
+    async findById(id : string) : Promise<BusinessCardModel> {
+        const businessCard = await this.prisma.businessCard.findUnique({
+            where : {
+                id : id
+            },
+            include : {
+                user : {
+                    include : {
+                        businessCard : {
+                            include : {
+                                offer : true
+                            }
+                        }
+                    }
+                },
+                company : true
+            }
+        });
+        return this.toBusinessCard(businessCard);
+    }
+
     async haveTheBusinessCardsReceived(senders_id : string[]) : Promise<BusinessCardModel[]> {
         const businessCards = await this.prisma.businessCard.findMany({
             where : {user_id : {
@@ -40,5 +122,15 @@ export class BusinessCardRepo implements IBusinessCardRepo {
             job : businessCard.job,
             created_at : businessCard.created_at,
         };
+    }
+
+    private toDatabase(businessCard : BusinessCardModel) : any {
+        return {
+            id : businessCard.id,
+            user_id : businessCard.user.id,
+            number : businessCard.number,
+            email : businessCard.email,
+            job : businessCard.job
+        }
     }
 }
