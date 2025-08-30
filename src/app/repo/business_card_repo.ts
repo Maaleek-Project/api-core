@@ -128,11 +128,11 @@ export class BusinessCardRepo implements IBusinessCardRepo {
     private toDatabase(businessCard : BusinessCardModel) : any {
         return {
             id : businessCard.id,
+            user_id : businessCard.user.id,
             number : businessCard.number,
             email : businessCard.email,
             job : businessCard.job,
-            user : businessCard.user,
-            offer : businessCard.user.businessCard![0].offer
+            offer_id : businessCard.user.businessCard![0].offer.id
         }
     }
 }
