@@ -107,7 +107,7 @@ export class SettingFeature {
 
         }catch(e){
             console.log(e)
-            return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .'+e.message, 'internal_error');
+            return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
     }
 

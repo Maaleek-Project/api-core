@@ -133,6 +133,7 @@ export class BusinessCardRepo implements IBusinessCardRepo {
             number : businessCard.number,
             email : businessCard.email,
             job : businessCard.job,
+            user : businessCard.user,
             offer : businessCard.user.businessCard![0].offer
         }
     }
