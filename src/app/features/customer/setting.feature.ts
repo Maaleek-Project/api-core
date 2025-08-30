@@ -111,4 +111,28 @@ export class SettingFeature {
         }
     }
 
+    async userBusinessCard(accountDtm : AccountDtm) : Promise<ApiResponse<BusinessCardDtm>> {
+        try {
+
+            const user : UserModel | null = await this.userRepo.findById(accountDtm.user.id)
+
+            if(user == null)
+            {
+                return ApiResponseUtil.error('Session inactive','Désolé, votre session a expiré, merci de bien vouloir vous reconnecter et réessayer .', 'unauthorized')
+            }
+
+            const businessCard : BusinessCardModel | null = await this.businessCardRepo.findByUserId(user.id)
+
+            if(businessCard == null)
+            {
+                return ApiResponseUtil.error('Carte inexistant','Désolé, vous n\'avez pas de carte de visite, merci de bien vouloir réessayer .', 'not_found')
+            }
+
+            return ApiResponseUtil.ok(BusinessCardDtm.fromBusinessCardDtm(businessCard),'','Votre carte de visite 🎉 .');
+
+        }catch(e){
+            return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
+        }
+    }
+
 }

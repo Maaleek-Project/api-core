@@ -1,4 +1,4 @@
-import { Controller,  Res, UseGuards, Req, Body, Put } from "@nestjs/common";
+import { Controller,  Res, UseGuards, Req, Body, Put, Get } from "@nestjs/common";
 import { UpdateBusinessCardContext, UpdateCustomerContext, UpdatePasswordContext } from "src/app/context/setting.context";
 import { Response } from "express";
 import { SettingFeature } from "src/app/features/customer/setting.feature";
@@ -55,5 +55,18 @@ export class UserController {
         };
         const status = statusMap[update.code] ;
         return res.status(status).json(update);
+    }
+
+    @EntityType(['Customer'])
+    @Get('business-card')
+    async userBusinessCard(@Req() req: Request, @Res() res: Response) {
+        const businessCardReceived = await this.feature.userBusinessCard(AccountDtm.fromAccountDtm(req['user']));
+        const statusMap: Record<string, number> = {
+            success: 200,
+            unauthorized: 401,
+            internal_error: 500,
+        };
+        const status = statusMap[businessCardReceived.code] ;
+        return res.status(status).json(businessCardReceived);
     }
 }
