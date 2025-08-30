@@ -9,6 +9,7 @@ export interface BusinessCardModel {
     email : string;
     job : string;
     offer : OfferModel;
+    social_networks : string[];
     company? : CompanyModel;
     created_at? : Date;
 }

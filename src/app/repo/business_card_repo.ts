@@ -121,6 +121,7 @@ export class BusinessCardRepo implements IBusinessCardRepo {
             email : businessCard.email,
             job : businessCard.job,
             offer : businessCard.offer,
+            social_networks : businessCard.social_networks,
             created_at : businessCard.created_at,
         };
     }
@@ -132,6 +133,7 @@ export class BusinessCardRepo implements IBusinessCardRepo {
             number : businessCard.number,
             email : businessCard.email,
             job : businessCard.job,
+            social_networks : businessCard.social_networks,
             offer_id : businessCard.user.businessCard![0].offer.id
         }
     }

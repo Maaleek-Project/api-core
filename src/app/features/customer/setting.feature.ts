@@ -100,6 +100,11 @@ export class SettingFeature {
                 userBusinessCard.email = context.email
                 userBusinessCard.number = context.number
                 userBusinessCard.job = context.job
+
+                userBusinessCard.social_networks[0] = context.linkedin_link 
+                userBusinessCard.social_networks[1] = context.portfolio_link 
+                userBusinessCard.social_networks[2] = context.facebook_link 
+                
                 await this.businessCardRepo.save(userBusinessCard)
 
                 return ApiResponseUtil.ok(BusinessCardDtm.fromBusinessCardDtm(userBusinessCard),'Carte configurée','Vos informations relatives à la carte de visite ont été mises à jour 🎉 .');

@@ -196,6 +196,7 @@ model BusinessCard{
   user_id    String      @unique
   offer_id   String 
   number     String      @unique
+  social_networks String[]  @default([])
   email      String?     @unique
   job        String?
   company_id String? 

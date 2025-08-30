@@ -32,4 +32,14 @@ export class UpdateBusinessCardContext {
 
     @IsNotEmpty({ message: 'Job is required .' })
     job : string;
+
+    @IsNotEmpty({ message: 'Facebook link is required .' })
+    facebook_link : string;
+
+    @IsNotEmpty({ message: 'Linkedin link is required .' })
+    linkedin_link : string;
+
+    @IsNotEmpty({ message: 'Portfolio link is required .' })
+    portfolio_link : string;
+
 }
