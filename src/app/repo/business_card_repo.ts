@@ -120,6 +120,7 @@ export class BusinessCardRepo implements IBusinessCardRepo {
             number : businessCard.number,
             email : businessCard.email,
             job : businessCard.job,
+            offer : businessCard.offer,
             created_at : businessCard.created_at,
         };
     }
@@ -130,7 +131,8 @@ export class BusinessCardRepo implements IBusinessCardRepo {
             user_id : businessCard.user.id,
             number : businessCard.number,
             email : businessCard.email,
-            job : businessCard.job
+            job : businessCard.job,
+            offer : businessCard.offer
         }
     }
 }
