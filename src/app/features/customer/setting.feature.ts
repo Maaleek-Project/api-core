@@ -85,7 +85,7 @@ export class SettingFeature {
 
                 const businessCard : BusinessCardModel | null = await this.businessCardRepo.findByEmailOrNumber(context.email, context.number)
 
-                if(businessCard != null)
+                if(businessCard != null && businessCard.user.id != user.id)
                 {
                     return ApiResponseUtil.error('Coordonnées existant','Désolé, les coordonnées sont déjà utilisées par une tiers personne, merci de bien vouloir réessayer .', 'conflict')
                 }
