@@ -13,11 +13,7 @@ export class BusinessCardRepo implements IBusinessCardRepo {
     async save(businessCard : BusinessCardModel) : Promise<BusinessCardModel> {
         const saved = await this.prisma.businessCard.upsert({
             where: {id : businessCard.id},
-            update: {
-                number : businessCard.number,
-                email : businessCard.email,
-                job : businessCard.job
-            },
+            update: this.toDatabase(businessCard),
             create: this.toDatabase(businessCard),
             include : {
                  user : {
@@ -130,6 +126,8 @@ export class BusinessCardRepo implements IBusinessCardRepo {
     }
 
     private toDatabase(businessCard : BusinessCardModel) : any {
+        console.log(businessCard.user)
+        console.log(businessCard.user.businessCard?.offer)
         return {
             id : businessCard.id,
             user_id : businessCard.user.id,
