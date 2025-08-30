@@ -126,15 +126,14 @@ export class BusinessCardRepo implements IBusinessCardRepo {
     }
 
     private toDatabase(businessCard : BusinessCardModel) : any {
-        console.log(businessCard.user)
-        console.log(businessCard.user.businessCard?.offer)
+        console.log(businessCard.user.businessCard![0].offer)
         return {
             id : businessCard.id,
             user_id : businessCard.user.id,
             number : businessCard.number,
             email : businessCard.email,
             job : businessCard.job,
-            offer : businessCard.user.businessCard?.offer
+            offer : businessCard.user.businessCard![0].offer
         }
     }
 }
