@@ -11,6 +11,7 @@ import { BusinessCardModel } from "src/core/domain/models/business_card.model";
 import { UserModel } from "src/core/domain/models/user.model";
 import { AuthentificationService } from "src/core/services/authenfication.service";
 import { R2Service } from "src/core/services/r2.service";
+import * as fs from 'fs';
 
 @Injectable()
 export class SettingFeature {
@@ -61,14 +62,22 @@ export class SettingFeature {
                 return ApiResponseUtil.error('Session inactive','Désolé, votre session a expiré, merci de bien vouloir vous reconnecter et réessayer .', 'unauthorized')
             }
 
-            const url = await this.r2Service.uploadFile(
+            const buffer = fs.readFileSync(file.path);
+            const folder = "maaleek/avatars";
+
+            await this.r2Service.uploadFile(
                 file.filename,
-                file.buffer,
+                buffer,
                 file.mimetype,
-                "maaleek/avatars",
+                folder
             );
 
-            user.picture = url;
+            if((user.picture != "" || user.picture != null) && user.picture != `${folder}/${file.filename}` )
+            {
+                await this.r2Service.deleteFile(user.picture!);
+            }
+
+            user.picture = `${folder}/${file.filename}`;
             user.civility = updateCustomerContext.civility
             user.name = updateCustomerContext.name
             user.surname = updateCustomerContext.surname

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 @Injectable()
@@ -36,4 +36,18 @@ export class R2Service {
     });
     return getSignedUrl(this.s3, command, { expiresIn });
   }
+
+  async deleteFile(key: string): Promise<void> {
+    try {
+      await this.s3.send(
+        new DeleteObjectCommand({
+          Bucket: this.bucketName,
+          Key: key, 
+        }),
+      );
+    } catch (error) {
+      return Promise.reject("❌ Erreur suppression R2 : "+error, );
+    }
+  }
+
 }
