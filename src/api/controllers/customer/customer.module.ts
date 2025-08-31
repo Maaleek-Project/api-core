@@ -11,6 +11,7 @@ import { NotificationRepo } from "src/app/repo/notification_repo";
 import { ExchangeRequestRepo } from "src/app/repo/exchange_request_repo";
 import { FirebaseService } from "src/core/services/firebase.service";
 import { BusinessCardRepo } from "src/app/repo/business_card_repo";
+import { R2Service } from "src/core/services/r2.service";
 
 @Module({
     imports : [],
@@ -25,6 +26,7 @@ import { BusinessCardRepo } from "src/app/repo/business_card_repo";
         MainFeature,
         SettingFeature,
         AuthentificationService,
+        R2Service,
         FirebaseService
     ]
 })

@@ -1,10 +1,13 @@
-import { Controller,  Res, UseGuards, Req, Body, Put, Get } from "@nestjs/common";
+import { Controller,  Res, UseGuards, Req, Body, Put, Get, UseInterceptors, UploadedFile } from "@nestjs/common";
 import { UpdateBusinessCardContext, UpdateCustomerContext, UpdatePasswordContext } from "src/app/context/setting.context";
 import { Response } from "express";
 import { SettingFeature } from "src/app/features/customer/setting.feature";
 import { EntityType } from "src/core/decorators/entity_type.decorator";
 import { AccountDtm } from "src/core/domain/dtms/account.dtm";
 import { EntityTypeGuard } from "src/core/guards/entity_type.guard";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { editFileName, imageFileFilter } from "src/validators/file.validator";
+import { diskStorage } from "multer";
 
 @UseGuards(EntityTypeGuard)
 @Controller('user')
@@ -29,10 +32,18 @@ export class UserController {
         return res.status(status).json(update);
     }
 
+    @UseInterceptors(
+        FileInterceptor('avatar', {
+            storage: diskStorage({
+                filename: editFileName,
+            }),
+            fileFilter: imageFileFilter,
+        }),
+    )
     @EntityType(['Customer'])
     @Put('update-info')
-    async updateCustomer(@Req() req: Request, @Body() context: UpdateCustomerContext, @Res() res: Response) {
-        const update = await this.feature.updateCustomerInfo(AccountDtm.fromAccountDtm(req['user']), context);
+    async updateCustomer(@Req() req: Request, @Body() context: UpdateCustomerContext, @UploadedFile() avatar: Express.Multer.File, @Res() res: Response) {
+        const update = await this.feature.updateCustomerInfo(AccountDtm.fromAccountDtm(req['user']), context, avatar);
         const statusMap: Record<string, number> = {
             success: 200,
             not_found: 404,

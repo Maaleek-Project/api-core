@@ -6,11 +6,11 @@ import { UserRepo } from "src/app/repo/user_repo";
 import { ApiResponse, ApiResponseUtil } from "src/app/utils/api-response.util";
 import { AccountDtm } from "src/core/domain/dtms/account.dtm";
 import { BusinessCardDtm } from "src/core/domain/dtms/business_card.dtm";
-import { UserDtm } from "src/core/domain/dtms/user.dtm";
 import { AccountModel } from "src/core/domain/models/account.model";
 import { BusinessCardModel } from "src/core/domain/models/business_card.model";
 import { UserModel } from "src/core/domain/models/user.model";
 import { AuthentificationService } from "src/core/services/authenfication.service";
+import { R2Service } from "src/core/services/r2.service";
 
 @Injectable()
 export class SettingFeature {
@@ -20,6 +20,7 @@ export class SettingFeature {
             private readonly userRepo : UserRepo,
             private readonly businessCardRepo : BusinessCardRepo,
             private readonly authentificationService : AuthentificationService,
+            private readonly r2Service: R2Service
         ) {}
 
     async updatePassword(accountDtm : AccountDtm, updatePasswordContext : UpdatePasswordContext) : Promise<ApiResponse<String>> {
@@ -50,7 +51,7 @@ export class SettingFeature {
         }
     }
 
-    async updateCustomerInfo(accountDtm : AccountDtm, updateCustomerContext : UpdateCustomerContext) : Promise<ApiResponse<AccountDtm>> {
+    async updateCustomerInfo(accountDtm : AccountDtm, updateCustomerContext : UpdateCustomerContext, file: Express.Multer.File) : Promise<ApiResponse<AccountDtm>> {
         try {
 
             const user : UserModel | null = await this.userRepo.findById(accountDtm.user.id)
@@ -60,6 +61,14 @@ export class SettingFeature {
                 return ApiResponseUtil.error('Session inactive','Désolé, votre session a expiré, merci de bien vouloir vous reconnecter et réessayer .', 'unauthorized')
             }
 
+            const url = await this.r2Service.uploadFile(
+                file.filename,
+                file.buffer,
+                file.mimetype,
+                "maaleek/avatars",
+            );
+
+            user.picture = url;
             user.civility = updateCustomerContext.civility
             user.name = updateCustomerContext.name
             user.surname = updateCustomerContext.surname
