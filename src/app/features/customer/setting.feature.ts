@@ -72,9 +72,8 @@ export class SettingFeature {
                 folder
             );
 
-            if((user.picture != "" || user.picture != null) && user.picture != `${folder}/${file.filename}` )
-            {
-                await this.r2Service.deleteFile(user.picture!);
+            if (user.picture &&  user.picture.trim() !== "" &&  user.picture !== `${folder}/${file.filename}`) {
+                await this.r2Service.deleteFile(user.picture);
             }
 
             user.picture = `${folder}/${file.filename}`;
