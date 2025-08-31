@@ -12,7 +12,6 @@ import { UserModel } from "src/core/domain/models/user.model";
 import { AuthentificationService } from "src/core/services/authenfication.service";
 import { R2Service } from "src/core/services/r2.service";
 import * as fs from 'fs';
-import { UserDtm } from "src/core/domain/dtms/user.dtm";
 
 @Injectable()
 export class SettingFeature {
@@ -53,7 +52,7 @@ export class SettingFeature {
         }
     }
 
-    async updateCustomerInfo(accountDtm : AccountDtm, updateCustomerContext : UpdateCustomerContext, file: Express.Multer.File) : Promise<ApiResponse<UserDtm>> {
+    async updateCustomerInfo(accountDtm : AccountDtm, updateCustomerContext : UpdateCustomerContext, file: Express.Multer.File) : Promise<ApiResponse<AccountDtm>> {
         try {
 
             const user : UserModel | null = await this.userRepo.findById(accountDtm.user.id)
@@ -84,8 +83,9 @@ export class SettingFeature {
 
             await this.userRepo.save(user)
 
+            const account = await this.accountRepo.findById(accountDtm.id) as AccountModel;
 
-            return ApiResponseUtil.ok(UserDtm.fromUserDtm(user),'Profil mis à jour', 'Vos informations de profil ont belle et bien été mis à jour . .')
+            return ApiResponseUtil.ok(AccountDtm.fromAccountDtm(account),'Profil mis à jour', 'Vos informations de profil ont belle et bien été mis à jour . .')
 
         }catch(e){
             return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
