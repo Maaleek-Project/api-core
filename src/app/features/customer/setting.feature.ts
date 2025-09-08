@@ -94,6 +94,7 @@ export class SettingFeature {
             return ApiResponseUtil.ok(AccountDtm.fromAccountDtm(account),'Profil mis à jour', 'Vos informations de profil ont belle et bien été mis à jour . .')
 
         }catch(e){
+            console.log(e)
             return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
     }
