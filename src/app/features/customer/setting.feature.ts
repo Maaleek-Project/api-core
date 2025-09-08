@@ -147,7 +147,7 @@ export class SettingFeature {
                 const collection = await this.firebaseService.get('business_card_trackings', account.document_id!)
 
                 if(collection != null){
-                    if(!collection.setup.profil){
+                    if(!collection.setup.business_card){
                         await this.firebaseService.update('business_card_trackings', account.document_id!, {
                             setup : {profil : collection.setup.profil , business_card : true}
                         })

@@ -13,8 +13,8 @@ export default async function CreateBusinessCard() {
           SELECT "id" INTO offer_id FROM public."offers" WHERE "code" = 'Std' ;
 
           IF NEW."id" IS NOT NULL THEN
-            INSERT INTO public."business_cards" ("id","user_id", "offer_id", "number", "email","job", "company_id", "created_at", "updated_at")
-            VALUES (gen_random_uuid(), NEW."id", offer_id, NEW."number", NULL, NULL, NULL, CURRENT_DATE, CURRENT_DATE);
+            INSERT INTO public."business_cards" ("id","user_id", "offer_id", "number", "email","job", "company_id", "created_at", "updated_at" , "social_networks")
+            VALUES (gen_random_uuid(), NEW."id", offer_id, NEW."number", NULL, NULL, NULL, CURRENT_DATE, CURRENT_DATE,ARRAY['','','']);
           END IF;
           RETURN NEW;
         END;
