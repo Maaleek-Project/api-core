@@ -87,7 +87,7 @@ export class SettingFeature {
 
             const account = await this.accountRepo.findById(accountDtm.id) as AccountModel;
 
-            const collection = await this.firebaseService.toSave('business_card_trackings', account.document_id!)
+            const collection = await this.firebaseService.get('business_card_trackings', account.document_id!)
 
             if(collection != null){
 
