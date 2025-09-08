@@ -168,17 +168,23 @@ export class AuthentificationFeature {
             await this.otpRepo.remove(action);
 
             setTimeout(async () => {
-            await this.firebaseService.toPush(
-                account.fcm_token!,
-                "C’est parti 🚀",
-                "Super nouvelle 🎉 Vous avez déjà 10 cartes de visite prêtes à partager avec vos contacts .",
-            );
+            if(account.fcm_token != null){
+                await this.firebaseService.toPush(
+                    account.fcm_token,
+                    "C’est parti 🚀",
+                    "Super nouvelle 🎉 Vous avez déjà 10 cartes de visite prêtes à partager avec vos contacts .",
+                );
+            }
             }, 5000);
 
             await this.firebaseService.toSave('business_card_trackings',{
                 account : account.id,
                 business_card : 10,
-                business_card_received : 0
+                business_card_received : 0,
+                setup : {
+                    profil : false,
+                    business_card : false
+                }
             })
 
             await this.notificationRepo.save({
