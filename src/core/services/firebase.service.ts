@@ -86,4 +86,24 @@ export class FirebaseService implements OnModuleInit {
         });
     }
 
+    async update(collection : string, id : string, data : any) : Promise<any> {
+        return await this.database.collection(collection).doc(id).update(data).then(function(docRef) {
+            return docRef;
+        }).catch(function(error) {
+            return null;
+        });
+    }
+
+    async get(collection : string, id : string) : Promise<any> {
+        return await this.database.collection(collection).doc(id).get().then(function(doc) {
+            if (doc.exists) {
+                return doc.data();
+            } else {
+                return null;
+            }
+        }).catch(function(error) {
+            return null;
+        });
+    }
+
 }

@@ -10,6 +10,7 @@ export interface AccountModel {
     country : CountryModel;
     entity : EntityModel;
     fcm_token : string;
+    document_id? : string;
     status? : string;
     state? : string;
     locked? : boolean;

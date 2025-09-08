@@ -159,10 +159,22 @@ export class AuthentificationFeature {
 
             const account : AccountModel = { id : uuidv4(), login : context.login, password : password, user : userSaved, country : country!, entity : entity, status : 'connected' , fcm_token : context.fcm_token};
 
+            const doc = await this.firebaseService.toSave('business_card_trackings',{
+                account : account.id,
+                business_card : 10,
+                business_card_received : 0,
+                setup : {
+                    profil : false,
+                    business_card : false
+                }
+            })
+
+            account.document_id = doc.id;
+
             const token = await this.authentificationService.generateToken(AccountDtm.fromAccountDtm(account));
             const model : TokenModel = { id : uuidv4(), token : token, type : 'to_connect', account_id : account.id, expired_at : SharedUtil.addDaysToNow(1)};
                 
-            ;
+            
             const saved = await this.accountRepo.save(account);
             await this.tokenRepo.save(model)
             await this.otpRepo.remove(action);
@@ -177,15 +189,7 @@ export class AuthentificationFeature {
             }
             }, 5000);
 
-            await this.firebaseService.toSave('business_card_trackings',{
-                account : account.id,
-                business_card : 10,
-                business_card_received : 0,
-                setup : {
-                    profil : false,
-                    business_card : false
-                }
-            })
+            
 
             await this.notificationRepo.save({
                 id : uuidv4(),
