@@ -87,11 +87,19 @@ export class SettingFeature {
 
             const account = await this.accountRepo.findById(accountDtm.id) as AccountModel;
 
-            console.log(account.document_id!)
+            const collection = await this.firebaseService.toSave('business_card_trackings', account.document_id!)
 
-            await this.firebaseService.update('business_card_trackings', account.document_id!, {
-                setup : {profil : true}
-            })
+            if(collection != null){
+
+                console.log(collection.setup)
+
+                await this.firebaseService.update('business_card_trackings', account.document_id!, {
+                    setup : {profil : true , business_card : false}
+                })
+
+            }
+
+            
 
             return ApiResponseUtil.ok(AccountDtm.fromAccountDtm(account),'Profil mis à jour', 'Vos informations de profil ont belle et bien été mis à jour . .')
 
