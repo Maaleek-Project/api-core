@@ -87,6 +87,8 @@ export class SettingFeature {
 
             const account = await this.accountRepo.findById(accountDtm.id) as AccountModel;
 
+            console.log(account.document_id!)
+
             await this.firebaseService.update('business_card_trackings', account.document_id!, {
                 setup : {profil : true}
             })
