@@ -12,6 +12,7 @@ import { UserModel } from "src/core/domain/models/user.model";
 import { AuthentificationService } from "src/core/services/authenfication.service";
 import { R2Service } from "src/core/services/r2.service";
 import * as fs from 'fs';
+import { FirebaseService } from "src/core/services/firebase.service";
 
 @Injectable()
 export class SettingFeature {
@@ -21,7 +22,8 @@ export class SettingFeature {
             private readonly userRepo : UserRepo,
             private readonly businessCardRepo : BusinessCardRepo,
             private readonly authentificationService : AuthentificationService,
-            private readonly r2Service: R2Service
+            private readonly r2Service: R2Service,
+            private readonly firebaseService : FirebaseService,
         ) {}
 
     async updatePassword(accountDtm : AccountDtm, updatePasswordContext : UpdatePasswordContext) : Promise<ApiResponse<String>> {
@@ -84,6 +86,10 @@ export class SettingFeature {
             await this.userRepo.save(user)
 
             const account = await this.accountRepo.findById(accountDtm.id) as AccountModel;
+
+            await this.firebaseService.update('business_card_trackings', account.document_id!, {
+                setup : {profil : true}
+            })
 
             return ApiResponseUtil.ok(AccountDtm.fromAccountDtm(account),'Profil mis à jour', 'Vos informations de profil ont belle et bien été mis à jour . .')
 

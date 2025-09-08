@@ -127,7 +127,8 @@ export class AccountRepo implements IAccountRepo {
             country_id : account.country.id,
             entity_id : account.entity.id,
             status: account.status,
-            fcm_token : account.fcm_token
+            fcm_token : account.fcm_token,
+            document_id : account.document_id
         }
     }
 
