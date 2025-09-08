@@ -69,6 +69,7 @@ export default async function UserSeeder() {
                 user_id: saved.id,
                 country_id: country!.id,
                 entity_id: entity!.id,
+                document_id : uuidv4(),
                 status: 'unconnected'
             }
         })
