@@ -112,6 +112,7 @@ export class AccountRepo implements IAccountRepo {
             entity: account.entity,
             status: account.status,
             state: account.state,
+            document_id : account.document_id,
             locked: account.locked,
             created_at: account.created_at,
             updated_at: account.updated_at,
