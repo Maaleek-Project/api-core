@@ -90,13 +90,11 @@ export class SettingFeature {
             const collection = await this.firebaseService.get('business_card_trackings', account.document_id!)
 
             if(collection != null){
-
-                console.log(collection.setup)
-
-                await this.firebaseService.update('business_card_trackings', account.document_id!, {
-                    setup : {profil : true , business_card : false}
-                })
-
+                if(!collection.setup.profil){
+                    await this.firebaseService.update('business_card_trackings', account.document_id!, {
+                        setup : {profil : true , business_card : collection.setup.business_card}
+                    })
+                }
             }
 
             
@@ -142,6 +140,19 @@ export class SettingFeature {
                 userBusinessCard.social_networks[2] = context.facebook_link 
                 
                 await this.businessCardRepo.save(userBusinessCard)
+
+                const account = await this.accountRepo.findById(accountDtm.id) as AccountModel;
+
+
+                const collection = await this.firebaseService.get('business_card_trackings', account.document_id!)
+
+                if(collection != null){
+                    if(!collection.setup.profil){
+                        await this.firebaseService.update('business_card_trackings', account.document_id!, {
+                            setup : {profil : collection.setup.profil , business_card : true}
+                        })
+                    }
+                }
 
                 return ApiResponseUtil.ok(BusinessCardDtm.fromBusinessCardDtm(userBusinessCard),'Carte configurée','Vos informations relatives à la carte de visite ont été mises à jour 🎉 .');
 
