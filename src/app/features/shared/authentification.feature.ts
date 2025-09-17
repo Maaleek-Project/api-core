@@ -87,11 +87,25 @@ export class AuthentificationFeature {
             if (account == null) 
             {
                 const action = await this.otpRepo.findAction('verified_number', 'waiting', context.login, context.country_id);
-                const code = "1234" // SharedUtil.generateOtp(4) ;
+                const code =  SharedUtil.generateOtp(4) ;
 
                 if(action == null)
                 {
                     // send code to user ---------------
+
+
+                    await fetch("https://apis.letexto.com/v1/messages/send",{
+                        method : 'POST',
+                        headers : {
+                            "Authorization" : "Bearer 51efdb02e8c2ea534b550f404d5770d6",
+                            "Content-Type" : "application/json"
+                        },
+                        body : JSON.stringify({
+                            "from" : "Maaleek",
+                            "to" : `${country.code}${context.login}`,
+                            "content" : `Entrez le code ${code} afin de valider votre compte. Attention, le code expirera dans 3 minutes.`,
+                        })
+                    })
 
                     // ---------------------------------
 
@@ -103,6 +117,20 @@ export class AuthentificationFeature {
                 else
                 {
                     const otp : OtpModel = await this.otpRepo.toValidate(action, code);
+
+                    await fetch("https://apis.letexto.com/v1/messages/send",{
+                        method : 'POST',
+                        headers : {
+                            "Authorization" : "Bearer 51efdb02e8c2ea534b550f404d5770d6",
+                            "Content-Type" : "application/json"
+                        },
+                        body : JSON.stringify({
+                            "from" : "Maaleek",
+                            "to" : `${country.code}${context.login}`,
+                            "content" : `Entrez le code ${code} afin de valider votre compte. Attention, le code expirera dans 3 minutes.`,
+                        })
+                    })
+
                     return ApiResponseUtil.ok(UserOrCodeDtm.fromCode(OtpDtm.fromOtpDtm(otp)),'Code envoyé', 'Un code vous a été envoyé .');
                 }
             }
