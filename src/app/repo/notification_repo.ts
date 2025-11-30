@@ -10,14 +10,25 @@ export class NotificationRepo implements INotificationRepo {
         private readonly prisma: PrismaService,
     ) {}
 
-    async findById(id : string) : Promise<NotificationModel | null> {
+    async findById(id : string , account_id : string) : Promise<NotificationModel | null> {
         const notification = await this.prisma.notification.findUnique({
-            where : {id : id},
+            where : {id : id,
+                account_id : account_id
+            },
             include : {
                 account : false
             }
         })
         return notification ? this.toNotification(notification) : null;
+    }
+
+    async remove(notification : NotificationModel) : Promise<void> {
+        await this.prisma.notification.update({
+            where : {id : notification.id},
+            data : {
+                deleted : true
+            }
+        });
     }
 
     async save(notification : NotificationModel) : Promise<NotificationModel> {
@@ -31,7 +42,7 @@ export class NotificationRepo implements INotificationRepo {
 
     async findByAccount(account_id : string) : Promise<NotificationModel[]> {
         const notifications = await this.prisma.notification.findMany({
-            where : {account_id : account_id},
+            where : {account_id : account_id, deleted : false},
             include : {
                 account : false
             }

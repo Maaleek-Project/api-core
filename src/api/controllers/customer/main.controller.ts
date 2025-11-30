@@ -1,4 +1,4 @@
-import { Controller,  Res, UseGuards, Req, Body, Post, Get, Put } from "@nestjs/common";
+import { Controller,  Res, UseGuards, Req, Body, Post, Get, Put, Delete, Param, Query } from "@nestjs/common";
 import { MainFeature } from "src/app/features/customer/main.feature";
 import { EntityType } from "src/core/decorators/entity_type.decorator";
 import { EntityTypeGuard } from "src/core/guards/entity_type.guard";
@@ -23,6 +23,21 @@ export class MainController {
         const status = statusMap[notifications.code] ;
         return res.status(status).json(notifications);
     }
+
+    @EntityType(['Customer'])
+    @Delete('user-remove-notification')
+    async deleteNotification(@Req() req: Request, @Query('id') context: string, @Res() res: Response) {
+        const deleteNotification = await this.feature.deleteNotification(AccountDtm.fromAccountDtm(req['user']), context);
+        const statusMap: Record<string, number> = {
+            success: 200,
+            not_found: 404,
+            internal_error: 500,
+        };
+        const status = statusMap[deleteNotification.code] ;
+        return res.status(status).json(deleteNotification);
+    }
+
+
 
     @EntityType(['Customer'])
     @Post('exchange-request')

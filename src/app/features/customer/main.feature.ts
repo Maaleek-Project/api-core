@@ -26,9 +26,29 @@ export class MainFeature {
         private readonly businessCardRepo : BusinessCardRepo,
     ) {}
 
-    async userNotifications(accounnt : AccountDtm) : Promise<ApiResponse<NotificationDtm[]>> {
-        const notifications = await this.notificationRepo.findByAccount(accounnt.id);
+    async userNotifications(account : AccountDtm) : Promise<ApiResponse<NotificationDtm[]>> {
+        const notifications = await this.notificationRepo.findByAccount(account.id);
         return ApiResponseUtil.ok(notifications.map(NotificationDtm.fromNotificationDtm),'','Notifications listed 🎉 .');
+    }
+
+    async deleteNotification(account : AccountDtm , notificationId : string) : Promise<ApiResponse<String>> {
+
+        try {
+            const notification = await this.notificationRepo.findById(notificationId, account.id);
+
+            if(notification == null)
+            {
+                return ApiResponseUtil.error('Notification inexistante','Désolé, cette notification semble ne pas exister, merci de bien vouloir réessayer .', 'not_found');
+            }
+
+            await this.notificationRepo.remove(notification);
+
+            return ApiResponseUtil.ok("",'Notification supprimée', 'Votre notification a bien été supprimée .');
+
+        }catch(e){
+            return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
+        }
+
     }
 
     async exchangeRequest(context : ExchangeRequestContext) : Promise<ApiResponse<AccountDtm>> {
