@@ -110,6 +110,7 @@ export class BusinessCardRepo implements IBusinessCardRepo {
                 company : true
             }
         })
+
         return businessCards.map(businessCard => this.toBusinessCard(businessCard));
     }
 
@@ -123,6 +124,7 @@ export class BusinessCardRepo implements IBusinessCardRepo {
             offer : businessCard.offer,
             social_networks : businessCard.social_networks,
             created_at : businessCard.created_at,
+            company : businessCard.company
         };
     }
 
@@ -135,6 +137,7 @@ export class BusinessCardRepo implements IBusinessCardRepo {
             job : businessCard.job,
             social_networks : businessCard.social_networks,
             offer_id : businessCard.user.businessCard![0].offer.id
+
         }
     }
 }

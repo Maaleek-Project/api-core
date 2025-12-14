@@ -180,6 +180,10 @@ model Company{
   email      String      @unique
   name       String
   address    String
+  front_text_color String @default("0xff000000")
+  back_text_color String @default("0xff000000")
+  front_background_color String @default("0xffffffff")
+  back_background_color String @default("0xfff5f5f5")
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

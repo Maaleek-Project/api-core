@@ -12,6 +12,7 @@ import { SetupController } from './api/controllers/management/setup.controller';
 import { UserModule } from './api/controllers/customer/customer.module';
 import { UserController } from './api/controllers/customer/user.controller';
 import { MainController } from './api/controllers/customer/main.controller';
+import { SettingController } from './api/controllers/corporation/setting.controller';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ export class AppModule {
         CompanyController,
         WorkerController,
         SetupController,
+        SettingController,
         UserController,
         MainController,
       );

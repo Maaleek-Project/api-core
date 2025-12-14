@@ -1,13 +1,13 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CreateWorkerContext {
-    @IsNotEmpty({ message: 'Name is required .' })
+    @IsOptional({ message: 'Name is required .' })
     name : string ;
 
-    @IsNotEmpty({ message: 'Surname is required .' })
+    @IsOptional({ message: 'Surname is required .' })
     surname : string;
 
-    @IsNotEmpty({ message: 'Civility is required .' })
+    @IsOptional({ message: 'Civility is required .' })
     civility : string;
 
     @IsNotEmpty({ message: 'Number is required .' })
@@ -16,9 +16,9 @@ export class CreateWorkerContext {
     @IsNotEmpty({ message: 'Please select a country .' })
     country_id : string;
 
-    @IsNotEmpty({ message: 'Email is required .' })
+    @IsOptional({ message: 'Email is required .' })
     email : string;
 
-    @IsNotEmpty({ message: 'Type is required .' })
+    @IsOptional({ message: 'Type is required .' })
     type : string;
 }

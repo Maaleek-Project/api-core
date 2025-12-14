@@ -141,11 +141,16 @@ export class CompanyRepo implements ICompanyRepo {
             number : company.number,
             email : company.email,
             account_id : company.account.id,
-            address : company.address
+            address : company.address,
+            front_text_color : company.front_text_color,
+            back_text_color : company.back_text_color,
+            front_background_color : company.front_background_color,
+            back_background_color : company.back_background_color,
         }
     }
 
     private toCompany(company : any) : CompanyModel {
+
         return {
             id : company.id,
             name : company.name,
@@ -153,7 +158,11 @@ export class CompanyRepo implements ICompanyRepo {
             email : company.email,
             account : company.account,
             address : company.address,
-            created_at : company.created_at
+            created_at : company.created_at,
+            front_text_color : company.front_text_color,
+            back_text_color : company.back_text_color,
+            front_background_color : company.front_background_color,
+            back_background_color : company.back_background_color,
         }
     }
 }

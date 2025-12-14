@@ -8,10 +8,13 @@ import { ResourceRepo } from "src/app/repo/resource_repo";
 import { PrismaService } from "src/prisma.service";
 import { WorkerRepo } from "src/app/repo/worker_repo";
 import { AuthentificationService } from "src/core/services/authenfication.service";
+import { FirebaseService } from "src/core/services/firebase.service";
+import { SettingFeature } from "src/app/features/manager/setting.feature";
+import { SettingController } from "./setting.controller";
 
 @Module({
     imports: [],
-    controllers: [WorkerController],
+    controllers: [WorkerController, SettingController],
     providers: [
         AccountRepo,
         UserRepo,
@@ -20,7 +23,9 @@ import { AuthentificationService } from "src/core/services/authenfication.servic
         WorkerRepo,
         PrismaService,
         WorkerFeature,
-        AuthentificationService
+        AuthentificationService,
+        FirebaseService,
+        SettingFeature
     ],
 
 })

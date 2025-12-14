@@ -8,17 +8,19 @@ export class BusinessCardDtm {
     email : string;
     job : string;
     social_networks : string[];
+    company? : any;
 
-    constructor(id : string, user : UserDtm, number : string, email : string, job : string, social_networks : string[] = []) {
+    constructor(id : string, user : UserDtm, number : string, email : string, job : string, social_networks : string[] = [], company? : any) {
         this.number = number;
         this.email = email;
         this.job = job;
         this.id = id;
         this.user = user;
+        this.company = company;
         this.social_networks = social_networks;
     }
 
     static fromBusinessCardDtm(businessCard : BusinessCardModel) : BusinessCardDtm {
-        return new BusinessCardDtm(businessCard.id, UserDtm.fromUserDtm(businessCard.user), businessCard.number, businessCard.email, businessCard.job, businessCard.social_networks);
+        return new BusinessCardDtm(businessCard.id, UserDtm.fromUserDtm(businessCard.user), businessCard.number, businessCard.email, businessCard.job, businessCard.social_networks, businessCard.company);
     }
 }

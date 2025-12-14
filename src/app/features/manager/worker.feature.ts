@@ -15,6 +15,7 @@ import { EntityModel } from "src/core/domain/models/entity.model";
 import { UserModel } from "src/core/domain/models/user.model";
 import { WorkerModel } from "src/core/domain/models/worker.model";
 import { AuthentificationService } from "src/core/services/authenfication.service";
+import { FirebaseService } from "src/core/services/firebase.service";
 import { v4 as uuidv4 } from 'uuid';
 
 
@@ -30,6 +31,7 @@ export class WorkerFeature {
         private readonly resourceRepo : ResourceRepo,
         private readonly userRepo : UserRepo,
         private readonly authentificationService : AuthentificationService,
+        private readonly firebaseService : FirebaseService,
     ) {}
 
 
@@ -77,6 +79,8 @@ export class WorkerFeature {
 
                 const to_saved : WorkerModel = { id : uuidv4(), account : account, company : company};
                 worker = await this.workerRepo.save(to_saved);
+
+                await this.firebaseService.toPush(account.fcm_token!, 'Travailleur ajouté 🎉', `Vous avez été ajouté en tant que travailleur dans l'entreprise. ${company.name}` );
             }
             else
             {

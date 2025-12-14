@@ -63,14 +63,14 @@ export class CompanyFeature {
                         return ApiResponseUtil.error('','This number is already used .', 'conflict');
                     }
 
-                    const user : UserModel = { id : uuidv4(), civility : context.manager_civility, name : context.manager_email, surname : context.manager_surname, number : context.manager_number , email : context.manager_email };
+                    const user : UserModel = { id : uuidv4(), civility : context.manager_civility, name : context.manager_name, surname : context.manager_surname, number : context.manager_number , email : context.manager_email };
                     await this.userRepo.save(user);
 
                     const password = await this.authentificationService.hashPassword("12563");
 
                     const entity : EntityModel | null = await this.resourceRepo.findEntityByCode("Company") as EntityModel;
 
-                    const account : AccountModel = { id : uuidv4(), login : context.manager_email, password : password, user : user, country : country!, entity : entity , fcm_token : `${context.manager_number}@fcm`};
+                    const account : AccountModel = { id : uuidv4(), login : context.manager_email, password : password, user : user, country : country!, entity : entity , fcm_token : `${context.manager_number}@fcm` , document_id : ""};
 
                     const saved = await this.accountRepo.save(account);
 
@@ -93,6 +93,7 @@ export class CompanyFeature {
 
 
         }catch(e){
+            console.log(e)
             return ApiResponseUtil.error('',"Failed to create company .", "internal_error");
         }
     }
