@@ -146,6 +146,8 @@ export class CompanyRepo implements ICompanyRepo {
             back_text_color : company.back_text_color,
             front_background_color : company.front_background_color,
             back_background_color : company.back_background_color,
+            slogan : company.slogan,
+            logo : company.logo
         }
     }
 
@@ -163,6 +165,8 @@ export class CompanyRepo implements ICompanyRepo {
             back_text_color : company.back_text_color,
             front_background_color : company.front_background_color,
             back_background_color : company.back_background_color,
+            slogan : company.slogan,
+            logo : company.logo
         }
     }
 }

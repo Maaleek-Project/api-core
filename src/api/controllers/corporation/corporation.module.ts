@@ -11,6 +11,7 @@ import { AuthentificationService } from "src/core/services/authenfication.servic
 import { FirebaseService } from "src/core/services/firebase.service";
 import { SettingFeature } from "src/app/features/manager/setting.feature";
 import { SettingController } from "./setting.controller";
+import { R2Service } from "src/core/services/r2.service";
 
 @Module({
     imports: [],
@@ -25,6 +26,7 @@ import { SettingController } from "./setting.controller";
         WorkerFeature,
         AuthentificationService,
         FirebaseService,
+        R2Service,
         SettingFeature
     ],
 

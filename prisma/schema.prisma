@@ -180,6 +180,8 @@ model Company{
   email      String      @unique
   name       String
   address    String
+  slogan     String      @default("Avec vous et partout ailleurs 💡 .")
+  logo       String?
   front_text_color String @default("0xff000000")
   back_text_color String @default("0xff000000")
   front_background_color String @default("0xffffffff")

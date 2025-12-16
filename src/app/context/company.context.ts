@@ -69,4 +69,8 @@ export class UpdateCompanyConfigContext {
     manager_email : string;
 
 
+    @IsNotEmpty({ message: 'Company is required .' })
+    slogan : string;
+
+
 }

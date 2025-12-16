@@ -16,6 +16,8 @@ export class CompanyInfoDtm {
         back_text_color : string;
         front_background_color : string;
         back_background_color : string;
+        slogan : string;
+        logo : string;
     }
 
     constructor(id : string, name : string, number : string, address : string, country : string, manager : {username : string, number : string, email : string},
@@ -24,6 +26,8 @@ export class CompanyInfoDtm {
             back_text_color : string;
             front_background_color : string;
             back_background_color : string;
+            slogan : string;
+            logo : string;
         }
     ){
         this.id = id ;
@@ -47,7 +51,9 @@ export class CompanyInfoDtm {
                 front_text_color : company.front_text_color ?? '0xff000000',
                 back_text_color : company.back_text_color ?? '0xff000000',
                 front_background_color : company.front_background_color ?? '0xffffffff',                
-                back_background_color : company.back_background_color ?? '0xfff5f5f5'
+                back_background_color : company.back_background_color ?? '0xfff5f5f5',
+                slogan : company.slogan ?? 'Avec vous et partout ailleurs 💡 .',
+                logo : company.logo ?? ''
             }
         );
     }

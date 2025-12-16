@@ -5,6 +5,8 @@ import { ApiResponse, ApiResponseUtil } from "src/app/utils/api-response.util";
 import { AccountDtm } from "src/core/domain/dtms/account.dtm";
 import { CompanyInfoDtm } from "src/core/domain/dtms/company_info.dtm";
 import { CompanyModel } from "src/core/domain/models/company.model";
+import { R2Service } from "src/core/services/r2.service";
+import * as fs from 'fs';
 
 @Injectable()
 export class SettingFeature {
@@ -12,6 +14,7 @@ export class SettingFeature {
 
     constructor(
         private readonly companyRepo : CompanyRepo,
+        private readonly r2Service: R2Service,
     ){}
 
 
@@ -27,13 +30,45 @@ export class SettingFeature {
     }
 
 
-    async updateCompanyConfig(accountDtm : AccountDtm, context : UpdateCompanyConfigContext) : Promise<ApiResponse<CompanyInfoDtm>> {
-
-
-        try {
+    async updateCompanyLogo(accountDtm : AccountDtm, file: Express.Multer.File) : Promise<ApiResponse<string>> {
+        try{
 
             const company : CompanyModel | null = await this.companyRepo.findByAccount(accountDtm.id);
+            if(company == null)
+            {
+                return ApiResponseUtil.error('','Company not found .', 'not_found');
+            }
 
+            const buffer = fs.readFileSync(file.path);
+            const folder = "maaleek/companies/logos";
+
+            await this.r2Service.uploadFile(
+                file.filename,
+                buffer,
+                file.mimetype,
+                folder
+            );
+
+            if (company.logo &&  company.logo.trim() !== "" &&  company.logo !== `${folder}/${file.filename}`) {
+                await this.r2Service.deleteFile(company.logo);
+            }
+
+            company.logo = `${folder}/${file.filename}`;
+            await this.companyRepo.save(company);
+
+            return ApiResponseUtil.ok('','Logo mis à jour 🎉 .','Votre logo a été mis à jour .');
+
+
+        }catch(e){
+            console.log(e)
+            return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
+        }
+    }
+
+
+    async updateCompanyConfig(accountDtm : AccountDtm, context : UpdateCompanyConfigContext) : Promise<ApiResponse<CompanyInfoDtm>> {
+        try {
+            const company : CompanyModel | null = await this.companyRepo.findByAccount(accountDtm.id);
             if(company == null)
             {
                 return ApiResponseUtil.error('','Company not found .', 'not_found');
@@ -46,6 +81,7 @@ export class SettingFeature {
             company.name = context.company_name;
             company.number = context.company_number;
             company.address = context.company_address;
+            company.slogan = context.slogan;
 
             await this.companyRepo.save(company);
 
