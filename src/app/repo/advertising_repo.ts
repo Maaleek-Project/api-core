@@ -57,7 +57,7 @@ export class AdvertisingRepo implements IAdvertisingRepo {
 
     private async toAdvertising(advertising : any) : Promise<AdvertisingModel> {
         // Récupérer la Company à partir de l'Account
-        const company = await this.companyRepo.findByAccount(advertising.company.id);
+        const company = await this.companyRepo.findByAccount(advertising.company.account.id);
         
         if (!company) {
             throw new Error(`Company not found for account ${advertising.company.id}`);

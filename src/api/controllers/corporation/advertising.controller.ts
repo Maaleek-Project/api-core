@@ -28,7 +28,7 @@ export class AdvertisingController {
     @EntityType(['Company'])
     @Post('create')
     async createAdvertising(@Req() req: Request, @Body() context : CreateAdvertisingContext, @UploadedFile() media: Express.Multer.File, @Res() res: Response) {
-        const account = req['user'] 
+        const account = req['user']
         const result = await this.feature.createAdvertising(account, context, media);
         const statusMap: Record<string, number> = {
             success: 200,
