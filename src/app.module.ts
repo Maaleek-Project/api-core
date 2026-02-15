@@ -13,6 +13,7 @@ import { UserModule } from './api/controllers/customer/customer.module';
 import { UserController } from './api/controllers/customer/user.controller';
 import { MainController } from './api/controllers/customer/main.controller';
 import { SettingController } from './api/controllers/corporation/setting.controller';
+import { AdvertisingController } from './api/controllers/corporation/advertising.controller';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ export class AppModule {
         SettingController,
         UserController,
         MainController,
+        AdvertisingController,
       );
   }
 }
