@@ -10,7 +10,7 @@ USER node
 FROM build-stage AS dependencies
 COPY --chown=node:node package.json package-lock.json ./
 RUN npm install
-COPY --chown=node:node . . 
+COPY --chown=node:node . .
 
 FROM dependencies AS build
 RUN npm run build --ignore-ts-errors
@@ -31,7 +31,7 @@ RUN npm install --omit=dev
 COPY --chown=node:node --from=build /home/node/app/dist ./dist
 
 # 3. Copier prisma
-COPY --chown=node:node ../prisma ./prisma
+COPY --chown=node:node prisma ./prisma
 
 # 4. Copier .env (LE PLUS IMPORTANT)
 COPY --chown=node:node .env .env
