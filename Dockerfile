@@ -40,3 +40,5 @@ COPY --chown=node:node .env .env
 RUN npx prisma generate
 
 EXPOSE $PORT
+
+CMD ["dumb-init", "node", "dist/src/main.js"]

@@ -195,6 +195,7 @@ model Company{
   @@map("companies")
   businessCard BusinessCard[]
   worker Worker[]
+  advertising Advertising[]
 }
 
 
@@ -297,4 +298,20 @@ model ExchangeRequest{
   @@unique([sender_id, recipient_id])
 
   @@map("exchanges_requests")
+}
+
+model Advertising {
+  id         String      @id @default(uuid())
+  company_id String
+  type       String
+  title      String
+  description String
+  link      String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  company Company @relation(fields: [company_id], references: [id], onDelete: Cascade)
+
+  @@map("advertisings")
 }

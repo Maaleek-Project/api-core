@@ -12,10 +12,13 @@ import { FirebaseService } from "src/core/services/firebase.service";
 import { SettingFeature } from "src/app/features/manager/setting.feature";
 import { SettingController } from "./setting.controller";
 import { R2Service } from "src/core/services/r2.service";
+import { AdvertisingFeature } from "src/app/features/manager/advertising.feature";
+import { AdvertisingController } from "./advertising.controller";
+import { AdvertisingRepo } from "src/app/repo/advertising_repo";
 
 @Module({
     imports: [],
-    controllers: [WorkerController, SettingController],
+    controllers: [WorkerController, SettingController, AdvertisingController],
     providers: [
         AccountRepo,
         UserRepo,
@@ -27,7 +30,9 @@ import { R2Service } from "src/core/services/r2.service";
         AuthentificationService,
         FirebaseService,
         R2Service,
-        SettingFeature
+        SettingFeature,
+        AdvertisingFeature,
+        AdvertisingRepo
     ],
 
 })
