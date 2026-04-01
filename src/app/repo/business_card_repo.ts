@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { Prisma } from "@prisma/client";
 import { BusinessCardModel } from "src/core/domain/models/business_card.model";
 import { IBusinessCardRepo } from "src/core/interfaces/i_business_card_repo";
 import { PrismaService } from "src/prisma.service";
@@ -10,134 +11,124 @@ export class BusinessCardRepo implements IBusinessCardRepo {
         private readonly prisma: PrismaService,
     ) {}
 
-    async save(businessCard : BusinessCardModel) : Promise<BusinessCardModel> {
-        const saved = await this.prisma.businessCard.upsert({
-            where: {id : businessCard.id},
+    async save(businessCard: BusinessCardModel, tx?: Prisma.TransactionClient): Promise<BusinessCardModel> {
+        const client = tx ?? this.prisma;
+        const saved = await client.businessCard.upsert({
+            where: { id: businessCard.id },
             update: this.toDatabase(businessCard),
             create: this.toDatabase(businessCard),
-            include : {
-                 user : {
-                    include : {
-                        businessCard : {
-                            include : {
-                                offer : true
-                            }
+            include: {
+                user: {
+                    include: {
+                        businessCard: {
+                            include: { offer: true }
                         }
                     }
                 },
-                company : true
+                company: true
             }
-        })
+        });
         return this.toBusinessCard(saved);
     }
 
-    async findByUserId(user_id : string) : Promise<BusinessCardModel | null> {
+    async findByUserId(user_id: string): Promise<BusinessCardModel | null> {
         const businessCard = await this.prisma.businessCard.findFirst({
-            where : {user_id : user_id},
-            include : {
-                user : {
-                    include : {
-                        businessCard : {
-                            include : {
-                                offer : true
-                            }
+            where: { user_id },
+            include: {
+                user: {
+                    include: {
+                        businessCard: {
+                            include: { offer: true }
                         }
                     }
                 }
-            } 
-        })
-       return businessCard ? this.toBusinessCard(businessCard) : null;
-    }
-
-    async findByEmailOrNumber(email : string, number : string) : Promise<BusinessCardModel | null> {
-        const businessCard = await this.prisma.businessCard.findFirst({
-            where : {
-                OR : [
-                    {email},
-                    {number}
-                ]
-            },
-            include : {
-                user : {
-                    include : {
-                        businessCard : {
-                            include : {
-                                offer : true
-                            }
-                        }
-                    }
-                }
-            } 
-        })
+            }
+        });
         return businessCard ? this.toBusinessCard(businessCard) : null;
     }
-    async findById(id : string) : Promise<BusinessCardModel> {
+
+    async findByEmailOrNumber(email: string, number: string): Promise<BusinessCardModel | null> {
+        const businessCard = await this.prisma.businessCard.findFirst({
+            where: { OR: [{ email }, { number }] },
+            include: {
+                user: {
+                    include: {
+                        businessCard: {
+                            include: { offer: true }
+                        }
+                    }
+                }
+            }
+        });
+        return businessCard ? this.toBusinessCard(businessCard) : null;
+    }
+
+    async findById(id: string): Promise<BusinessCardModel> {
         const businessCard = await this.prisma.businessCard.findUnique({
-            where : {
-                id : id
-            },
-            include : {
-                user : {
-                    include : {
-                        businessCard : {
-                            include : {
-                                offer : true
-                            }
+            where: { id },
+            include: {
+                user: {
+                    include: {
+                        businessCard: {
+                            include: { offer: true }
                         }
                     }
                 },
-                company : true
+                company: {
+                    include: { advertising: true }
+                }
             }
         });
         return this.toBusinessCard(businessCard);
     }
 
-    async haveTheBusinessCardsReceived(senders_id : string[]) : Promise<BusinessCardModel[]> {
+    async haveTheBusinessCardsReceived(senders_id: string[]): Promise<BusinessCardModel[]> {
         const businessCards = await this.prisma.businessCard.findMany({
-            where : {user_id : {
-                in : senders_id
-            }},
-            include : {
-                user : {
-                    include : {
-                        businessCard : {
-                            include : {
-                                offer : true
-                            }
+            where: { user_id: { in: senders_id } },
+            include: {
+                user: {
+                    include: {
+                        businessCard: {
+                            include: { offer: true }
                         }
                     }
                 },
-                company : true
+                company: {
+                    include: { advertising: true }
+                }
             }
-        })
-
-        return businessCards.map(businessCard => this.toBusinessCard(businessCard));
+        });
+        return businessCards.map(bc => this.toBusinessCard(bc));
     }
 
-    private toBusinessCard(businessCard : any) : BusinessCardModel {
+    private toBusinessCard(businessCard: any): BusinessCardModel {
         return {
-            id : businessCard.id,
-            user : businessCard.user,
-            number : businessCard.number,
-            email : businessCard.email,
-            job : businessCard.job,
-            offer : businessCard.offer,
-            social_networks : businessCard.social_networks,
-            created_at : businessCard.created_at,
-            company : businessCard.company
+            id: businessCard.id,
+            user: businessCard.user,
+            number: businessCard.number,
+            email: businessCard.email,
+            job: businessCard.job,
+            offer: businessCard.offer,
+            social_networks: businessCard.social_networks,
+            created_at: businessCard.created_at,
+            company: businessCard.company
         };
     }
 
-    private toDatabase(businessCard : BusinessCardModel) : any {
-        return {
-            id : businessCard.id,
-            user_id : businessCard.user.id,
-            number : businessCard.number,
-            email : businessCard.email,
-            job : businessCard.job,
-            social_networks : businessCard.social_networks,
-            offer_id : businessCard.user.businessCard![0].offer.id
+    private toDatabase(businessCard: BusinessCardModel): any {
 
-        }
+        console.log('Converting to database format:');
+        console.log(businessCard.company);
+
+        return {
+            id: businessCard.id,
+            user_id: businessCard.user.id,
+            number: businessCard.number,
+            email: businessCard.email,
+            job: businessCard.job,
+            social_networks: businessCard.social_networks,
+            offer_id: businessCard.user.businessCard![0].offer.id,
+            company_id: businessCard.company ? businessCard.company.id : null
+        };
     }
 }

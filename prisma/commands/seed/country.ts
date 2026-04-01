@@ -26,19 +26,10 @@ export default async function CountrySeeder() {
     for (const country of countries) {
         await prisma.country.upsert({
             where: { alias: country.alias },
-            update: {},
+            update: { libelle: country.libelle, code: country.code, flag: country.flag, currency: country.currency },
             create: country
         })
     }
 
     console.log('🎉 Countries seeding done.');
 }
-
-CountrySeeder()
-  .catch((e) => {
-    console.error('❌ Error countries seeding :', e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-});

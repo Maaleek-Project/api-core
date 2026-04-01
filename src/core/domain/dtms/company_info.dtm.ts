@@ -1,13 +1,17 @@
 import { CompanyModel } from "../models/company.model";
+import { CountryDtm } from "./country.dtm";
 
 export class CompanyInfoDtm {
     id : string ;
     name : string;
     number : string;
     address : string;
-    country: string;
+    country: CountryDtm;
+    email : string;
     manager : {
-        username : string;
+        civility : string;
+        name : string;
+        surname : string;
         number : string;
         email : string;
     };
@@ -20,7 +24,20 @@ export class CompanyInfoDtm {
         logo : string;
     }
 
-    constructor(id : string, name : string, number : string, address : string, country : string, manager : {username : string, number : string, email : string},
+    constructor(
+        id : string,
+        name : string,
+        number : string,
+        address : string,
+        country : CountryDtm,
+        email : string,
+        manager : {
+            civility : string;
+            name : string;
+            surname : string;
+            number : string;
+            email : string;
+        },
         card : {
             front_text_color : string;
             back_text_color : string;
@@ -31,6 +48,7 @@ export class CompanyInfoDtm {
         }
     ){
         this.id = id ;
+        this.email = email;
         this.name = name;
         this.number = number;
         this.address = address;
@@ -41,10 +59,13 @@ export class CompanyInfoDtm {
 
     static fromCompanyInfoDtm(company : CompanyModel) : CompanyInfoDtm {
         return new CompanyInfoDtm(company.id, company.name, company.number, company.address, 
-            company.account.country.libelle, 
+            CountryDtm.fromCountryDtm(company.account.country), 
+            company.email,
             {
-                username : `${company.account.user.name} ${company.account.user.surname}`,
-                number : company.account.user.number,
+                civility : company.account.user.civility,
+                name : company.account.user.name,
+                surname : company.account.user.surname,
+                number : `+${company.account.country.code} ${company.account.user.number}`,
                 email : company.account.user.email ?? ''
             },
             {

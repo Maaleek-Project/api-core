@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+import * as bcrypt from 'bcrypt';
 import { Injectable } from "@nestjs/common";
 import { AccountDtm } from "../domain/dtms/account.dtm";
 import { JwtService } from "@nestjs/jwt";

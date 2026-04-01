@@ -12,90 +12,89 @@ import { v4 as uuidv4 } from 'uuid';
 import { UserModel } from "src/core/domain/models/user.model";
 import { AuthentificationService } from "src/core/services/authenfication.service";
 import { EntityModel } from "src/core/domain/models/entity.model";
+import { PrismaService } from "src/prisma.service";
 
 @Injectable()
 export class CompanyFeature {
 
     constructor(
-        private readonly companyRepo : CompanyRepo,
-        private readonly resourceRepo : ResourceRepo,
-        private readonly accountRepo : AccountRepo,
-        private readonly userRepo : UserRepo,
-        private readonly authentificationService : AuthentificationService,
+        private readonly prisma: PrismaService,
+        private readonly companyRepo: CompanyRepo,
+        private readonly resourceRepo: ResourceRepo,
+        private readonly accountRepo: AccountRepo,
+        private readonly userRepo: UserRepo,
+        private readonly authentificationService: AuthentificationService,
     ) {}
 
-    async listing() : Promise<ApiResponse<CompanyDtm[]>> {
+    async listing(): Promise<ApiResponse<CompanyDtm[]>> {
         const companies = await this.companyRepo.findAllCompanies();
-        const dtos = companies.map(company => CompanyDtm.fromCompanyDtm(company));
-        return ApiResponseUtil.ok(dtos,'', 'Companies listed 🎉 .');
+        return ApiResponseUtil.ok(companies.map(company => CompanyDtm.fromCompanyDtm(company)), '', 'Companies listed 🎉 .');
     }
 
-
-    async createCompany(context : CreateCompanyContext) : Promise<ApiResponse<CompanyDtm>> {
-        try{
-
+    async createCompany(context: CreateCompanyContext): Promise<ApiResponse<CompanyDtm>> {
+        try {
             const country = await this.resourceRepo.findCountry(context.country_id);
 
-            if(country == null)
-            {
-                return ApiResponseUtil.error('','Country not found .', 'not_found');
+            if (country == null) {
+                return ApiResponseUtil.error('', 'Country not found .', 'not_found');
             }
 
-            const find_email_or_number : CompanyModel | null = await this.companyRepo.findByNumerOrEmail(context.company_number, context.company_email);
-            
-            if(find_email_or_number != null)
-            {
-                return ApiResponseUtil.error('','Company email or number is already used .', 'conflict');
+            const find_email_or_number: CompanyModel | null = await this.companyRepo.findByNumerOrEmail(context.company_number, context.company_email);
+
+            if (find_email_or_number != null) {
+                return ApiResponseUtil.error('', 'Company email or number is already used .', 'conflict');
             }
 
-            const account : AccountModel | null = await this.accountRepo.fetchByLogin(context.manager_number, context.country_id);
+            const account: AccountModel | null = await this.accountRepo.fetchByLogin(context.manager_number, context.country_id);
 
-            if (account == null)
-            {
-                const user : UserModel | null = await this.userRepo.findByEmail(context.manager_email);
-
-                if(user == null)
-                {
-                    const find_number : UserModel | null = await this.userRepo.findByNumber(context.manager_number);
-
-                    if(find_number != null)
-                    {
-                        return ApiResponseUtil.error('','This number is already used .', 'conflict');
-                    }
-
-                    const user : UserModel = { id : uuidv4(), civility : context.manager_civility, name : context.manager_name, surname : context.manager_surname, number : context.manager_number , email : context.manager_email };
-                    await this.userRepo.save(user);
-
-                    const password = await this.authentificationService.hashPassword("12563");
-
-                    const entity : EntityModel | null = await this.resourceRepo.findEntityByCode("Company") as EntityModel;
-
-                    const account : AccountModel = { id : uuidv4(), login : context.manager_email, password : password, user : user, country : country!, entity : entity , fcm_token : `${context.manager_number}@fcm` , document_id : ""};
-
-                    const saved = await this.accountRepo.save(account);
-
-                    const company : CompanyModel = { id : uuidv4(), name : context.company_name, number : context.company_number, email : context.company_email, account : saved, address : context.company_address};
-
-                    const saved_company = await this.companyRepo.save(company);
-
-                    return ApiResponseUtil.ok({...CompanyDtm.fromCompanyDtm(saved_company)},'', 'Company created 🎉 .');
-                    
-                }
-                else
-                {
-                    return ApiResponseUtil.error('','Manager email is already used .', 'conflict');
-                }
-            }
-            else
-            {
-                return ApiResponseUtil.error('','Manager number is already used .', 'conflict');
+            if (account != null) {
+                return ApiResponseUtil.error('', 'Manager number is already used .', 'conflict');
             }
 
+            const user: UserModel | null = await this.userRepo.findByEmail(context.manager_email);
 
-        }catch(e){
-            console.log(e)
-            return ApiResponseUtil.error('',"Failed to create company .", "internal_error");
+            if (user != null) {
+                return ApiResponseUtil.error('', 'Manager email is already used .', 'conflict');
+            }
+
+            const find_number: UserModel | null = await this.userRepo.findByNumber(context.manager_number);
+
+            if (find_number != null) {
+                return ApiResponseUtil.error('', 'This number is already used .', 'conflict');
+            }
+
+            const password = await this.authentificationService.hashPassword(process.env.DEFAULT_ACCOUNT_PASSWORD ?? "Maaleek@2024!");
+            const entity: EntityModel = await this.resourceRepo.findEntityByCode("Company") as EntityModel;
+
+            const newUser: UserModel = { id: uuidv4(), civility: context.manager_civility, name: context.manager_name, surname: context.manager_surname, number: context.manager_number, email: context.manager_email };
+            const newAccount: AccountModel = { id: uuidv4(), login: context.manager_email, password, user: newUser, country: country!, entity, fcm_token: `${context.manager_number}@fcm`, document_id: "" };
+            const newCompany: CompanyModel = { id: uuidv4(), name: context.company_name, number: context.company_number, email: context.company_email, account: newAccount, password, address: context.company_address };
+
+            const saved_company = await this.prisma.$transaction(async (tx) => {
+                const savedUser = await this.userRepo.save(newUser, tx);
+                newAccount.user = savedUser;
+                const savedAccount = await this.accountRepo.save(newAccount, tx);
+                newCompany.account = savedAccount;
+                return this.companyRepo.save(newCompany, tx);
+            });
+
+            return ApiResponseUtil.ok(CompanyDtm.fromCompanyDtm(saved_company), '', 'Company created 🎉 .');
+
+        } catch (e) {
+            console.log(e);
+            return ApiResponseUtil.error('', "Failed to create company .", "internal_error");
         }
     }
-    
+
+    async toogleLock(company_id: string): Promise<ApiResponse<CompanyDtm>> {
+        const company = await this.companyRepo.findCompany(company_id);
+        if (company == null) {
+            return ApiResponseUtil.error('Company not found', 'This company does not exist. Please try again with a different company .', 'not_found');
+        }
+
+        company.locked = !company.locked;
+        await this.companyRepo.save(company);
+
+        return ApiResponseUtil.ok(CompanyDtm.fromCompanyDtm(company), company.locked ? 'Company unlocked' : 'Company locked', 'This company was ' + (company.locked ? 'locked' : 'unlocked') + ' successfully .');
+    }
 }

@@ -1,4 +1,4 @@
-import { Controller, Post, Res, UseGuards, Req, Body, Get } from "@nestjs/common";
+import { Controller, Post, Res, UseGuards, Req, Body, Get, Param, Put } from "@nestjs/common";
 import { EntityType } from "src/core/decorators/entity_type.decorator";
 import { EntityTypeGuard } from "src/core/guards/entity_type.guard";
 import { Response } from "express";
@@ -31,6 +31,20 @@ export class CompanyController {
     @Post('created')
     async createCompany(@Body() context : CreateCompanyContext, @Req() req: Request, @Res() res: Response) {
         const create = await this.companyFeature.createCompany(context);
+        const statusMap: Record<string, number> = {
+            success: 200,
+            not_found: 404,
+            conflict: 409,
+            internal_error: 500,
+        };
+        const status = statusMap[create.code] ;
+        return res.status(status).json(create);
+    }
+
+    @EntityType(['Manager'])
+    @Put('toogle-lock/:company_id')
+    async toogleLock(@Param('company_id') company_id: string, @Req() req: Request, @Res() res: Response) {
+        const create = await this.companyFeature.toogleLock(company_id);
         const statusMap: Record<string, number> = {
             success: 200,
             not_found: 404,

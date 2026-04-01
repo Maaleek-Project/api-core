@@ -34,4 +34,16 @@ export class CreateOfferContext {
 
     @IsNotEmpty({ message: 'Sharing number is required .' })
     shared_number : string;
+
+    @IsNotEmpty({ message: 'Badge color is required .' })
+    badge_color : string;
+
+    @IsNotEmpty({ message: 'Periodicity is required .' })
+    periodicity : string;
+
+    @IsNotEmpty({ message: 'Price is required .' })
+    price : string;
+
+    @IsNotEmpty({ message: 'Description is required .' })
+    description : string;
 }

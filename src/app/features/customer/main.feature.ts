@@ -14,177 +14,159 @@ import { BusinessCardModel } from "src/core/domain/models/business_card.model";
 import { ExchangeRequestModel } from "src/core/domain/models/exchange_request.model";
 import { FirebaseService } from "src/core/services/firebase.service";
 import { v4 as uuidv4 } from 'uuid';
+import { PrismaService } from "src/prisma.service";
 
 @Injectable()
 export class MainFeature {
 
     constructor(
-        private readonly notificationRepo : NotificationRepo,
-        private readonly accountRepo : AccountRepo,
-        private readonly exchangeRequestRepo : ExchangeRequestRepo,
-        private readonly firebaseService : FirebaseService,
-        private readonly businessCardRepo : BusinessCardRepo,
+        private readonly prisma: PrismaService,
+        private readonly notificationRepo: NotificationRepo,
+        private readonly accountRepo: AccountRepo,
+        private readonly exchangeRequestRepo: ExchangeRequestRepo,
+        private readonly firebaseService: FirebaseService,
+        private readonly businessCardRepo: BusinessCardRepo,
     ) {}
 
-    async userNotifications(account : AccountDtm) : Promise<ApiResponse<NotificationDtm[]>> {
+    async userNotifications(account: AccountDtm): Promise<ApiResponse<NotificationDtm[]>> {
         const notifications = await this.notificationRepo.findByAccount(account.id);
-        return ApiResponseUtil.ok(notifications.map(NotificationDtm.fromNotificationDtm),'','Notifications listed 🎉 .');
+        return ApiResponseUtil.ok(notifications.map(NotificationDtm.fromNotificationDtm), '', 'Notifications listed 🎉 .');
     }
 
-    async deleteNotification(account : AccountDtm , notificationId : string) : Promise<ApiResponse<String>> {
-
+    async deleteNotification(account: AccountDtm, notificationId: string): Promise<ApiResponse<String>> {
         try {
             const notification = await this.notificationRepo.findById(notificationId, account.id);
 
-            if(notification == null)
-            {
-                return ApiResponseUtil.error('Notification inexistante','Désolé, cette notification semble ne pas exister, merci de bien vouloir réessayer .', 'not_found');
+            if (notification == null) {
+                return ApiResponseUtil.error('Notification inexistante', 'Désolé, cette notification semble ne pas exister, merci de bien vouloir réessayer .', 'not_found');
             }
 
             await this.notificationRepo.remove(notification);
 
-            return ApiResponseUtil.ok("",'Notification supprimée', 'Votre notification a bien été supprimée .');
+            return ApiResponseUtil.ok("", 'Notification supprimée', 'Votre notification a bien été supprimée .');
 
-        }catch(e){
-            return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
+        } catch (e) {
+            return ApiResponseUtil.error('Erreur interne', 'Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
-
     }
 
-    async exchangeRequest(context : ExchangeRequestContext) : Promise<ApiResponse<AccountDtm>> {
-        try{
-            const sender : AccountModel | null = await this.accountRepo.findById(context.request_sender_id)
-            const recipient : AccountModel | null = await this.accountRepo.findById(context.request_recipient_id)
+    async exchangeRequest(context: ExchangeRequestContext): Promise<ApiResponse<AccountDtm>> {
+        try {
+            const [sender, recipient] = await Promise.all([
+                this.accountRepo.findById(context.request_sender_id),
+                this.accountRepo.findById(context.request_recipient_id),
+            ]);
 
-            if(sender == null || recipient == null)
-            {
-                return ApiResponseUtil.error('Session inactive','Désolé, votre session a expiré, merci de bien vouloir vous reconnecter et réessayer .', 'unauthorized')
+            if (sender == null || recipient == null) {
+                return ApiResponseUtil.error('Session inactive', 'Désolé, votre session a expiré, merci de bien vouloir vous reconnecter et réessayer .', 'unauthorized');
             }
 
-            if(context.request_recipient_id == context.request_sender_id)
-            {
-                return ApiResponseUtil.error('Même Identité','Désolé, vous ne pouvez pas envoyer une demande de carte à vous-même .', 'conflict');
+            if (context.request_recipient_id == context.request_sender_id) {
+                return ApiResponseUtil.error('Même Identité', 'Désolé, vous ne pouvez pas envoyer une demande de carte à vous-même .', 'conflict');
             }
 
-            const exchange : ExchangeRequestModel = {
-                id : uuidv4(),
-                sender : sender,
-                recipient : recipient,
-                status : ExchangeRequestStatus.WAITING
-            }
+            const exchange: ExchangeRequestModel = {
+                id: uuidv4(),
+                sender,
+                recipient,
+                status: ExchangeRequestStatus.WAITING
+            };
 
             await this.exchangeRequestRepo.save(exchange);
 
             await this.firebaseService.toSave('exchange_requests', {
-                exchange : {
-                    exchange_id : exchange.id,
-                    sender : sender.id,
-                    recipient : recipient.id,
-                    created_at : new Date(),
-                }, 
-                user : {
-                    name : recipient.user.name,
-                    surname : recipient.user.surname,
-                    civility : recipient.user.civility,
-                    avatar : recipient.user.picture,
-                }
+                exchange: { exchange_id: exchange.id, sender: sender.id, recipient: recipient.id, created_at: new Date() },
+                user: { name: recipient.user.name, surname: recipient.user.surname, civility: recipient.user.civility, avatar: recipient.user.picture }
             });
 
-
             await this.firebaseService.toPush(sender.fcm_token, 'Demande de carte 🎉', 'Vous avez reçu une demande de carte, merci de bien vouloir accepter ou refuser la demande .');
-                
-            return ApiResponseUtil.ok(AccountDtm.fromAccountDtm(sender),'Demande d\'échange envoyée', 'Votre demande d\'échange a bien été envoyée, vous serez notifié dès que votre demande sera acceptée .');
 
-        }catch(e){
-            return ApiResponseUtil.error('Carte déjà réçu','Désolé, vous avez déjà réçu la carte de cette personne .', 'internal_error');
+            return ApiResponseUtil.ok(AccountDtm.fromAccountDtm(sender), 'Demande d\'échange envoyée', 'Votre demande d\'échange a bien été envoyée, vous serez notifié dès que votre demande sera acceptée .');
+
+        } catch (e) {
+            return ApiResponseUtil.error('Carte déjà réçu', 'Désolé, vous avez déjà réçu la carte de cette personne .', 'internal_error');
         }
     }
 
-    async refreshToken(accountDtm : AccountDtm, context : RefreshTokenContext) : Promise<ApiResponse<String>> {
-        try{
+    async refreshToken(accountDtm: AccountDtm, context: RefreshTokenContext): Promise<ApiResponse<String>> {
+        try {
+            const account: AccountModel | null = await this.accountRepo.findById(accountDtm.id);
 
-            const account : AccountModel | null = await this.accountRepo.findById(accountDtm.id);
-
-            if(account == null)
-            {
-                return ApiResponseUtil.error('Session inactive','Désolé, votre session a expiré, merci de bien vouloir vous reconnecter et réessayer .', 'unauthorized')
+            if (account == null) {
+                return ApiResponseUtil.error('Session inactive', 'Désolé, votre session a expiré, merci de bien vouloir vous reconnecter et réessayer .', 'unauthorized');
             }
 
             account.fcm_token = context.refresh_token;
             await this.accountRepo.save(account);
 
-            return ApiResponseUtil.ok("",'Token refreshed', 'Votre token a bien été actualisé .');
+            return ApiResponseUtil.ok("", 'Token refreshed', 'Votre token a bien été actualisé .');
 
-        }catch(e){
-            return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
+        } catch (e) {
+            return ApiResponseUtil.error('Erreur interne', 'Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
     }
 
-    async responseExchangeRequest(accountDtm : AccountDtm, context : ExchangeResponseContext) : Promise<ApiResponse<String>> {
-        try{
+    async responseExchangeRequest(accountDtm: AccountDtm, context: ExchangeResponseContext): Promise<ApiResponse<String>> {
+        try {
+            const account: AccountModel | null = await this.accountRepo.findById(accountDtm.id);
 
-            const account : AccountModel | null = await this.accountRepo.findById(accountDtm.id);
-
-            if(account == null)
-            {
-                return ApiResponseUtil.error('Session inactive','Désolé, votre session a expiré, merci de bien vouloir vous reconnecter et réessayer .', 'unauthorized')
+            if (account == null) {
+                return ApiResponseUtil.error('Session inactive', 'Désolé, votre session a expiré, merci de bien vouloir vous reconnecter et réessayer .', 'unauthorized');
             }
 
-            const exchangeRequest : ExchangeRequestModel | null = await this.exchangeRequestRepo.findById(context.exchange_id);
+            const exchangeRequest: ExchangeRequestModel | null = await this.exchangeRequestRepo.findById(context.exchange_id);
 
-            if(exchangeRequest == null)
-            {
-                return ApiResponseUtil.error('Demande inexistante','Désolé, cette demande de carte semble ne pas exister, merci de bien vouloir réessayer .', 'not_found')
+            if (exchangeRequest == null) {
+                return ApiResponseUtil.error('Demande inexistante', 'Désolé, cette demande de carte semble ne pas exister, merci de bien vouloir réessayer .', 'not_found');
             }
 
-            if(exchangeRequest.sender.id != account.id || exchangeRequest.recipient.id != context.request_recipient_id)
-            {
-                return ApiResponseUtil.error('Demande invalide','Désolé, cette demande de carte semble ne pas exister, merci de bien vouloir réessayer .', 'not_found')
+            if (exchangeRequest.sender.id != account.id || exchangeRequest.recipient.id != context.request_recipient_id) {
+                return ApiResponseUtil.error('Demande invalide', 'Désolé, cette demande de carte semble ne pas exister, merci de bien vouloir réessayer .', 'not_found');
             }
 
-            exchangeRequest.status = context.response ? ExchangeRequestStatus.ACCEPTED : ExchangeRequestStatus.REJECTED ;
-            await this.exchangeRequestRepo.save(exchangeRequest);
+            exchangeRequest.status = context.response ? ExchangeRequestStatus.ACCEPTED : ExchangeRequestStatus.REJECTED;
 
-            const recipient : AccountModel  = await this.accountRepo.findById(exchangeRequest.recipient.id) as AccountModel;
+            const recipient: AccountModel = await this.accountRepo.findById(exchangeRequest.recipient.id) as AccountModel;
 
-            await this.firebaseService.toPush(recipient.fcm_token, context.response ? 'Carte reçue 📇' : 'Carte refusée ❌', context.response ? 'Vous avez reçu une nouvelle carte de visite dans votre réseau .' : 'Votre demande d’accès à une carte de visite n’a pas abouti.');
-            await this.firebaseService.toDelete('exchange_requests', context.document_id);
-
-            await this.notificationRepo.save({
-                id : uuidv4(),
-                account : recipient,
-                title : context.response ? 'Reception de Carte acceptée 👏' : 'Reception de Carte refusée 😔',
-                message : context.response ? 'Bonne nouvelle !! vous venez de recevoir une carte de visite de la part de '+ account.user.civility + ' ' + account.user.name + ' 🎉 .' : 'Désolé, une demande d\'accès à une carte de visite vous a été refusée par '+ account.user.civility + ' ' + account.user.name,
-                type : context.response ? NotificationType.APPROVAL : NotificationType.REJECTED,
+            await this.prisma.$transaction(async (tx) => {
+                await this.exchangeRequestRepo.save(exchangeRequest, tx);
+                await this.notificationRepo.save({
+                    id: uuidv4(),
+                    account: recipient,
+                    title: context.response ? 'Reception de Carte acceptée 👏' : 'Reception de Carte refusée 😔',
+                    message: context.response
+                        ? 'Bonne nouvelle !! vous venez de recevoir une carte de visite de la part de ' + account.user.civility + ' ' + account.user.name + ' 🎉 .'
+                        : 'Désolé, une demande d\'accès à une carte de visite vous a été refusée par ' + account.user.civility + ' ' + account.user.name,
+                    type: context.response ? NotificationType.APPROVAL : NotificationType.REJECTED,
+                }, tx);
             });
 
-            return ApiResponseUtil.ok("",'Demande d\'échange répondue', 'Votre demande d\'échange a bien été répondue .');
+            await this.firebaseService.toPush(recipient.fcm_token, context.response ? 'Carte reçue 📇' : 'Carte refusée ❌', context.response ? 'Vous avez reçu une nouvelle carte de visite dans votre réseau .' : 'Votre demande d\'accès à une carte de visite n\'a pas abouti.');
+            await this.firebaseService.toDelete('exchange_requests', context.document_id);
 
-        }catch(e){
-            return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
+            return ApiResponseUtil.ok("", 'Demande d\'échange répondue', 'Votre demande d\'échange a bien été répondue .');
+
+        } catch (e) {
+            return ApiResponseUtil.error('Erreur interne', 'Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
     }
 
-    async businessCardReceived(accountDtm : AccountDtm) : Promise<ApiResponse<BusinessCardDtm[]>> {
-        try{
+    async businessCardReceived(accountDtm: AccountDtm): Promise<ApiResponse<BusinessCardDtm[]>> {
+        try {
+            const account: AccountModel | null = await this.accountRepo.findById(accountDtm.id);
 
-            const account : AccountModel | null = await this.accountRepo.findById(accountDtm.id);
-
-            if(account == null)
-            {
-                return ApiResponseUtil.error('Session inactive','Désolé, votre session a expiré, merci de bien vouloir vous reconnecter et réessayer .', 'unauthorized')
+            if (account == null) {
+                return ApiResponseUtil.error('Session inactive', 'Désolé, votre session a expiré, merci de bien vouloir vous reconnecter et réessayer .', 'unauthorized');
             }
 
-            const senders : ExchangeRequestModel[] = await this.exchangeRequestRepo.findByRecipient(account.id);
-
+            const senders: ExchangeRequestModel[] = await this.exchangeRequestRepo.findByRecipient(account.id);
             const ids = senders.map(sender => sender.sender.user.id);
+            const businessCards: BusinessCardModel[] = await this.businessCardRepo.haveTheBusinessCardsReceived(ids);
 
-            const businessCards : BusinessCardModel[] = await this.businessCardRepo.haveTheBusinessCardsReceived(ids);
+            return ApiResponseUtil.ok(businessCards.map(BusinessCardDtm.fromBusinessCardDtm), '', 'Liste de cartes de visite reçues 🎉 .');
 
-            return ApiResponseUtil.ok(businessCards.map(BusinessCardDtm.fromBusinessCardDtm),'','Liste de cartes de visite reçues 🎉 .');
-
-        }catch(e){
-            return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
+        } catch (e) {
+            return ApiResponseUtil.error('Erreur interne', 'Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
     }
 }

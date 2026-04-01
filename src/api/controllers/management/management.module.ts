@@ -16,6 +16,7 @@ import { CountryFeature } from "src/app/features/administrator/setting/setup/cou
 import { SettingFeature } from "src/app/features/administrator/setting/setting.feature";
 import { OfferFeature } from "src/app/features/administrator/setting/setup/offer.feature";
 import { OfferRepo } from "src/app/repo/offer_repo";
+import { R2Service } from "src/core/services/r2.service";
 
 @Module({
     imports: [],
@@ -38,6 +39,7 @@ import { OfferRepo } from "src/app/repo/offer_repo";
         SettingFeature,
         PaymentProviderFeature,
         OfferFeature,
+        R2Service,
         AuthentificationService
     ],
 })

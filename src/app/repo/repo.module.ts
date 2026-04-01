@@ -7,6 +7,8 @@ import { UserRepo } from "./user_repo";
 import { TokenRepo } from "./token_repo";
 import { NotificationRepo } from "./notification_repo";
 import { ExchangeRequestRepo } from "./exchange_request_repo";
+import { BusinessCardRepo } from "./business_card_repo";
+import { CompanyRepo } from "./company_repo";
 
 @Module({
     imports: [
@@ -22,6 +24,8 @@ import { ExchangeRequestRepo } from "./exchange_request_repo";
         TokenRepo,
         NotificationRepo,
         ExchangeRequestRepo,
+        BusinessCardRepo,
+        CompanyRepo,
         PrismaService
 
     ],
@@ -32,7 +36,10 @@ import { ExchangeRequestRepo } from "./exchange_request_repo";
         AccountRepo,
         TokenRepo,
         NotificationRepo,
-        ExchangeRequestRepo
+        ExchangeRequestRepo,
+        CompanyRepo,
+        BusinessCardRepo,
+        PrismaService
     ],
 })
 export class RepoModule {}

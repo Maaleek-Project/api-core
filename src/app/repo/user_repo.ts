@@ -1,7 +1,14 @@
 import { Injectable } from "@nestjs/common";
+import { Prisma } from "@prisma/client";
 import { UserModel } from "src/core/domain/models/user.model";
 import { IUserRepo } from "src/core/interfaces/i_user_repo";
 import { PrismaService } from "src/prisma.service";
+
+const USER_INCLUDE = {
+    businessCard: {
+        include: { offer: true }
+    }
+} as const;
 
 @Injectable()
 export class UserRepo implements IUserRepo {
@@ -10,82 +17,49 @@ export class UserRepo implements IUserRepo {
         private readonly prisma: PrismaService,
     ) {}
 
-    async save(model : UserModel) : Promise<UserModel> {
-        const user = await this.prisma.user.upsert({
-            where: {id : model.id},
+    async save(model: UserModel, tx?: Prisma.TransactionClient): Promise<UserModel> {
+        const client = tx ?? this.prisma;
+        const user = await client.user.upsert({
+            where: { id: model.id },
             update: this.toDatabase(model),
             create: this.toDatabase(model),
-            include :{
-                businessCard : {
-                    include: {
-                        offer : true
-                    }
-                }
-            }
-        })
+            include: USER_INCLUDE
+        });
         return this.toUser(user);
     }
 
     async findByEmailOrNumber(email: string, number: string): Promise<UserModel | null> {
         const user = await this.prisma.user.findFirst({
-            where : {
-                OR : [
-                    {email},
-                    {number}
-                ]
-            },include :{
-                businessCard : {
-                    include: {
-                        offer : true
-                    }
-                }
-            }
-        })
-
-        return user ? this.toUser(user) : null ;
+            where: { OR: [{ email }, { number }] },
+            include: USER_INCLUDE
+        });
+        return user ? this.toUser(user) : null;
     }
 
     async findByEmail(email: string): Promise<UserModel | null> {
         const user = await this.prisma.user.findFirst({
-            where : {email : email},
-            include :{
-                businessCard : {
-                    include: {
-                        offer : true
-                    }
-                }
-            }
-        })
-
-        return user ? this.toUser(user) : null ;
+            where: { email },
+            include: USER_INCLUDE
+        });
+        return user ? this.toUser(user) : null;
     }
 
     async findById(id: string): Promise<UserModel | null> {
         const user = await this.prisma.user.findFirst({
-            where : {id : id},
-            include :{
-                businessCard : {
-                    include: {
-                        offer : true
-                    }
-                }
-            }
-        })
-
-        return user ? this.toUser(user) : null ;
+            where: { id },
+            include: USER_INCLUDE
+        });
+        return user ? this.toUser(user) : null;
     }
 
     async findByNumber(number: string): Promise<UserModel | null> {
         const user = await this.prisma.user.findFirst({
-            where : {number : number}
-        })
-
-        return user ? this.toUser(user) : null ;
+            where: { number }
+        });
+        return user ? this.toUser(user) : null;
     }
 
-    // private function to transform the entity from the database to the DTO
-
-    private toUser(user : any) : UserModel {
+    private toUser(user: any): UserModel {
         return {
             id: user.id,
             civility: user.civility,
@@ -94,14 +68,14 @@ export class UserRepo implements IUserRepo {
             picture: user.picture,
             birthdate: user.birthdate,
             number: user.number,
-            email : user.email,
+            email: user.email,
             created_at: user.created_at,
             updated_at: user.updated_at,
             businessCard: user.businessCard
-        }
+        };
     }
 
-    private toDatabase(user : UserModel) : any {
+    private toDatabase(user: UserModel): any {
         return {
             id: user.id,
             civility: user.civility,
@@ -110,8 +84,7 @@ export class UserRepo implements IUserRepo {
             picture: user.picture,
             birthdate: user.birthdate,
             number: user.number,
-            email : user.email
-        }
+            email: user.email
+        };
     }
-
 }

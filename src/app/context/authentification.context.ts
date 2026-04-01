@@ -52,9 +52,18 @@ export class SignInContext {
     @IsNotEmpty({ message: 'Login is required .' })
     login : string;
 
-    @IsNotEmpty({ message: 'Please select a country .' })
+    @IsNotEmpty({ message: 'Password is required .' })
     password : string;
 
     @IsNotEmpty({ message: 'Please select a country .' })
     country_id : string;
+}
+
+
+export class SignInWebContext {
+    @IsNotEmpty({ message: 'Login is required .' })
+    login : string;
+
+    @IsNotEmpty({ message: 'Password is required .' })
+    password : string;
 }

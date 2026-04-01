@@ -22,3 +22,12 @@ export class CreateWorkerContext {
     @IsOptional({ message: 'Type is required .' })
     type : string;
 }
+
+export class SearchWorkerContext {
+    @IsNotEmpty({ message: 'Please select a country .' })
+    country_id : string;
+
+    @IsNotEmpty({ message: 'Number is required .' })
+    number : string;
+}
+

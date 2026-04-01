@@ -78,12 +78,3 @@ export default async function UserSeeder() {
 
     console.log('🎉 Users seeding done.');
 }
-
-UserSeeder()
-  .catch((e) => {
-    console.error('❌ Error users seeding :', e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-});

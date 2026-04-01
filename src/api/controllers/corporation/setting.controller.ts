@@ -3,7 +3,7 @@ import { SettingFeature } from "src/app/features/manager/setting.feature";
 import { EntityTypeGuard } from "src/core/guards/entity_type.guard";
 import { Response } from "express";
 import { EntityType } from "src/core/decorators/entity_type.decorator";
-import { UpdateCompanyConfigContext } from "src/app/context/company.context";
+import { UpdateCompanyBusinessCardContext } from "src/app/context/company.context";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { editFileName, imageFileFilter } from "src/validators/file.validator";
 import { diskStorage } from "multer";
@@ -32,8 +32,8 @@ export class SettingController {
     }   
 
     @EntityType(['Company'])
-    @Put('update-config')
-    async updateCompanyConfig(@Body() context : UpdateCompanyConfigContext, @Req() req: Request, @Res() res: Response) {
+    @Put('update-business-card-config') 
+    async updateCompanyBusinessCardConfig(@Body() context : UpdateCompanyBusinessCardContext, @Req() req: Request, @Res() res: Response) {
         const account = req['user'] 
         const listing = await this.feature.updateCompanyConfig(account, context);
         const statusMap: Record<string, number> = {

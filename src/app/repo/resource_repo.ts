@@ -84,6 +84,7 @@ export class ResourceRepo implements IResourceRepo {
             libelle: country.libelle,
             code: country.code,
             alias: country.alias,
+            is_active: country.is_active,
             flag: country.flag,
             currency: country.currency,
             created_at: country.created_at,
@@ -100,6 +101,7 @@ export class ResourceRepo implements IResourceRepo {
             alias : country.alias,
             flag : country.flag,
             currency : country.currency,
+            is_active : country.is_active,
         }
     }
 

@@ -5,6 +5,7 @@ export interface CountryModel {
     alias: string;
     flag: string;
     currency: string;
+    is_active?: boolean;
     created_at?: Date;
     updated_at?: Date;
 }

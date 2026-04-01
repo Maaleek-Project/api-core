@@ -22,6 +22,13 @@ export class OfferRepo implements IOfferRepo {
         return offer ? this.toOffer(offer) : null;
     }
 
+    async findOffer(id : string) : Promise<OfferModel | null> {
+        const offer = await this.prisma.offer.findUnique({
+            where : {id : id}
+        })
+        return offer ? this.toOffer(offer) : null;
+    }
+
     async findAll() : Promise<OfferModel[]> {
         const offers = await this.prisma.offer.findMany();
         return offers.map(offer => this.toOffer(offer));
@@ -42,7 +49,12 @@ export class OfferRepo implements IOfferRepo {
             libelle : offer.libelle,
             sharing_number : offer.sharing_number,
             code : offer.code,
-            created_at : offer.created_at
+            created_at : offer.created_at,
+            badge_color : offer.badge_color,
+            is_active : offer.is_active,
+            periodicity : offer.periodicity,
+            price : offer.price,
+            description : offer.description
         }
     }
 
@@ -51,7 +63,12 @@ export class OfferRepo implements IOfferRepo {
             id : offer.id,
             libelle : offer.libelle,
             sharing_number : offer.sharing_number,
-            code : offer.code
+            code : offer.code,
+            badge_color : offer.badge_color,
+            is_active : offer.is_active,
+            periodicity : offer.periodicity,
+            price : offer.price,
+            description : offer.description
         }
     }
 }

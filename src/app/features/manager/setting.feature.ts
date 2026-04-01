@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { UpdateCompanyConfigContext } from "src/app/context/company.context";
+import { UpdateCompanyBusinessCardContext } from "src/app/context/company.context";
 import { CompanyRepo } from "src/app/repo/company_repo";
 import { ApiResponse, ApiResponseUtil } from "src/app/utils/api-response.util";
 import { AccountDtm } from "src/core/domain/dtms/account.dtm";
@@ -42,7 +42,7 @@ export class SettingFeature {
             const buffer = fs.readFileSync(file.path);
             const folder = "maaleek/companies/logos";
 
-            await this.r2Service.uploadFile(
+            const link = await this.r2Service.uploadFile(
                 file.filename,
                 buffer,
                 file.mimetype,
@@ -66,7 +66,7 @@ export class SettingFeature {
     }
 
 
-    async updateCompanyConfig(accountDtm : AccountDtm, context : UpdateCompanyConfigContext) : Promise<ApiResponse<CompanyInfoDtm>> {
+    async updateCompanyConfig(accountDtm : AccountDtm, context : UpdateCompanyBusinessCardContext) : Promise<ApiResponse<CompanyInfoDtm>> {
         try {
             const company : CompanyModel | null = await this.companyRepo.findByAccount(accountDtm.id);
             if(company == null)
@@ -78,13 +78,9 @@ export class SettingFeature {
             company.back_text_color = context.back_text_color;
             company.front_background_color = context.front_background_color;
             company.back_background_color = context.back_background_color;
-            company.name = context.company_name;
-            company.number = context.company_number;
-            company.address = context.company_address;
             company.slogan = context.slogan;
 
             await this.companyRepo.save(company);
-
 
             return ApiResponseUtil.ok(CompanyInfoDtm.fromCompanyInfoDtm(company),'','Company informations 🎉 .');
 

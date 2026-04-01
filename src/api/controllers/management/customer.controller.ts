@@ -14,6 +14,9 @@ export class CustomerController {
     ) {}
 
 
+    
+
+
     @EntityType(['Manager'])
     @Get('listing')
     async listing(@Req() req: Request, @Res() res: Response) {

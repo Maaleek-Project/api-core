@@ -34,4 +34,24 @@ export class CountryFeature {
             return ApiResponseUtil.error('',"Failed to create country .", "internal_error");
         }
     }
+
+
+    async toogleCountryStatus(country_id : string) : Promise<ApiResponse<CountryDtm>> {
+        try{
+            const country = await this.countryRepo.findCountry(country_id);
+            if(country == null)
+            {
+                return ApiResponseUtil.error('Country not found','This country does not exist. Please try again with a different country .', 'not_found');
+            }
+
+            country.is_active = !country.is_active;
+
+            await this.countryRepo.saveCountry(country);
+
+            return ApiResponseUtil.ok(CountryDtm.fromCountryDtm(country), country.is_active ? 'Country activated' : 'Country deactivated', 'This country was ' + (country.is_active ? 'activated' : 'deactivated') + ' successfully .');
+        }catch(e){
+            console.log(e)
+            return ApiResponseUtil.error('Internal error','An unexpected error occurred, please try again .', 'internal_error');
+        }
+    }
 }

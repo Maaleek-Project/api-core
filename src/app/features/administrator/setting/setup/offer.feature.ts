@@ -29,7 +29,7 @@ export class OfferFeature {
                 return ApiResponseUtil.error('','Offer already exists .', 'conflict');
             }
 
-            const offer : OfferModel = { id : uuidv4(), libelle : context.libelle, sharing_number : parseInt(context.shared_number), code : context.code};
+            const offer : OfferModel = { id : uuidv4(), libelle : context.libelle, sharing_number : parseInt(context.shared_number), code : context.code , badge_color : context.badge_color , periodicity : parseInt(context.periodicity), price : parseInt(context.price), description : context.description };
 
             const saved = await this.offerRepo.save(offer);
 
@@ -40,5 +40,24 @@ export class OfferFeature {
             return ApiResponseUtil.error('',"Failed to create offer .", "internal_error");
         }
 
+    }
+
+    async toogleOfferStatus(offer_id : string) : Promise<ApiResponse<OfferDtm>> {
+        try{
+            const offer = await this.offerRepo.findOffer(offer_id);
+            if(offer == null)
+            {
+                return ApiResponseUtil.error('Offer not found','This offer does not exist. Please try again with a different offer .', 'not_found');
+            }
+
+            offer.is_active = !offer.is_active;
+
+            await this.offerRepo.save(offer);
+
+            return ApiResponseUtil.ok(OfferDtm.fromOfferDtm(offer), offer.is_active ? 'Offer activated' : 'Offer deactivated', 'This offer was ' + (offer.is_active ? 'activated' : 'deactivated') + ' successfully .');
+        }catch(e){
+            console.log(e)
+            return ApiResponseUtil.error('Internal error','An unexpected error occurred, please try again .', 'internal_error');
+        }
     }
 }

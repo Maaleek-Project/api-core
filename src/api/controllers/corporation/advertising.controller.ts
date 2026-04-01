@@ -1,4 +1,4 @@
-import { UseGuards, Controller, Post, Get, Req, Res, Body, UploadedFile, UseInterceptors } from "@nestjs/common";
+import { UseGuards, Controller, Post, Get, Req, Res, Body, UploadedFile, UseInterceptors, Param, Put, Delete } from "@nestjs/common";
 import { AdvertisingFeature } from "src/app/features/manager/advertising.feature";
 import { EntityTypeGuard } from "src/core/guards/entity_type.guard";
 import { Response } from "express";
@@ -23,12 +23,13 @@ export class AdvertisingController {
                 filename: editFileName,
             }),
             fileFilter: mediaFileFilter,
+            limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB max
         }),
     )
     @EntityType(['Company'])
     @Post('create')
-    async createAdvertising(@Req() req: Request, @Body() context : CreateAdvertisingContext, @UploadedFile() media: Express.Multer.File, @Res() res: Response) {
-        const account = req['user']
+    async createAdvertising(@Req() req: Request, @Body() context: CreateAdvertisingContext, @UploadedFile() media: Express.Multer.File | undefined, @Res() res: Response) {
+        const account = req['user'];
         const result = await this.feature.createAdvertising(account, context, media);
         const statusMap: Record<string, number> = {
             success: 200,
@@ -53,5 +54,34 @@ export class AdvertisingController {
         const status = statusMap[listing.code] || 500;
         return res.status(status).json(listing);
     }
+
+    @EntityType(['Company'])
+    @Put('toogle-advertising/:id')
+    async toogleAdvertising(@Req() req: Request, @Res() res: Response, @Param('id') id : string) {
+        const account = req['user'] 
+        const advertising = await this.feature.toogleAdvertising(id);
+        const statusMap: Record<string, number> = {
+            success: 200,
+            not_found: 404,
+            internal_error: 500,
+        };
+        const status = statusMap[advertising.code] || 500;
+        return res.status(status).json(advertising);
+    }
+
+    @EntityType(['Company'])
+    @Delete('delete-advertising/:id')
+    async deleteAdvertising(@Req() req: Request, @Res() res: Response, @Param('id') id : string) {
+        const account = req['user'] 
+        const advertising = await this.feature.deleteAdvertising(id);
+        const statusMap: Record<string, number> = {
+            success: 200,
+            not_found: 404,
+            internal_error: 500,
+        };
+        const status = statusMap[advertising.code] || 500;
+        return res.status(status).json(advertising);
+    }
+
 }
 

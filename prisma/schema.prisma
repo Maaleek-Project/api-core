@@ -29,6 +29,12 @@ enum ExchangeRequestStatus {
   REJECTED
 }
 
+enum AdvertisingType {
+  TEXT
+  IMAGE
+  VIDEO
+}
+
 model Account {
   id         String      @id @default(uuid())
   entity_id  String
@@ -40,6 +46,7 @@ model Account {
   status     String   @default("unconnected")
   state      String   @default("waiting")
   locked     Boolean  @default(false)
+  register_in_app Boolean  @default(false)
   fcm_token  String   @unique
 
   created_at DateTime @default(now())
@@ -70,6 +77,7 @@ model Country {
   alias     String   @unique
   flag      String
   currency  String
+  is_active Boolean  @default(true)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -99,6 +107,7 @@ model User {
   @@map("users")
   account Account[]
   businessCard BusinessCard[]
+  companySubscriber CompanySubscriber[]
 }
 
 model Otp{
@@ -128,7 +137,7 @@ model Token{
   account_id String      @unique
 
   created_at DateTime @default(now())
-  expired_at DateTime @updatedAt
+  expired_at DateTime
   updated_at DateTime @updatedAt
 
   account Account @relation(fields: [account_id], references: [id], onDelete: Cascade)
@@ -175,29 +184,49 @@ model Assignment {
 
 model Company{
   id         String      @id @default(uuid())
-  account_id String
+  owner_id String
   number     String      @unique
   email      String      @unique
+  password   String
   name       String
   address    String
   slogan     String      @default("Avec vous et partout ailleurs 💡 .")
   logo       String?
+  offer_id String?
   front_text_color String @default("0xff000000")
   back_text_color String @default("0xff000000")
   front_background_color String @default("0xffffffff")
   back_background_color String @default("0xfff5f5f5")
 
+  locked     Boolean  @default(false)
+
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  account Account @relation(fields: [account_id], references: [id], onDelete: Cascade)
+  account Account @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  offer Offer? @relation(fields: [offer_id], references: [id], onDelete: Cascade)
 
   @@map("companies")
   businessCard BusinessCard[]
   worker Worker[]
   advertising Advertising[]
+  subscribers CompanySubscriber[]
 }
 
+model CompanySubscriber {
+  id         String      @id @default(uuid())
+  company_id String
+  user_id    String
+  is_subscribed Boolean @default(true)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  company Company @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("companies_subscribers")
+}
 
 model BusinessCard{
   id         String      @id @default(uuid())
@@ -225,6 +254,11 @@ model Offer {
   libelle    String
   sharing_number Int
   code       String      @unique
+  price     Float 
+  periodicity Int
+  description String
+  is_active Boolean  @default(true)
+  badge_color String @default("0xff000000")
 
 
   created_at DateTime @default(now())
@@ -232,6 +266,7 @@ model Offer {
 
   @@map("offers")
   businessCard BusinessCard[]
+  company Company[]
 }
 
 model Worker {
@@ -255,7 +290,7 @@ model Worker {
 model PaymentProvider {
   id         String      @id @default(uuid())
   libelle    String      @unique
-  activated   Boolean    @default(false)
+  activated   Boolean    @default(true)
   cover       String
   description String
   
@@ -303,10 +338,12 @@ model ExchangeRequest{
 model Advertising {
   id         String      @id @default(uuid())
   company_id String
-  type       String
+  type       AdvertisingType 
   title      String
   description String
-  link      String
+  is_active Boolean  @default(true)
+  is_deleted Boolean  @default(false)
+  link      String?
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Post, Req, Res } from "@nestjs/common";
-import { InitiatedContext, SignInContext, SignUpContext, ValidateCodeContext } from "src/app/context/authentification.context";
+import { InitiatedContext, SignInContext, SignInWebContext, SignUpContext, ValidateCodeContext } from "src/app/context/authentification.context";
 import { Response } from "express";
 import { AccountDtm } from "src/core/domain/dtms/account.dtm";
 import { AuthentificationFeature } from "src/app/features/shared/authentification.feature";
@@ -52,6 +52,32 @@ export class AuthentificationController {
     @Post('sign-in')
     async signIn(@Req() req: Request, @Body() context: SignInContext, @Res() res: Response) {
         const signIn = await this.feature.signIn(context);
+        const statusMap: Record<string, number> = {
+            success: 200,
+            not_found: 404,
+            internal_error: 500,
+            conflict : 409,
+        };
+        const status = statusMap[signIn.code] ;
+        return res.status(status).json(signIn);
+    }
+
+    @Post('in-web')
+    async WebAuth(@Req() req: Request, @Body() context: SignInWebContext, @Res() res: Response) {
+        const signIn = await this.feature.signInWeb(context);
+        const statusMap: Record<string, number> = {
+            success: 200,
+            not_found: 404,
+            internal_error: 500,
+            conflict : 409,
+        };
+        const status = statusMap[signIn.code] ;
+        return res.status(status).json(signIn);
+    }
+
+    @Post('sign-in-business-entity')
+    async signBusinessEntity(@Req() req: Request, @Body() context: SignInWebContext, @Res() res: Response) {
+        const signIn = await this.feature.signBusinessEntity(context);
         const statusMap: Record<string, number> = {
             success: 200,
             not_found: 404,

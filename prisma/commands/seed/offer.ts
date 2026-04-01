@@ -10,12 +10,18 @@ export default async function OfferSeeder() {
             libelle: 'Standard',
             sharing_number: 10,
             code: 'Std',
+            price : 100,
+            periodicity : 1,
+            description : 'Offre standard pour les petites entreprises'
         },
         {
             id: uuidv4(),
             libelle: 'Premium',
             sharing_number: 20,
             code: 'Prm',
+            price : 200,
+            periodicity : 1,
+            description : 'Offre premium pour les grandes entreprises'
         }
     ]
 
@@ -29,12 +35,3 @@ export default async function OfferSeeder() {
 
     console.log('🎉 Offers seeding done.');
 }
-
-OfferSeeder()
-  .catch((e) => {
-    console.error('❌ Error offers seeding :', e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-});

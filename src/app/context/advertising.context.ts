@@ -1,14 +1,20 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsIn } from 'class-validator';
 
 export class CreateAdvertisingContext {
+
     @IsNotEmpty({ message: 'Title is required .' })
-    title : string;
+    @IsString()
+    title: string;
 
     @IsNotEmpty({ message: 'Description is required .' })
-    description : string;
+    @IsString()
+    description: string;
 
     @IsNotEmpty({ message: 'Type is required .' })
-    @IsString()
-    type : string; // 'image' ou 'video'
-}
+    @IsIn(['text', 'image', 'video'], { message: 'Type must be text, image or video .' })
+    type: string;
 
+    @IsOptional()
+    @IsString()
+    link?: string;
+}

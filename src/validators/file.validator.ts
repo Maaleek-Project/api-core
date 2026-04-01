@@ -3,8 +3,10 @@ import { extname } from 'path';
 import * as fs from 'fs';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import * as ffprobeInstaller from '@ffprobe-installer/ffprobe';
 
 const execAsync = promisify(exec);
+const FFPROBE_PATH = ffprobeInstaller.path;
 
 export const imageFileFilter = (req : Request, file : Express.Multer.File, callback : any) => {
   if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
@@ -39,9 +41,8 @@ export const editFileName = (req: any, file: Express.Multer.File, callback: any)
 
 export async function validateVideoDuration(filePath: string, maxDurationSeconds: number = 10): Promise<boolean> {
   try {
-    // Utiliser ffprobe pour obtenir la durée de la vidéo
     const { stdout } = await execAsync(
-      `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${filePath}"`
+      `"${FFPROBE_PATH}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${filePath}"`
     );
     
     const duration = parseFloat(stdout.trim());

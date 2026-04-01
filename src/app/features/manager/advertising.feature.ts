@@ -2,7 +2,6 @@ import { Injectable } from "@nestjs/common";
 import { CompanyRepo } from "src/app/repo/company_repo";
 import { ApiResponse, ApiResponseUtil } from "src/app/utils/api-response.util";
 import { AccountDtm } from "src/core/domain/dtms/account.dtm";
-import { CompanyModel } from "src/core/domain/models/company.model";
 import { R2Service } from "src/core/services/r2.service";
 import { CreateAdvertisingContext } from "src/app/context/advertising.context";
 import * as fs from 'fs';
@@ -10,118 +9,141 @@ import { validateVideoDuration } from "src/validators/file.validator";
 import { v4 as uuidv4 } from 'uuid';
 import { AdvertisingRepo } from "src/app/repo/advertising_repo";
 import { AdvertisingModel } from "src/core/domain/models/advertising.model";
+import { AdvertisingType } from "@prisma/client";
+import { AdvertisingDtm } from "src/core/domain/dtms/adversiting.dtm";
 
 @Injectable()
 export class AdvertisingFeature {
 
     constructor(
-            private readonly companyRepo : CompanyRepo,
-            private readonly r2Service: R2Service,
-            private readonly advertisingRepo : AdvertisingRepo,
-        ){}
+        private readonly companyRepo: CompanyRepo,
+        private readonly r2Service: R2Service,
+        private readonly advertisingRepo: AdvertisingRepo,
+    ) {}
 
-    async createAdvertising(accountDtm : AccountDtm, context : CreateAdvertisingContext, file: Express.Multer.File) : Promise<ApiResponse<any>> {
+    async createAdvertising(accountDtm: AccountDtm, context: CreateAdvertisingContext, file?: Express.Multer.File): Promise<ApiResponse<AdvertisingDtm>> {
         try {
-            const company : CompanyModel | null = await this.companyRepo.findByAccount(accountDtm.id);
-            
-            if(company == null)
-            {
-                return ApiResponseUtil.error('','Company not found .', 'not_found');
+            const company = await this.companyRepo.findByAccount(accountDtm.id);
+
+            if (company == null) {
+                return ApiResponseUtil.error('', 'Company not found .', 'not_found');
             }
 
-            // Valider le type
-            if (context.type !== 'image' && context.type !== 'video') {
-                return ApiResponseUtil.error('','Type must be "image" or "video" .', 'bad_request');
-            }
+            const type = context.type.toUpperCase() as AdvertisingType;
+            let link: string | undefined = undefined;
 
-            // Valider que le fichier correspond au type
-            const isImage = file.mimetype.startsWith('image/');
-            const isVideo = file.mimetype.startsWith('video/');
+            if (type === AdvertisingType.TEXT) {
+                // Pas de fichier requis — juste le lien optionnel
+                link = context.link ?? undefined;
 
-            if (context.type === 'image' && !isImage) {
-                return ApiResponseUtil.error('','File must be an image .', 'bad_request');
-            }
-
-            if (context.type === 'video' && !isVideo) {
-                return ApiResponseUtil.error('','File must be a video .', 'bad_request');
-            }
-
-            // Valider la durée de la vidéo (max 10 secondes)
-            if (context.type === 'video') {
-                try {
-                    const isValidDuration = await validateVideoDuration(file.path, 10);
-                    if (!isValidDuration) {
-                        // Supprimer le fichier temporaire
-                        fs.unlinkSync(file.path);
-                        return ApiResponseUtil.error('','Video duration must not exceed 10 seconds .', 'bad_request');
-                    }
-                } catch (error) {
-                    // Supprimer le fichier temporaire en cas d'erreur
-                    if (fs.existsSync(file.path)) {
-                        fs.unlinkSync(file.path);
-                    }
-                    return ApiResponseUtil.error('','Failed to validate video duration .', 'internal_error');
+            } else {
+                // Fichier obligatoire pour IMAGE et VIDEO
+                if (!file) {
+                    return ApiResponseUtil.error('Fichier requis', `Un fichier média est obligatoire pour le type ${context.type} .`, 'bad_request');
                 }
+
+                const isImage = file.mimetype.startsWith('image/');
+                const isVideo = file.mimetype.startsWith('video/');
+
+                if (type === AdvertisingType.IMAGE && !isImage) {
+                    fs.unlinkSync(file.path);
+                    return ApiResponseUtil.error('', 'Le fichier doit être une image .', 'bad_request');
+                }
+
+                if (type === AdvertisingType.VIDEO && !isVideo) {
+                    fs.unlinkSync(file.path);
+                    return ApiResponseUtil.error('', 'Le fichier doit être une vidéo .', 'bad_request');
+                }
+
+                if (type === AdvertisingType.VIDEO) {
+                    let isValidDuration: boolean;
+                    try {
+                        isValidDuration = await validateVideoDuration(file.path, 10);
+                    } catch {
+                        fs.unlinkSync(file.path);
+                        return ApiResponseUtil.error('', 'Impossible de valider la durée de la vidéo .', 'internal_error');
+                    }
+
+                    if (!isValidDuration) {
+                        fs.unlinkSync(file.path);
+                        return ApiResponseUtil.error('', 'La durée de la vidéo ne doit pas dépasser 10 secondes .', 'bad_request');
+                    }
+                }
+
+                const folder = type === AdvertisingType.IMAGE
+                    ? 'maaleek/advertisings/images'
+                    : 'maaleek/advertisings/videos';
+
+                const buffer = fs.readFileSync(file.path);
+                link = await this.r2Service.uploadFile(file.filename, buffer, file.mimetype, folder);
+                fs.unlinkSync(file.path);
             }
 
-            // Upload sur R2
-            const buffer = fs.readFileSync(file.path);
-            const folder = context.type === 'image' 
-                ? "maaleek/advertisings/images" 
-                : "maaleek/advertisings/videos";
-
-            const link = await this.r2Service.uploadFile(
-                file.filename,
-                buffer,
-                file.mimetype,
-                folder
-            );
-
-            // Supprimer le fichier temporaire après upload
-            fs.unlinkSync(file.path);
-
-            // Créer l'advertising dans la base de données
-            const advertisingModel : AdvertisingModel = {
+            const advertisingModel: AdvertisingModel = {
                 id: uuidv4(),
-                company: company , // Selon le schéma Prisma, company_id référence Account
-                type: context.type,
+                company,
+                type,
                 title: context.title,
                 description: context.description,
-                link: link
+                link,
             };
 
             const advertising = await this.advertisingRepo.save(advertisingModel);
-
-            return ApiResponseUtil.ok(advertising, '', 'Advertising created successfully 🎉 .');
+            return ApiResponseUtil.ok(AdvertisingDtm.fromAdvertisingDtm(advertising), '', 'Publicité créée avec succès 🎉 .');
 
         } catch (e) {
             console.log(e);
             if (file && fs.existsSync(file.path)) {
-                try {
-                    fs.unlinkSync(file.path);
-                } catch (unlinkError) {
-                    console.error('Error deleting temp file:', unlinkError);
-                }
+                fs.unlinkSync(file.path);
             }
             return ApiResponseUtil.error('Erreur interne', 'Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
     }
 
-    async listingAdvertisings(accountDtm : AccountDtm) : Promise<ApiResponse<AdvertisingModel[]>> {
+    async listingAdvertisings(accountDtm: AccountDtm): Promise<ApiResponse<AdvertisingDtm[]>> {
         try {
-            const company : CompanyModel | null = await this.companyRepo.findByAccount(accountDtm.id);
-            
-            if(company == null)
-            {
-                return ApiResponseUtil.error('','Company not found .', 'not_found');
+            const company = await this.companyRepo.findByAccount(accountDtm.id);
+
+            if (company == null) {
+                return ApiResponseUtil.error('', 'Company not found .', 'not_found');
             }
 
-            const advertisings = await this.advertisingRepo.findByCompanyId(accountDtm.id);
-            return ApiResponseUtil.ok(advertisings, '', 'Advertisings listed 🎉 .');
+            const advertisings = await this.advertisingRepo.findByCompanyId(company.id);
+            return ApiResponseUtil.ok(advertisings.map(AdvertisingDtm.fromAdvertisingDtm), '', 'Liste des publicités récupérée 🎉 .');
         } catch (e) {
             console.log(e);
             return ApiResponseUtil.error('Erreur interne', 'Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
     }
 
+    async toogleAdvertising(id : string) : Promise<ApiResponse<AdvertisingDtm>>  {
+        try {
+            const advertising = await this.advertisingRepo.findById(id);
+            if(!advertising){
+                return ApiResponseUtil.error('', 'Advertising not found .', 'not_found');
+            }
+            advertising.is_active = !advertising.is_active;
+            await this.advertisingRepo.save(advertising);
+            return ApiResponseUtil.ok(AdvertisingDtm.fromAdvertisingDtm(advertising), '', 'Advertising updated .');
+        } catch (e) {
+            console.log(e);
+            return ApiResponseUtil.error('Erreur interne', 'Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
+        }
+    }
+
+    async deleteAdvertising(id : string) : Promise<ApiResponse<AdvertisingDtm>>  {
+        try {
+            const advertising = await this.advertisingRepo.findById(id);
+            if(!advertising){
+                return ApiResponseUtil.error('', 'Advertising not found .', 'not_found');
+            }
+            advertising.is_deleted = true;
+            advertising.is_active = false;
+            await this.advertisingRepo.save(advertising);
+            return ApiResponseUtil.ok(AdvertisingDtm.fromAdvertisingDtm(advertising), '', 'Advertising deleted .');
+        } catch (e) {
+            console.log(e);
+            return ApiResponseUtil.error('Erreur interne', 'Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
+        }
+    }
 }

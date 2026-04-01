@@ -32,12 +32,3 @@ export default async function EntitySeeder() {
 
     console.log('🎉 Entities seeding done.');
 }
-
-EntitySeeder()
-  .catch((e) => {
-    console.error('❌ Error entities seeding :', e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-});

@@ -29,12 +29,3 @@ export default async function RoleSeeder() {
 
     console.log('🎉 Roles seeding done.');
 }
-
-RoleSeeder()
-  .catch((e) => {
-    console.error('❌ Error roles seeding :', e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-});
