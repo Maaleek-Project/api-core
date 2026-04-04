@@ -1,6 +1,7 @@
 import { CountryModel } from "./country.model";
 import { EntityModel } from "./entity.model";
 import { UserModel } from "./user.model";
+import { WorkerModel } from "./worker.model";
 
 export interface AccountModel {
     id: string;
@@ -16,4 +17,5 @@ export interface AccountModel {
     locked? : boolean;
     created_at? : Date;
     updated_at? : Date;
+    worker? : [WorkerModel] | null;
 }

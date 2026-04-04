@@ -6,4 +6,5 @@ export interface CompanySusbcriberModel {
     company : CompanyModel;
     user : UserModel;
     is_subscribed : boolean;
+    created_at? : string;
 }

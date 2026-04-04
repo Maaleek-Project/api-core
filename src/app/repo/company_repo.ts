@@ -18,9 +18,35 @@ const COMPANY_INCLUDE = {
             entity: true
         }
     },
-    advertising: true,
-    worker: true,
-    subscribers: true
+    advertising: {
+        where: { is_deleted : false }
+    },
+    worker: {
+        include :{
+            account : {
+                include : {
+                    user : {
+                        include : {
+                            businessCard : true
+                        }
+                    },
+                    country : true
+                }
+            },
+            company : true
+        }
+    },
+    subscribers: {
+        include : {
+            user : {
+                include : {
+                    businessCard: {
+                        include: { offer: true }
+                    }
+                }
+            } 
+        }
+    }
 } as const;
 
 @Injectable()

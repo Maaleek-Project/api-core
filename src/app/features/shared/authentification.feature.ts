@@ -260,6 +260,8 @@ export class AuthentificationFeature {
         const saved = await this.prisma.$transaction(async (tx) => {
             await this.tokenRepo.save(tokenModel, tx);
             return this.accountRepo.save(account, tx);
+        },{
+                    timeout: 20000,
         });
 
         return ApiResponseUtil.ok({ ...AccountDtm.fromAccountDtm(saved), token, expired_at: tokenModel.expired_at }, 'Session active', 'Bien 🎉, bon retour parmis nous, votre espace n\'attendais que vous.');

@@ -11,6 +11,7 @@ import { UserModel } from "src/core/domain/models/user.model";
 import { AuthentificationService } from "src/core/services/authenfication.service";
 import { EntityModel } from "src/core/domain/models/entity.model";
 import { PrismaService } from "src/prisma.service";
+import { CustomerDtm } from "src/core/domain/dtms/customer.dtm";
 
 @Injectable()
 export class CustomerFeature {
@@ -23,12 +24,12 @@ export class CustomerFeature {
         private readonly authentificationService: AuthentificationService,
     ) {}
 
-    async listing(): Promise<ApiResponse<AccountDtm[]>> {
+    async listing(): Promise<ApiResponse<CustomerDtm[]>> {
         const customers = await this.accountRepo.findAllCustomer();
-        return ApiResponseUtil.ok(customers.map(account => AccountDtm.fromAccountDtm(account)), '', 'Customers listed 🎉 .');
+        return ApiResponseUtil.ok(customers.map(account => CustomerDtm.fromCustomerDtm(AccountDtm.fromAccountDtm(account))), '', 'Customers listed 🎉 .');
     }
 
-    async createCustomer(context: CreateCustomerContext): Promise<ApiResponse<AccountDtm>> {
+    async createCustomer(context: CreateCustomerContext): Promise<ApiResponse<CustomerDtm>> {
         try {
             const country = await this.resourceRepo.findCountry(context.country_id);
 
@@ -66,11 +67,31 @@ export class CustomerFeature {
                 return this.accountRepo.save(newAccount, tx);
             });
 
-            return ApiResponseUtil.ok(AccountDtm.fromAccountDtm(saved), '', 'Customer created 🎉 .');
+            return ApiResponseUtil.ok(CustomerDtm.fromCustomerDtm(AccountDtm.fromAccountDtm(saved)), '', 'Customer created 🎉 .');
 
         } catch (e) {
             console.log(e);
             return ApiResponseUtil.error('', "Failed to create customer .", "internal_error");
+        }
+    }
+
+    async toggleLockedCustomer(customer_id : string) : Promise<ApiResponse<CustomerDtm>>{
+
+        try {
+            const account = await this.accountRepo.findById(customer_id);
+
+            if(!account){
+                return ApiResponseUtil.error('', 'Customer not found .', 'not_found');
+            }
+
+            account.locked = !account.locked;
+
+            const saved = await this.accountRepo.save(account);
+
+            return ApiResponseUtil.ok(CustomerDtm.fromCustomerDtm(AccountDtm.fromAccountDtm(saved)), '', `Customer ${account.locked ? 'locked' : 'unlocked'} 🎉 .`);
+        
+        } catch(e){
+            return ApiResponseUtil.error('', "Failed action to customer .", "internal_error");
         }
     }
 }

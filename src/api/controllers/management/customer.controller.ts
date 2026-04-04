@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Post, Req, Res, Get, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Post, Req, Res, Get, UseGuards, Put, Param } from "@nestjs/common";
 import { Response } from "express";
 import { EntityType } from "src/core/decorators/entity_type.decorator";
 import { EntityTypeGuard } from "src/core/guards/entity_type.guard";
@@ -42,6 +42,20 @@ export class CustomerController {
         };
         const status = statusMap[create.code] ;
         return res.status(status).json(create);
+    }
+
+
+    @EntityType(['Manager'])
+    @Put('toogle-locked/:id')
+    async toogleLocked(@Req() req: Request, @Res() res: Response, @Param('id') id : string){
+        const locked = await this.feature.toggleLockedCustomer(id)
+        const statusMap: Record<string, number> = {
+            success: 200,
+            not_found: 404,
+            internal_error: 500,
+        };
+        const status = statusMap[locked.code] ;
+        return res.status(status).json(locked);
     }
 
 }

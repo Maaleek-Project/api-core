@@ -4,6 +4,7 @@ import { CountryDtm } from "./country.dtm";
 import { EntityDtm } from "./entity.dtm";
 import { TokenDtm } from "./token.dtm";
 import { UserDtm } from "./user.dtm";
+import { WorkerDtm } from "./worker.dtm";
 
 export class AccountDtm {
     id: string;
@@ -16,8 +17,15 @@ export class AccountDtm {
     locked?: boolean;
     created_at?: Date;
     updated_at?: Date;
+    worker : {
+        company_name : string ;
+        job_name : string ;
+    } | null;
 
-    constructor(id: string, login : string , user: UserDtm, country: CountryDtm, entity : EntityDtm, document_id : string, status?: string, locked?: boolean, created_at?: Date, updated_at?: Date) {
+    constructor(
+        id: string, login : string , user: UserDtm, country: CountryDtm, entity : EntityDtm, document_id : string, 
+        worker : { company_name : string ; job_name : string ;} | null,
+        status?: string, locked?: boolean, created_at?: Date, updated_at?: Date) {
         this.id = id;
         this.user = user;
         this.country = country;
@@ -28,9 +36,17 @@ export class AccountDtm {
         this.document_id = document_id;
         this.created_at = created_at;
         this.updated_at = updated_at;
+        this.worker = worker;
     }
 
     static fromAccountDtm(account: AccountModel): AccountDtm {
-        return new AccountDtm(account.id,  account.login , UserDtm.fromUserDtm(account.user), CountryDtm.fromCountryDtm(account.country), EntityDtm.fromEntityDtm(account.entity), account.document_id!, account.status, account.locked, account.created_at, account.updated_at);
+        return new AccountDtm(account.id,  account.login , UserDtm.fromUserDtm(account.user), 
+        CountryDtm.fromCountryDtm(account.country), EntityDtm.fromEntityDtm(account.entity), 
+        account.document_id!, account.worker ? {
+            company_name : account.worker && account.worker?.length > 0 ? account.worker[0].company.name : "",
+            job_name : account.user.businessCard ? account.user.businessCard[0].job : "No business card"
+        } : null , account.status, account.locked, account.created_at, account.updated_at,
+       
+    );
     }
 }

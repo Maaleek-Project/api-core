@@ -13,7 +13,13 @@ const ACCOUNT_INCLUDE = {
         }
     },
     country: true,
-    entity: true
+    entity: true,
+    worker : {
+        include : {
+            company : true
+        },
+        where : {state : 'in_office'}
+    } 
 } as const;
 
 @Injectable()
@@ -81,6 +87,7 @@ export class AccountRepo implements IAccountRepo {
             locked: account.locked,
             created_at: account.created_at,
             updated_at: account.updated_at,
+            worker : account.worker 
         };
     }
 
@@ -94,6 +101,7 @@ export class AccountRepo implements IAccountRepo {
             entity_id: account.entity.id,
             status: account.status,
             fcm_token: account.fcm_token,
+            locked : account.locked,
             document_id: account.document_id
         };
     }
