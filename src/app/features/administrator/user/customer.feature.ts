@@ -70,7 +70,6 @@ export class CustomerFeature {
             return ApiResponseUtil.ok(CustomerDtm.fromCustomerDtm(AccountDtm.fromAccountDtm(saved)), '', 'Customer created 🎉 .');
 
         } catch (e) {
-            console.log(e);
             return ApiResponseUtil.error('', "Failed to create customer .", "internal_error");
         }
     }

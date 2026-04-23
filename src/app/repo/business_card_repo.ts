@@ -117,8 +117,6 @@ export class BusinessCardRepo implements IBusinessCardRepo {
 
     private toDatabase(businessCard: BusinessCardModel): any {
 
-        console.log('Converting to database format:');
-        console.log(businessCard.company);
 
         return {
             id: businessCard.id,

@@ -15,6 +15,11 @@ import { ExchangeRequestModel } from "src/core/domain/models/exchange_request.mo
 import { FirebaseService } from "src/core/services/firebase.service";
 import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from "src/prisma.service";
+import { CompanyRepo } from "src/app/repo/company_repo";
+import { CompanyKPIDtm } from "src/core/domain/dtms/company_kpi.dtm";
+import { CompanyDtm } from "src/core/domain/dtms/company.dtm";
+import { SubscriberRepo } from "src/app/repo/subscriber_repo";
+import { CompanyModel } from "src/core/domain/models/company.model";
 
 @Injectable()
 export class MainFeature {
@@ -26,6 +31,8 @@ export class MainFeature {
         private readonly exchangeRequestRepo: ExchangeRequestRepo,
         private readonly firebaseService: FirebaseService,
         private readonly businessCardRepo: BusinessCardRepo,
+        private readonly companyRepo: CompanyRepo,
+        private readonly subscriberRepo: SubscriberRepo,
     ) {}
 
     async userNotifications(account: AccountDtm): Promise<ApiResponse<NotificationDtm[]>> {
@@ -64,6 +71,8 @@ export class MainFeature {
             if (context.request_recipient_id == context.request_sender_id) {
                 return ApiResponseUtil.error('Même Identité', 'Désolé, vous ne pouvez pas envoyer une demande de carte à vous-même .', 'conflict');
             }
+
+            // if(recipient != null && sender != null && recipient.status =){
 
             const exchange: ExchangeRequestModel = {
                 id: uuidv4(),
@@ -147,6 +156,7 @@ export class MainFeature {
             return ApiResponseUtil.ok("", 'Demande d\'échange répondue', 'Votre demande d\'échange a bien été répondue .');
 
         } catch (e) {
+            console.log(e)
             return ApiResponseUtil.error('Erreur interne', 'Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
     }
@@ -166,6 +176,44 @@ export class MainFeature {
             return ApiResponseUtil.ok(businessCards.map(BusinessCardDtm.fromBusinessCardDtm), '', 'Liste de cartes de visite reçues 🎉 .');
 
         } catch (e) {
+            return ApiResponseUtil.error('Erreur interne', 'Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
+        }
+    }
+
+
+    async companyListing(account: AccountDtm): Promise<ApiResponse<CompanyKPIDtm[]>> {
+        const companies = await this.companyRepo.findAllCompanies();
+        const filtered = companies.filter(company => company.locked == false);
+        const mapping = filtered.map(company => CompanyDtm.fromCompanyDtm(company));
+        return ApiResponseUtil.ok(mapping.map(company => CompanyKPIDtm.fromCompanyKPIDtm(company, account.user.id)), '', 'Liste des entreprises .');
+    }
+
+    async companyToggleSubscription(account: AccountDtm, company_id : string): Promise<ApiResponse<CompanyKPIDtm>> {
+        try{
+            const company = await this.companyRepo.findCompany(company_id);
+            if(company == null){
+                return ApiResponseUtil.error('Entreprise inexistante', 'L\'entreprise n\'existe pas, merci de bien vouloir réessayer .', 'not_found');
+            }
+            const subscriber = await this.subscriberRepo.findByUserId(account.user.id , company_id);
+
+            if(subscriber == null){
+                const saved = await this.subscriberRepo.save({
+                    id : uuidv4(),
+                    company : company,
+                    user : account.user,
+                    is_subscribed : true
+                });
+                return ApiResponseUtil.ok(CompanyKPIDtm.fromCompanyKPIDtm(CompanyDtm.fromCompanyDtm(company) ,account.user.id), 'Votre abonnement a bien été créé .', 'Votre abonnement a bien été créé .');
+            }
+
+            subscriber.is_subscribed = !subscriber.is_subscribed;
+            await this.subscriberRepo.save(subscriber);
+
+            const refresh_company = await this.companyRepo.findCompany(company_id) as CompanyModel;
+
+            return ApiResponseUtil.ok(CompanyKPIDtm.fromCompanyKPIDtm(CompanyDtm.fromCompanyDtm(refresh_company) ,account.user.id), 'Votre abonnement a bien été modifié .', 'Votre abonnement a bien été modifié .');
+        
+        }catch(e){
             return ApiResponseUtil.error('Erreur interne', 'Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
     }

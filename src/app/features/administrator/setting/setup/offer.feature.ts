@@ -36,7 +36,6 @@ export class OfferFeature {
             return ApiResponseUtil.ok(OfferDtm.fromOfferDtm(saved),'', 'Offer created 🎉 .');
 
         }catch(e){
-            console.log(e)
             return ApiResponseUtil.error('',"Failed to create offer .", "internal_error");
         }
 
@@ -56,7 +55,6 @@ export class OfferFeature {
 
             return ApiResponseUtil.ok(OfferDtm.fromOfferDtm(offer), offer.is_active ? 'Offer activated' : 'Offer deactivated', 'This offer was ' + (offer.is_active ? 'activated' : 'deactivated') + ' successfully .');
         }catch(e){
-            console.log(e)
             return ApiResponseUtil.error('Internal error','An unexpected error occurred, please try again .', 'internal_error');
         }
     }

@@ -12,6 +12,7 @@ export class CompanyDtm {
     email: string;
     name: string;
     address: string;
+    logo : string;
     owner : {
         username : string;
         number : string;
@@ -33,7 +34,7 @@ export class CompanyDtm {
     } ;
     created_at?: Date;
 
-    constructor(id: string, number: string, email: string, name: string, address: string, account: AccountDtm, locked : boolean , pubs : number, workers : number, susbcribers : number,
+    constructor(id: string, number: string, email: string, name: string, address: string, logo : string, account: AccountDtm, locked : boolean , pubs : number, workers : number, susbcribers : number,
         details : {
             employees : WorkerDtm[],
             advertisements : AdvertisingDtm[],
@@ -50,6 +51,7 @@ export class CompanyDtm {
         this.number = `+${account.country.code} ${number}`;
         this.email = email;
         this.name = name;
+        this.logo = logo;
         this.address = address;
         this.owner = {
             username : `${account.user.name} ${account.user.surname}`,
@@ -73,6 +75,7 @@ export class CompanyDtm {
             company.email, 
             company.name,
             company.address, 
+            company.logo ?? "",
             AccountDtm.fromAccountDtm(company.account), 
             company.locked ?? false , 
             company.advertising?.length ?? 0 , 

@@ -13,7 +13,7 @@ export class MainController {
         private readonly feature : MainFeature,
     ) {}
 
-    @EntityType(['Customer'])
+    @EntityType(['Customer' , 'Company', 'Manager'])
     @Get('user-notifications')
     async userNotifications(@Req() req: Request, @Res() res: Response) {
         const notifications = await this.feature.userNotifications(AccountDtm.fromAccountDtm(req['user']));
@@ -24,7 +24,18 @@ export class MainController {
         return res.status(status).json(notifications);
     }
 
-    @EntityType(['Customer'])
+    @EntityType(['Customer' , 'Company', 'Manager'])
+    @Get('company-listing')
+    async companyListing(@Req() req: Request, @Res() res: Response) {
+        const companies = await this.feature.companyListing(AccountDtm.fromAccountDtm(req['user']));
+        const statusMap: Record<string, number> = {
+            success: 200,
+        };
+        const status = statusMap[companies.code] ;
+        return res.status(status).json(companies);
+    }
+
+    @EntityType(['Customer' , 'Company', 'Manager'])
     @Delete('user-remove-notification')
     async deleteNotification(@Req() req: Request, @Query('id') context: string, @Res() res: Response) {
         const deleteNotification = await this.feature.deleteNotification(AccountDtm.fromAccountDtm(req['user']), context);
@@ -39,7 +50,7 @@ export class MainController {
 
 
 
-    @EntityType(['Customer'])
+    @EntityType(['Customer' , 'Company', 'Manager'])
     @Post('exchange-request')
     async exchangeRequest(@Req() req: Request, @Body() context: ExchangeRequestContext, @Res() res: Response) {
         const exchangeRequest = await this.feature.exchangeRequest(context);
@@ -53,7 +64,7 @@ export class MainController {
         return res.status(status).json(exchangeRequest);
     }
 
-    @EntityType(['Customer'])
+    @EntityType(['Customer' , 'Company', 'Manager'])
     @Put('refresh-token')
     async refreshToken(@Req() req: Request, @Body() context: RefreshTokenContext, @Res() res: Response) {
         const refreshToken = await this.feature.refreshToken(AccountDtm.fromAccountDtm(req['user']), context);
@@ -66,7 +77,7 @@ export class MainController {
         return res.status(status).json(refreshToken);
     }
 
-    @EntityType(['Customer'])
+    @EntityType(['Customer' , 'Company', 'Manager'])
     @Put('response-exchange-request')
     async responseExchangeRequest(@Req() req: Request, @Body() context: ExchangeResponseContext, @Res() res: Response) {
         const responseExchangeRequest = await this.feature.responseExchangeRequest(AccountDtm.fromAccountDtm(req['user']), context);
@@ -80,7 +91,7 @@ export class MainController {
         return res.status(status).json(responseExchangeRequest);
     }
 
-    @EntityType(['Customer'])
+    @EntityType(['Customer' , 'Company', 'Manager'])
     @Get('business-card-received')
     async businessCardReceived(@Req() req: Request, @Res() res: Response) {
         const businessCardReceived = await this.feature.businessCardReceived(AccountDtm.fromAccountDtm(req['user']));
@@ -91,5 +102,19 @@ export class MainController {
         };
         const status = statusMap[businessCardReceived.code] ;
         return res.status(status).json(businessCardReceived);
+    }
+
+    @EntityType(['Customer'])
+    @Put('company-toggle-subscription/:company_id')
+    async companyToggleSubscription(@Req() req: Request,  @Param('company_id') company_id : string, @Res() res: Response) {
+        const companyToggleSubscription = await this.feature.companyToggleSubscription(AccountDtm.fromAccountDtm(req['user']), company_id);
+        const statusMap: Record<string, number> = {
+            success: 200,
+            unauthorized: 401,
+            not_found: 404,
+            internal_error: 500,
+        };
+        const status = statusMap[companyToggleSubscription.code] ;
+        return res.status(status).json(companyToggleSubscription);
     }
 }

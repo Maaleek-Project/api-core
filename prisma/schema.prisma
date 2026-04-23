@@ -330,8 +330,6 @@ model ExchangeRequest{
   sender Account @relation("sender_relation",fields: [sender_id], references: [id], onDelete: Cascade)
   recipient Account @relation("recipient_relation",fields: [recipient_id], references: [id], onDelete: Cascade)
 
-  @@unique([sender_id, recipient_id])
-
   @@map("exchanges_requests")
 }
 

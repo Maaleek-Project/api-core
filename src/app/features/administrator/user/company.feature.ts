@@ -81,7 +81,6 @@ export class CompanyFeature {
             return ApiResponseUtil.ok(CompanyDtm.fromCompanyDtm(saved_company), '', 'Company created 🎉 .');
 
         } catch (e) {
-            console.log(e);
             return ApiResponseUtil.error('', "Failed to create company .", "internal_error");
         }
     }

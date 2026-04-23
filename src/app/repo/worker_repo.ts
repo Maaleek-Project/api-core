@@ -90,7 +90,6 @@ export class WorkerRepo implements IWorkerRepo {
     }
 
     private toDatabase(worker: WorkerModel): any {
-        console.log(worker);
         return {
             id: worker.id,
             account_id: worker.account.id,

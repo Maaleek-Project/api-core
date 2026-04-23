@@ -97,6 +97,23 @@ export class AuthentificationFeature {
 
             const account = await this.accountRepo.fetchByLogin(context.login, context.country_id);
 
+            const find_user = await this.userRepo.findByNumber(context.login);
+
+            if(find_user != null && account == null){
+                const by_email = await this.accountRepo.fetchByIdentifiant(find_user.email!);
+                if(by_email != null){
+                    if (by_email.locked) {
+                        return ApiResponseUtil.error('Compte bloqué', 'Votre compte est bloqué, merci de bien vouloir contacter notre service pour une vérification de votre identité .', 'conflict');
+                    }
+                    by_email.status = "processing";
+                    await this.accountRepo.save(by_email);
+
+                    return ApiResponseUtil.ok(UserOrCodeDtm.fromUser(UserDtm.fromUserDtm(by_email.user)), 'Mot de passe requis', 'Bien 🎉, entez votre mon de passe .');
+                }else{
+                    return ApiResponseUtil.error('Conflit utilisateur', 'Désolé, mais votre numéro de téléphone semble ne pas être associé à un compte existant, merci de bien vouloir réessayer avec un autre numéro .', 'conflict');
+                }
+            }
+
             if (account == null) {
                 const action = await this.otpRepo.findAction('verified_number', 'waiting', context.login, context.country_id);
                 const code = SharedUtil.generateOtp(4);
@@ -126,7 +143,6 @@ export class AuthentificationFeature {
             }
 
         } catch (e) {
-            console.log(e);
             if (otp) {
                 await this.otpRepo.remove(otp);
             }
@@ -157,7 +173,7 @@ export class AuthentificationFeature {
 
             const user: UserModel = { id: uuidv4(), civility: context.civility, name: context.name.trim(), surname: context.surname.trim(), number: context.login.trim() };
             const password = await this.authentificationService.hashPassword(context.password.trim());
-            const account: AccountModel = { id: uuidv4(), login: context.login, password, user, country: country!, entity, status: 'connected', fcm_token: context.fcm_token };
+            const account: AccountModel = { id: uuidv4(), login: context.login, password, user, country: country!, entity, status: 'connected', fcm_token: context.fcm_token , register_in_app : true };
 
             const documentId = await this.firebaseService.toSave('business_card_trackings', {
                 account: account.id,
@@ -168,7 +184,13 @@ export class AuthentificationFeature {
 
             account.document_id = documentId;
 
-            const token = await this.authentificationService.generateToken(AccountDtm.fromAccountDtm(account));
+            const token = await this.authentificationService.generateToken({
+                id: account.id,
+                name: account.user.name,
+                surname: account.user.surname,
+                number: account.user.number,
+                entity: account.entity.libelle
+            });
             const tokenModel: TokenModel = { id: uuidv4(), token, type: 'to_connect', account_id: account.id, expired_at: SharedUtil.addDaysToNow(1) };
 
             const saved = await this.prisma.$transaction(async (tx) => {
@@ -200,15 +222,24 @@ export class AuthentificationFeature {
             return ApiResponseUtil.ok({ ...AccountDtm.fromAccountDtm(saved), token, expired_at: tokenModel.expired_at }, 'Compte créer', 'Bienvenue 🎉, votre compte a été créé avec succès, accéder à votre espace .');
 
         } catch (e) {
-            console.log(e);
             return ApiResponseUtil.error('Erreur interne', 'Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
     }
 
     async signIn(context: SignInContext): Promise<ApiResponse<AccountDtm>> {
-        const account = await this.accountRepo.fetchByLogin(context.login, context.country_id);
+        let account = await this.accountRepo.fetchByLogin(context.login, context.country_id);
 
-        if (account == null) {
+        const find_user = await this.userRepo.findByNumber(context.login);
+
+        if (find_user == null && account == null) {
+            return ApiResponseUtil.error('Compte inexistant', 'Votre compte n\'existe pas, merci de bien vouloir contacter notre service pour une vérification de votre identité .', 'conflict');
+        }
+
+        if(find_user != null && account == null){
+            account = await this.accountRepo.fetchByIdentifiant(find_user.email!);
+        }
+
+        if(account == null){
             return ApiResponseUtil.error('Compte inexistant', 'Votre compte n\'existe pas, merci de bien vouloir contacter notre service pour une vérification de votre identité .', 'conflict');
         }
 
@@ -222,13 +253,48 @@ export class AuthentificationFeature {
             return ApiResponseUtil.error('Accès réfusé', 'Le mot de passe fourni est incorrect, merci de réessayer avec le bon mot de passe .', 'conflict');
         }
 
-        const token = await this.authentificationService.generateToken(AccountDtm.fromAccountDtm(account));
+        if(!account.register_in_app){
+            const documentId = await this.firebaseService.toSave('business_card_trackings', {
+                account: account.id,
+                business_card: 10,
+                business_card_received: 0,
+                setup: { profil: false, business_card: false }
+            });
+
+            account.document_id = documentId;
+
+            setTimeout(async () => {
+                if (account.fcm_token) {
+                    await this.firebaseService.toPush(
+                        account.fcm_token,
+                        "C'est parti 🚀",
+                        "Super nouvelle 🎉 Vous avez déjà 10 cartes de visite prêtes à partager avec vos contacts .",
+                    );
+                }
+            }, 5000);
+            account.register_in_app = true;
+        }
+
+        const token = await this.authentificationService.generateToken({
+            id: account.id,
+            name: account.user.name,
+            surname: account.user.surname,
+            number: account.user.number,
+            entity: account.entity.libelle
+        });
         const tokenModel: TokenModel = { id: uuidv4(), token, type: 'to_connect', account_id: account.id, expired_at: SharedUtil.addDaysToNow(1) };
 
         account.status = "connected";
 
         const saved = await this.prisma.$transaction(async (tx) => {
             await this.tokenRepo.save(tokenModel, tx);
+            await this.notificationRepo.save({
+                    id: uuidv4(),
+                    account: account,
+                    type: NotificationType.WELCOME,
+                    title: "Merci d'avoir rejoint maaleek 🎉",
+                    message: "Nous sommes ravis de vous compter parmi nous. Ensemble, construisons un réseau solide et inspirant !",
+                }, tx);
             return this.accountRepo.save(account, tx);
         });
 
@@ -252,7 +318,13 @@ export class AuthentificationFeature {
             return ApiResponseUtil.error('Accès réfusé', 'Le mot de passe fourni est incorrect, merci de réessayer avec le bon mot de passe .', 'conflict');
         }
 
-        const token = await this.authentificationService.generateToken(AccountDtm.fromAccountDtm(account));
+        const token = await this.authentificationService.generateToken({
+            id: account.id,
+            name: account.user.name,
+            surname: account.user.surname,
+            number: account.user.number,
+            entity: account.entity.libelle
+        });
         const tokenModel: TokenModel = { id: uuidv4(), token, type: 'to_connect', account_id: account.id, expired_at: SharedUtil.addDaysToNow(1) };
 
         account.status = "connected";
@@ -306,7 +378,13 @@ export class AuthentificationFeature {
             return ApiResponseUtil.error('Accès réfusé', 'Le mot de passe fourni est incorrect, merci de réessayer avec le bon mot de passe .', 'conflict');
         }
 
-        const token = await this.authentificationService.generateToken(AccountDtm.fromAccountDtm(company.account));
+        const token = await this.authentificationService.generateToken({
+            id: company.account.id,
+            name: company.account.user.name,
+            surname: company.account.user.surname,
+            number: company.account.user.number,
+            entity: company.account.entity.libelle
+        });
         const tokenModel: TokenModel = { id: uuidv4(), token, type: 'to_connect', account_id: company.account.id, expired_at: SharedUtil.addDaysToNow(1) };
 
         await this.tokenRepo.save(tokenModel);

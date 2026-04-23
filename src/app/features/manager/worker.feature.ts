@@ -84,7 +84,6 @@ export class WorkerFeature {
             return ApiResponseUtil.ok(WorkerDtm.fromWorkerDtm(worker), '', 'Worker created 🎉 .');
 
         } catch (e) {
-            console.log(e);
             return ApiResponseUtil.error('', "Failed to create worker .", "internal_error");
         }
     }
@@ -135,7 +134,6 @@ export class WorkerFeature {
                 return ApiResponseUtil.ok(WorkerDtm.fromWorkerDtm(worker), '', 'Worker created 🎉 .');
         }
         catch (e) {
-            console.log(e);
             return ApiResponseUtil.error('', "Failed to added worker .", "internal_error");
         }
     }
@@ -164,7 +162,6 @@ export class WorkerFeature {
             return ApiResponseUtil.ok(CustomerDtm.fromCustomerDtm(AccountDtm.fromAccountDtm(account)), '', 'Customer found 🎉 .');
 
         } catch (e) {
-            console.log(e);
             return ApiResponseUtil.error('', "Failed to find customer .", "internal_error");
 
         }
@@ -193,7 +190,6 @@ export class WorkerFeature {
             await this.workerRepo.save(worker);
             return ApiResponseUtil.ok(WorkerDtm.fromWorkerDtm(worker), '', 'Worker removed 🎉 .');
         } catch (e) {
-            console.log(e);
             return ApiResponseUtil.error('', "Failed to remove worker .", "internal_error");
         }
     }

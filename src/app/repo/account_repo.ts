@@ -13,13 +13,20 @@ const ACCOUNT_INCLUDE = {
         }
     },
     country: true,
+    Sender: {
+        include: {
+            sender: { include: { user: true, country: true, worker: { include: { company: true }, where: { state: 'in_office' } } } },
+            recipient: { include: { user: true, country: true, worker: { include: { company: true }, where: { state: 'in_office' } } } }
+        }
+    },
     entity: true,
     worker : {
         include : {
             company : true
         },
         where : {state : 'in_office'}
-    } 
+    } ,
+    
 } as const;
 
 @Injectable()
@@ -87,7 +94,8 @@ export class AccountRepo implements IAccountRepo {
             locked: account.locked,
             created_at: account.created_at,
             updated_at: account.updated_at,
-            worker : account.worker 
+            worker : account.worker ,
+            sender : account.Sender
         };
     }
 

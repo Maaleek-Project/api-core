@@ -30,7 +30,6 @@ export class CountryFeature {
             return ApiResponseUtil.ok(CountryDtm.fromCountryDtm(saved),'', 'Country created 🎉 .');
 
         }catch(e){
-            console.log(e)
             return ApiResponseUtil.error('',"Failed to create country .", "internal_error");
         }
     }
@@ -50,7 +49,6 @@ export class CountryFeature {
 
             return ApiResponseUtil.ok(CountryDtm.fromCountryDtm(country), country.is_active ? 'Country activated' : 'Country deactivated', 'This country was ' + (country.is_active ? 'activated' : 'deactivated') + ' successfully .');
         }catch(e){
-            console.log(e)
             return ApiResponseUtil.error('Internal error','An unexpected error occurred, please try again .', 'internal_error');
         }
     }

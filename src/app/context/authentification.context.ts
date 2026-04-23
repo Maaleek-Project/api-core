@@ -1,3 +1,4 @@
+import { Optional } from '@nestjs/common';
 import { IsString, IsNotEmpty } from 'class-validator';
 
 export class InitiatedContext {
@@ -57,6 +58,9 @@ export class SignInContext {
 
     @IsNotEmpty({ message: 'Please select a country .' })
     country_id : string;
+
+    @Optional()
+    fcm_token : string;
 }
 
 

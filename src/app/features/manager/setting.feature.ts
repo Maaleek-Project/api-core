@@ -66,7 +66,6 @@ export class SettingFeature {
 
 
         }catch(e){
-            console.log(e)
             return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
     }
@@ -92,7 +91,6 @@ export class SettingFeature {
 
 
         }catch(e){
-            console.log(e)
             return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
 
@@ -129,7 +127,6 @@ export class SettingFeature {
             return ApiResponseUtil.ok(CompanyInfoDtm.fromCompanyInfoDtm(company),'','Informations mises à jour 🎉 .');
 
         }catch(e){
-            console.log(e)
             return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
     }
@@ -150,7 +147,6 @@ export class SettingFeature {
             return ApiResponseUtil.ok(CompanyInfoDtm.fromCompanyInfoDtm(company),'','Informations mises à jour 🎉 .');
 
         }catch(e){
-            console.log(e)
             return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
     }
@@ -164,10 +160,7 @@ export class SettingFeature {
             }
 
 
-            console.log("context.current_password")
-            console.log(context.current_password)
-            console.log((await this.authentificationService.hashPassword(context.current_password)))
-
+           
             const isValid = await this.authentificationService.comparePassword(context.current_password, company.password);
 
 
@@ -183,7 +176,6 @@ export class SettingFeature {
             return ApiResponseUtil.ok('','Password mis à jour 🎉 .','Votre mot de passe a été mis à jour .');
 
         }catch(e){
-            console.log(e)
             return ApiResponseUtil.error('Erreur interne','Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
     }

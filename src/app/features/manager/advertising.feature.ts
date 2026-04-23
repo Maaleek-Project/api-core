@@ -92,7 +92,6 @@ export class AdvertisingFeature {
             return ApiResponseUtil.ok(AdvertisingDtm.fromAdvertisingDtm(advertising), '', 'Publicité créée avec succès 🎉 .');
 
         } catch (e) {
-            console.log(e);
             if (file && fs.existsSync(file.path)) {
                 fs.unlinkSync(file.path);
             }
@@ -111,7 +110,6 @@ export class AdvertisingFeature {
             const advertisings = await this.advertisingRepo.findByCompanyId(company.id);
             return ApiResponseUtil.ok(advertisings.map(AdvertisingDtm.fromAdvertisingDtm), '', 'Liste des publicités récupérée 🎉 .');
         } catch (e) {
-            console.log(e);
             return ApiResponseUtil.error('Erreur interne', 'Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
     }
@@ -126,7 +124,6 @@ export class AdvertisingFeature {
             await this.advertisingRepo.save(advertising);
             return ApiResponseUtil.ok(AdvertisingDtm.fromAdvertisingDtm(advertising), '', 'Advertising updated .');
         } catch (e) {
-            console.log(e);
             return ApiResponseUtil.error('Erreur interne', 'Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
     }
@@ -142,7 +139,6 @@ export class AdvertisingFeature {
             await this.advertisingRepo.save(advertising);
             return ApiResponseUtil.ok(AdvertisingDtm.fromAdvertisingDtm(advertising), '', 'Advertising deleted .');
         } catch (e) {
-            console.log(e);
             return ApiResponseUtil.error('Erreur interne', 'Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
     }

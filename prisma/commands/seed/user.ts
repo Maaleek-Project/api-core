@@ -24,7 +24,7 @@ export default async function UserSeeder() {
             surname: 'Fabrice',
             number: '0779312475',
             login : 'louisfabrice1@gmail.com',
-            password : '12563'
+            password : 'Maaleek@2024!'
         },
         {
             id: uuidv4(),
@@ -33,7 +33,7 @@ export default async function UserSeeder() {
             surname: 'Oscar',
             number: '0777002625',
             login : 'fabriceo.kouame@gmail.com',
-            password : '78564'
+            password : 'Maaleek@2024!'
         }
     ]
 

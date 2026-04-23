@@ -23,8 +23,6 @@ export class CompanySubscriberDtm {
 
     static fromCompanySubscriberDtm(subscriber : CompanySusbcriberModel) : CompanySubscriberDtm {
 
-        console.log(subscriber)
-
         return new CompanySubscriberDtm(subscriber.id, subscriber.is_subscribed, subscriber.created_at?? '', UserDtm.fromUserDtm(subscriber.user));
     }
 }

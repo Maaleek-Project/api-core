@@ -43,7 +43,6 @@ export class PaymentProviderFeature {
             return ApiResponseUtil.ok(ProviderDtm.fromProviderDtm(saved),'', 'Provider created 🎉 .');
 
         }catch(e){
-            console.log(e)
             return ApiResponseUtil.error('',"Failed to create provider .", "internal_error");
         }
     }
@@ -67,7 +66,6 @@ export class PaymentProviderFeature {
 
             return ApiResponseUtil.ok(ProviderDtm.fromProviderDtm(provider), provider.activated ? 'Provider activated' : 'Provider deactivated', 'This provider was ' + (provider.activated ? 'activated' : 'deactivated') + ' successfully .');
         }catch(e){
-            console.log(e)
             return ApiResponseUtil.error('Internal error','An unexpected error occurred, please try again .', 'internal_error');
         }
     }

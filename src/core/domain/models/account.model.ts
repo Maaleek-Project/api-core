@@ -1,5 +1,6 @@
 import { CountryModel } from "./country.model";
 import { EntityModel } from "./entity.model";
+import { ExchangeRequestModel } from "./exchange_request.model";
 import { UserModel } from "./user.model";
 import { WorkerModel } from "./worker.model";
 
@@ -18,4 +19,6 @@ export interface AccountModel {
     created_at? : Date;
     updated_at? : Date;
     worker? : [WorkerModel] | null;
+    sender? : [ExchangeRequestModel] | null;
+    register_in_app? : boolean;
 }

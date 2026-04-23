@@ -18,7 +18,7 @@ export class UserController {
     ) {}
 
 
-    @EntityType(['Customer'])
+    @EntityType(['Customer' , 'Company', 'Manager'])
     @Put('update-password')
     async updatePassword(@Req() req: Request, @Body() context: UpdatePasswordContext, @Res() res: Response) {
         const update = await this.feature.updatePassword(AccountDtm.fromAccountDtm(req['user']), context);
@@ -40,7 +40,7 @@ export class UserController {
             fileFilter: imageFileFilter,
         }),
     )
-    @EntityType(['Customer'])
+    @EntityType(['Customer' , 'Company', 'Manager'])
     @Put('update-info')
     async updateCustomer(@Req() req: Request, @Body() context: UpdateCustomerContext, @UploadedFile() avatar: Express.Multer.File, @Res() res: Response) {
         const update = await this.feature.updateCustomerInfo(AccountDtm.fromAccountDtm(req['user']), context, avatar);
@@ -54,7 +54,7 @@ export class UserController {
         return res.status(status).json(update);
     }
 
-    @EntityType(['Customer'])
+    @EntityType(['Customer' , 'Company', 'Manager'])
     @Put('update-business-card')
     async updateBusinessCard(@Req() req: Request, @Body() context: UpdateBusinessCardContext, @Res() res: Response) {
         const update = await this.feature.updateBusinessCardInfo(AccountDtm.fromAccountDtm(req['user']), context);
@@ -68,7 +68,7 @@ export class UserController {
         return res.status(status).json(update);
     }
 
-    @EntityType(['Customer'])
+    @EntityType(['Customer' , 'Company', 'Manager'])
     @Get('business-card')
     async userBusinessCard(@Req() req: Request, @Res() res: Response) {
         const businessCardReceived = await this.feature.userBusinessCard(AccountDtm.fromAccountDtm(req['user']));

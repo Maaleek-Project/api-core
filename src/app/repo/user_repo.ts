@@ -77,10 +77,6 @@ export class UserRepo implements IUserRepo {
 
     private toDatabase(user: UserModel): any {
 
-        console.log(" ################ in toDabatse user repo ##################")
-        console.log(user)
-        console.log("##########################################")
-
         return {
             id: user.id,
             civility: user.civility,

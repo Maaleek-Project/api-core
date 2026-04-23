@@ -21,6 +21,13 @@ export class BusinessCardDtm {
     }
 
     static fromBusinessCardDtm(businessCard : BusinessCardModel) : BusinessCardDtm {
-        return new BusinessCardDtm(businessCard.id, UserDtm.fromUserDtm(businessCard.user), businessCard.number, businessCard.email, businessCard.job, businessCard.social_networks, businessCard.company);
+        return new BusinessCardDtm(
+            businessCard.id, 
+            UserDtm.fromUserDtm(businessCard.user), 
+            `+225 ${businessCard.number}`, 
+            businessCard.email, 
+            businessCard.job, 
+            businessCard.social_networks, 
+            businessCard.company);
     }
 }

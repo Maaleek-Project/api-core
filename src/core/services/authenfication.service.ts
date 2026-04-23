@@ -19,8 +19,14 @@ export class AuthentificationService {
         return await bcrypt.compare(password, hash);
     }
 
-    async generateToken(account : AccountDtm) {
-        const payload = { id : account.id, name : account.user.name, surname : account.user.surname, number : account.user.number, entity : account.entity.libelle } ;
+    async generateToken(account : {
+        id : string ,
+        name : string ,
+        surname : string ,
+        number : string ,
+        entity : string
+    }) {
+        const payload = { id : account.id, name : account.name, surname : account.surname, number : account.number, entity : account.entity } ;
         const secret = process.env.JWT_SECRET;
         return  this.jwtService.signAsync(payload, {
             secret,

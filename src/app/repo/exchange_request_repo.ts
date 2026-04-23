@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Prisma } from "@prisma/client";
+import { ExchangeRequestStatus, Prisma } from "@prisma/client";
 import { ExchangeRequestModel } from "src/core/domain/models/exchange_request.model";
 import { IExchangeRequestRepo } from "src/core/interfaces/i_exchange_request_repo";
 import { PrismaService } from "src/prisma.service";
@@ -26,12 +26,12 @@ export class ExchangeRequestRepo implements IExchangeRequestRepo {
         private readonly prisma: PrismaService,
     ) {}
 
-    async findById(id: string): Promise<ExchangeRequestModel> {
+    async findById(id: string): Promise<ExchangeRequestModel | null> {
         const exchangeRequest = await this.prisma.exchangeRequest.findUnique({
             where: { id },
             include: EXCHANGE_INCLUDE
         });
-        return this.toExchangeRequest(exchangeRequest);
+        return exchangeRequest ? this.toExchangeRequest(exchangeRequest) : null;
     }
 
     async findBySender(sender_id: string): Promise<ExchangeRequestModel[]> {
@@ -44,7 +44,7 @@ export class ExchangeRequestRepo implements IExchangeRequestRepo {
 
     async findByRecipient(recipient_id: string): Promise<ExchangeRequestModel[]> {
         const exchangeRequests = await this.prisma.exchangeRequest.findMany({
-            where: { recipient_id },
+            where: { recipient_id , status  : ExchangeRequestStatus.ACCEPTED},
             include: EXCHANGE_INCLUDE
         });
         return exchangeRequests.map(er => this.toExchangeRequest(er));
@@ -70,6 +70,11 @@ export class ExchangeRequestRepo implements IExchangeRequestRepo {
     }
 
     private toExchangeRequest(exchangeRequest: any): ExchangeRequestModel {
+
+        console.log("#########################")
+        console.log(exchangeRequest)
+        console.log("#########################")
+
         return {
             id: exchangeRequest.id,
             sender: exchangeRequest.sender,

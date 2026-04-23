@@ -9,6 +9,7 @@ import { NotificationRepo } from "./notification_repo";
 import { ExchangeRequestRepo } from "./exchange_request_repo";
 import { BusinessCardRepo } from "./business_card_repo";
 import { CompanyRepo } from "./company_repo";
+import { SubscriberRepo } from "./subscriber_repo";
 
 @Module({
     imports: [
@@ -25,6 +26,7 @@ import { CompanyRepo } from "./company_repo";
         NotificationRepo,
         ExchangeRequestRepo,
         BusinessCardRepo,
+        SubscriberRepo,
         CompanyRepo,
         PrismaService
 
@@ -39,6 +41,7 @@ import { CompanyRepo } from "./company_repo";
         ExchangeRequestRepo,
         CompanyRepo,
         BusinessCardRepo,
+        SubscriberRepo,
         PrismaService
     ],
 })

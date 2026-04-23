@@ -12,6 +12,8 @@ import { ExchangeRequestRepo } from "src/app/repo/exchange_request_repo";
 import { FirebaseService } from "src/core/services/firebase.service";
 import { BusinessCardRepo } from "src/app/repo/business_card_repo";
 import { R2Service } from "src/core/services/r2.service";
+import { CompanyRepo } from "src/app/repo/company_repo";
+import { SubscriberRepo } from "src/app/repo/subscriber_repo";
 
 @Module({
     imports : [],
@@ -26,6 +28,8 @@ import { R2Service } from "src/core/services/r2.service";
         MainFeature,
         SettingFeature,
         AuthentificationService,
+        CompanyRepo,
+        SubscriberRepo,
         R2Service,
         FirebaseService
     ]
