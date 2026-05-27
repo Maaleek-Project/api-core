@@ -24,7 +24,7 @@ export class BusinessCardDtm {
         return new BusinessCardDtm(
             businessCard.id, 
             UserDtm.fromUserDtm(businessCard.user), 
-            `+225 ${businessCard.number}`, 
+            `${businessCard.number}`, 
             businessCard.email, 
             businessCard.job, 
             businessCard.social_networks, 

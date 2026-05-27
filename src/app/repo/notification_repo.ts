@@ -22,7 +22,21 @@ export class NotificationRepo implements INotificationRepo {
     async remove(notification: NotificationModel): Promise<void> {
         await this.prisma.notification.update({
             where: { id: notification.id },
-            data: { deleted: true }
+            data: { deleted: true , readed: true }
+        });
+    }
+
+    async readed(notification: NotificationModel): Promise<void> {
+        await this.prisma.notification.update({
+            where: { id: notification.id },
+            data: { readed: true }
+        });
+    }
+
+    async saveMany(notifications: NotificationModel[]): Promise<void> {
+        await this.prisma.notification.createMany({
+            data: notifications.map(n => this.toDatabase(n)),
+            skipDuplicates: true,
         });
     }
 

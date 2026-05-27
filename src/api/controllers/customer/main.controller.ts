@@ -4,7 +4,7 @@ import { EntityType } from "src/core/decorators/entity_type.decorator";
 import { EntityTypeGuard } from "src/core/guards/entity_type.guard";
 import { Response } from "express";
 import { AccountDtm } from "src/core/domain/dtms/account.dtm";
-import { ExchangeRequestContext, ExchangeResponseContext, RefreshTokenContext } from "src/app/context/main.context";
+import { ExchangeRequestContext, ExchangeResponseContext, RefreshTokenContext, TouchBusinessCardContext } from "src/app/context/main.context";
 
 @UseGuards(EntityTypeGuard)
 @Controller('main')
@@ -46,6 +46,19 @@ export class MainController {
         };
         const status = statusMap[deleteNotification.code] ;
         return res.status(status).json(deleteNotification);
+    }
+
+    @EntityType(['Customer' , 'Company', 'Manager'])
+    @Put('user-readed-notification')
+    async readedNotification(@Req() req: Request, @Query('id') context: string, @Res() res: Response) {
+        const readedNotification = await this.feature.readedNotification(AccountDtm.fromAccountDtm(req['user']), context);
+        const statusMap: Record<string, number> = {
+            success: 200,
+            not_found: 404,
+            internal_error: 500,
+        };
+        const status = statusMap[readedNotification.code] ;
+        return res.status(status).json(readedNotification);
     }
 
 
@@ -102,6 +115,18 @@ export class MainController {
         };
         const status = statusMap[businessCardReceived.code] ;
         return res.status(status).json(businessCardReceived);
+    }
+
+    @EntityType(['Customer', 'Company', 'Manager'])
+    @Post('touch-business-card')
+    async touchBusinessCard(@Req() req: Request, @Body() context: TouchBusinessCardContext, @Res() res: Response) {
+        const result = await this.feature.touchBusinessCard(AccountDtm.fromAccountDtm(req['user']), context);
+        const statusMap: Record<string, number> = {
+            success      : 200,
+            not_found    : 404,
+            internal_error: 500,
+        };
+        return res.status(statusMap[result.code] || 500).json(result);
     }
 
     @EntityType(['Customer'])

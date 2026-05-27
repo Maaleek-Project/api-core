@@ -13,6 +13,10 @@ import { UserModel } from "src/core/domain/models/user.model";
 import { AuthentificationService } from "src/core/services/authenfication.service";
 import { EntityModel } from "src/core/domain/models/entity.model";
 import { PrismaService } from "src/prisma.service";
+import { NotificationRepo } from "src/app/repo/notification_repo";
+import { FirebaseService } from "src/core/services/firebase.service";
+import { NotificationType } from "@prisma/client";
+import { NotificationModel } from "src/core/domain/models/notification.model";
 
 @Injectable()
 export class CompanyFeature {
@@ -24,6 +28,8 @@ export class CompanyFeature {
         private readonly accountRepo: AccountRepo,
         private readonly userRepo: UserRepo,
         private readonly authentificationService: AuthentificationService,
+        private readonly notificationRepo: NotificationRepo,
+        private readonly firebaseService: FirebaseService,
     ) {}
 
     async listing(): Promise<ApiResponse<CompanyDtm[]>> {
@@ -76,13 +82,42 @@ export class CompanyFeature {
                 const savedAccount = await this.accountRepo.save(newAccount, tx);
                 newCompany.account = savedAccount;
                 return this.companyRepo.save(newCompany, tx);
-            });
+            }, { timeout: 20000 });
+
+            // Fire-and-forget : ne bloque pas la réponse
+            this.broadcastNewCompany(saved_company).catch(() => {});
 
             return ApiResponseUtil.ok(CompanyDtm.fromCompanyDtm(saved_company), '', 'Company created 🎉 .');
 
         } catch (e) {
+            console.error(e);
             return ApiResponseUtil.error('', "Failed to create company .", "internal_error");
         }
+    }
+
+    private async broadcastNewCompany(company: CompanyModel): Promise<void> {
+        const accounts = await this.accountRepo.findAllFcmTokens();
+        if (accounts.length === 0) return;
+
+        const title   = '🏢 Nouvelle entreprise sur Maaleek';
+        const message = `${company.name} vient de rejoindre la plateforme !`;
+
+        // 1. Persistance en un seul appel DB (createMany)
+        const notifications: NotificationModel[] = accounts.map(account => ({
+            id       : uuidv4(),
+            account  : { id: account.id } as AccountModel,
+            title,
+            message,
+            type     : NotificationType.OTHER,
+        }));
+        await this.notificationRepo.saveMany(notifications);
+
+        // 2. Push FCM en parallèle — les échecs individuels sont ignorés
+        await Promise.allSettled(
+            accounts.map(({ fcm_token }) =>
+                this.firebaseService.toPush(fcm_token, title, message)
+            )
+        );
     }
 
     async toogleLock(company_id: string): Promise<ApiResponse<CompanyDtm>> {

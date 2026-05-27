@@ -72,7 +72,7 @@ export class AdvertisingController {
     @EntityType(['Company'])
     @Delete('delete-advertising/:id')
     async deleteAdvertising(@Req() req: Request, @Res() res: Response, @Param('id') id : string) {
-        const account = req['user'] 
+        const account = req['user']
         const advertising = await this.feature.deleteAdvertising(id);
         const statusMap: Record<string, number> = {
             success: 200,
@@ -81,6 +81,31 @@ export class AdvertisingController {
         };
         const status = statusMap[advertising.code] || 500;
         return res.status(status).json(advertising);
+    }
+
+    @EntityType(['Customer', 'Company', 'Manager'])
+    @Post(':id/view')
+    async recordView(@Req() req: Request, @Res() res: Response, @Param('id') id: string) {
+        const account = req['user'];
+        const result = await this.feature.recordView(account.id, id);
+        const statusMap: Record<string, number> = {
+            success      : 200,
+            not_found    : 404,
+            internal_error: 500,
+        };
+        return res.status(statusMap[result.code] || 500).json(result);
+    }
+
+    @EntityType(['Customer', 'Company', 'Manager'])
+    @Get('all-by-company')
+    async listingAllByCompany(@Res() res: Response) {
+        const result = await this.feature.listingAllByCompany();
+        const statusMap: Record<string, number> = {
+            success: 200,
+            internal_error: 500,
+        };
+        const status = statusMap[result.code] || 500;
+        return res.status(status).json(result);
     }
 
 }

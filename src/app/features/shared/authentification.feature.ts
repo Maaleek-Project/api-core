@@ -68,6 +68,7 @@ export class AuthentificationFeature {
             const time_up = SharedUtil.isTimeUp(action.updated_at!, 3);
 
             if (time_up) {
+                await this.otpRepo.remove(action);
                 return ApiResponseUtil.error('Temps écoulé', 'Le temps de validation est écoulé, merci de réessayer avec un nouveau code .', 'conflict');
             }
 
@@ -207,6 +208,8 @@ export class AuthentificationFeature {
                     message: "Nous sommes ravis de vous compter parmi nous. Ensemble, construisons un réseau solide et inspirant !",
                 }, tx);
                 return savedAccount;
+            },{
+                timeout: 20000,
             });
 
             setTimeout(async () => {
@@ -222,6 +225,7 @@ export class AuthentificationFeature {
             return ApiResponseUtil.ok({ ...AccountDtm.fromAccountDtm(saved), token, expired_at: tokenModel.expired_at }, 'Compte créer', 'Bienvenue 🎉, votre compte a été créé avec succès, accéder à votre espace .');
 
         } catch (e) {
+            console.log(e)
             return ApiResponseUtil.error('Erreur interne', 'Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
     }

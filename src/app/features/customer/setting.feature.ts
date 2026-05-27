@@ -130,13 +130,17 @@ export class SettingFeature {
                     return ApiResponseUtil.error('Carte inexistant','Désolé, vous n\'avez pas de carte de visite, merci de bien vouloir réessayer .', 'not_found')
                 }
 
-                userBusinessCard.email = context.email
-                userBusinessCard.number = context.number
-                userBusinessCard.job = context.job
+                userBusinessCard.email = context.email;
+                userBusinessCard.number = context.number;
+                userBusinessCard.job = context.job;
 
-                userBusinessCard.social_networks[0] = context.linkedin_link 
-                userBusinessCard.social_networks[1] = context.portfolio_link 
-                userBusinessCard.social_networks[2] = context.facebook_link 
+                // Liens optionnels : on ne remplace que les champs explicitement fournis
+                const existing = userBusinessCard.social_networks ?? [];
+                userBusinessCard.social_networks = [
+                    context.linkedin_link  !== undefined ? context.linkedin_link  : (existing[0] ?? ''),
+                    context.portfolio_link !== undefined ? context.portfolio_link : (existing[1] ?? ''),
+                    context.facebook_link  !== undefined ? context.facebook_link  : (existing[2] ?? ''),
+                ];
                 
                 await this.businessCardRepo.save(userBusinessCard)
 

@@ -26,3 +26,8 @@ export class ExchangeResponseContext {
     @IsNotEmpty({ message: 'Document id is required .' })
     document_id : string;
 }
+
+export class TouchBusinessCardContext {
+    @IsNotEmpty({ message: 'Card owner account id is required .' })
+    card_owner_account_id : string;
+}

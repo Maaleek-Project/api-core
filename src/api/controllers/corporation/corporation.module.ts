@@ -15,6 +15,7 @@ import { R2Service } from "src/core/services/r2.service";
 import { AdvertisingFeature } from "src/app/features/manager/advertising.feature";
 import { AdvertisingController } from "./advertising.controller";
 import { AdvertisingRepo } from "src/app/repo/advertising_repo";
+import { AdvertisingViewRepo } from "src/app/repo/advertising_view_repo";
 import { BusinessCardRepo } from "src/app/repo/business_card_repo"
 
 @Module({
@@ -34,6 +35,7 @@ import { BusinessCardRepo } from "src/app/repo/business_card_repo"
         SettingFeature,
         AdvertisingFeature,
         AdvertisingRepo,
+        AdvertisingViewRepo,
         BusinessCardRepo
     ],
 

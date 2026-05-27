@@ -4,4 +4,5 @@ export interface IAdvertisingRepo {
     save(advertising : AdvertisingModel) : Promise<AdvertisingModel>;
     findById(id : string) : Promise<AdvertisingModel | null>;
     findByCompanyId(company_id : string) : Promise<AdvertisingModel[]>;
+    findAll() : Promise<AdvertisingModel[]>;
 }

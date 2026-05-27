@@ -1,4 +1,4 @@
-import {  IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsOptional } from 'class-validator';
 
 export  class UpdateCustomerContext {
 
@@ -33,13 +33,13 @@ export class UpdateBusinessCardContext {
     @IsNotEmpty({ message: 'Job is required .' })
     job : string;
 
-    @IsNotEmpty({ message: 'Facebook link is required .' })
-    facebook_link : string;
+    @IsOptional()
+    facebook_link? : string;
 
-    @IsNotEmpty({ message: 'Linkedin link is required .' })
-    linkedin_link : string;
+    @IsOptional()
+    linkedin_link? : string;
 
-    @IsNotEmpty({ message: 'Portfolio link is required .' })
-    portfolio_link : string;
+    @IsOptional()
+    portfolio_link? : string;
 
 }

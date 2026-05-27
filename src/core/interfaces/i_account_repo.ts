@@ -5,4 +5,6 @@ export interface IAccountRepo {
     save(account : AccountModel) : Promise<AccountModel>
     findAllCustomer() : Promise<AccountModel[]>
     findById(id : string ) : Promise<AccountModel | null>
+    findAllFcmTokens() : Promise<{ id: string; fcm_token: string }[]>
+    findByUserId(user_id : string) : Promise<AccountModel | null>
 }

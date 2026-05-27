@@ -4,6 +4,7 @@ import { AccountModel } from "src/core/domain/models/account.model";
 import { IAccountRepo } from "src/core/interfaces/i_account_repo";
 import { PrismaService } from "src/prisma.service";
 
+// Include complet — utilisé pour les lectures (findById, findAllCustomer, etc.)
 const ACCOUNT_INCLUDE = {
     user: {
         include: {
@@ -20,13 +21,23 @@ const ACCOUNT_INCLUDE = {
         }
     },
     entity: true,
-    worker : {
-        include : {
-            company : true
-        },
-        where : {state : 'in_office'}
-    } ,
-    
+    worker: {
+        include: { company: true },
+        where: { state: 'in_office' }
+    },
+} as const;
+
+// Include minimal — utilisé uniquement dans save() pour éviter le timeout de transaction
+const ACCOUNT_SAVE_INCLUDE = {
+    user: {
+        include: {
+            businessCard: {
+                include: { offer: true }
+            }
+        }
+    },
+    country: true,
+    entity: true,
 } as const;
 
 @Injectable()
@@ -35,6 +46,14 @@ export class AccountRepo implements IAccountRepo {
     constructor(
         private readonly prisma: PrismaService,
     ) {}
+
+    async findByUserId(user_id: string): Promise<AccountModel | null> {
+        const account = await this.prisma.account.findFirst({
+            where: { user_id },
+            include: ACCOUNT_INCLUDE
+        });
+        return account ? this.toAccount(account) : null;
+    }
 
     async findById(id: string): Promise<AccountModel | null> {
         const account = await this.prisma.account.findFirst({
@@ -50,7 +69,7 @@ export class AccountRepo implements IAccountRepo {
             where: { id: model.id },
             update: this.toDatabase(model),
             create: this.toDatabase(model),
-            include: ACCOUNT_INCLUDE
+            include: ACCOUNT_SAVE_INCLUDE   // inclure minimal : pas de Sender ni worker → pas de timeout
         });
         return this.toAccount(account);
     }
@@ -79,6 +98,13 @@ export class AccountRepo implements IAccountRepo {
         return accounts.map(account => this.toAccount(account));
     }
 
+    async findAllFcmTokens(): Promise<{ id: string; fcm_token: string }[]> {
+        return this.prisma.account.findMany({
+            select: { id: true, fcm_token: true },
+            where: { fcm_token: { not: '' } },
+        });
+    }
+
     private toAccount(account: any): AccountModel {
         return {
             id: account.id,
@@ -94,8 +120,9 @@ export class AccountRepo implements IAccountRepo {
             locked: account.locked,
             created_at: account.created_at,
             updated_at: account.updated_at,
-            worker : account.worker ,
-            sender : account.Sender
+            worker: account.worker ?? null,
+            sender: account.Sender ?? [],
+            register_in_app : account.register_in_app,
         };
     }
 
@@ -110,7 +137,8 @@ export class AccountRepo implements IAccountRepo {
             status: account.status,
             fcm_token: account.fcm_token,
             locked : account.locked,
-            document_id: account.document_id
+            document_id: account.document_id,
+            register_in_app: account.register_in_app,
         };
     }
 }

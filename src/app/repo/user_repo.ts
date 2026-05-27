@@ -86,6 +86,7 @@ export class UserRepo implements IUserRepo {
             birthdate: user.birthdate,
             number: user.number,
             email: user.email
+    
         };
     }
 }

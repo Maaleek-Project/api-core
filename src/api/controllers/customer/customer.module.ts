@@ -11,6 +11,7 @@ import { NotificationRepo } from "src/app/repo/notification_repo";
 import { ExchangeRequestRepo } from "src/app/repo/exchange_request_repo";
 import { FirebaseService } from "src/core/services/firebase.service";
 import { BusinessCardRepo } from "src/app/repo/business_card_repo";
+import { BusinessCardViewRepo } from "src/app/repo/business_card_view_repo";
 import { R2Service } from "src/core/services/r2.service";
 import { CompanyRepo } from "src/app/repo/company_repo";
 import { SubscriberRepo } from "src/app/repo/subscriber_repo";
@@ -24,6 +25,7 @@ import { SubscriberRepo } from "src/app/repo/subscriber_repo";
         NotificationRepo,
         ExchangeRequestRepo,
         BusinessCardRepo,
+        BusinessCardViewRepo,
         PrismaService,
         MainFeature,
         SettingFeature,

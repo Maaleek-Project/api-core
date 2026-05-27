@@ -17,6 +17,8 @@ import { SettingFeature } from "src/app/features/administrator/setting/setting.f
 import { OfferFeature } from "src/app/features/administrator/setting/setup/offer.feature";
 import { OfferRepo } from "src/app/repo/offer_repo";
 import { R2Service } from "src/core/services/r2.service";
+import { NotificationRepo } from "src/app/repo/notification_repo";
+import { FirebaseService } from "src/core/services/firebase.service";
 
 @Module({
     imports: [],
@@ -31,6 +33,7 @@ import { R2Service } from "src/core/services/r2.service";
         CompanyRepo,
         ResourceRepo,
         PaymentProviderRepo,
+        NotificationRepo,
         PrismaService,
         OfferRepo,
         CustomerFeature,
@@ -40,6 +43,7 @@ import { R2Service } from "src/core/services/r2.service";
         PaymentProviderFeature,
         OfferFeature,
         R2Service,
+        FirebaseService,
         AuthentificationService
     ],
 })

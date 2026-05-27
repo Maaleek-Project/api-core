@@ -67,6 +67,8 @@ model Account {
   Notification Notification[] 
   Sender ExchangeRequest[] @relation("sender_relation")
   Recipient ExchangeRequest[] @relation("recipient_relation")
+  AdvertisingView AdvertisingView[]
+  BusinessCardViews BusinessCardView[] @relation("viewer_relation")
 }
 
 
@@ -231,13 +233,13 @@ model CompanySubscriber {
 model BusinessCard{
   id         String      @id @default(uuid())
   user_id    String      @unique
-  offer_id   String 
+  offer_id   String
   number     String      @unique
   social_networks String[]  @default([])
   email      String?     @unique
   job        String?
-  company_id String? 
-  
+  company_id String?
+
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -245,8 +247,22 @@ model BusinessCard{
   company Company? @relation(fields: [company_id], references: [id], onDelete: Cascade)
   offer Offer @relation(fields: [offer_id], references: [id], onDelete: Cascade)
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  views BusinessCardView[]
 
   @@map("business_cards")
+}
+
+model BusinessCardView {
+  id               String   @id @default(uuid())
+  viewer_id        String
+  business_card_id String
+
+  viewed_at        DateTime @default(now())
+
+  viewer        Account      @relation("viewer_relation",  fields: [viewer_id],        references: [id], onDelete: Cascade)
+  business_card BusinessCard @relation(                    fields: [business_card_id], references: [id], onDelete: Cascade)
+
+  @@map("business_card_views")
 }
 
 model Offer {
@@ -336,7 +352,7 @@ model ExchangeRequest{
 model Advertising {
   id         String      @id @default(uuid())
   company_id String
-  type       AdvertisingType 
+  type       AdvertisingType
   title      String
   description String
   is_active Boolean  @default(true)
@@ -347,6 +363,20 @@ model Advertising {
   updated_at DateTime @updatedAt
 
   company Company @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  views   AdvertisingView[]
 
   @@map("advertisings")
+}
+
+model AdvertisingView {
+  id             String   @id @default(uuid())
+  advertising_id String
+  account_id     String
+
+  viewed_at      DateTime @default(now())
+
+  advertising Advertising @relation(fields: [advertising_id], references: [id], onDelete: Cascade)
+  account     Account     @relation(fields: [account_id],     references: [id], onDelete: Cascade)
+
+  @@map("advertising_views")
 }

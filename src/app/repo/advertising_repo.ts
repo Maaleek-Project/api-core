@@ -49,6 +49,15 @@ export class AdvertisingRepo implements IAdvertisingRepo {
         return advertisings.map(a => this.toAdvertising(a));
     }
 
+    async findAll(): Promise<AdvertisingModel[]> {
+        const advertisings = await this.prisma.advertising.findMany({
+            where: { is_deleted: false, is_active: true },
+            include: ADVERTISING_INCLUDE,
+            orderBy: { created_at: 'desc' },
+        });
+        return advertisings.map(a => this.toAdvertising(a));
+    }
+
     async save(advertising: AdvertisingModel): Promise<AdvertisingModel> {
         const saved = await this.prisma.advertising.upsert({
             where: { id: advertising.id },

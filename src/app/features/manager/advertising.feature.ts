@@ -11,6 +11,9 @@ import { AdvertisingRepo } from "src/app/repo/advertising_repo";
 import { AdvertisingModel } from "src/core/domain/models/advertising.model";
 import { AdvertisingType } from "@prisma/client";
 import { AdvertisingDtm } from "src/core/domain/dtms/adversiting.dtm";
+import { CompanyAdvertisingsDtm } from "src/core/domain/dtms/company_advertisings.dtm";
+import { CompanyModel } from "src/core/domain/models/company.model";
+import { AdvertisingViewRepo } from "src/app/repo/advertising_view_repo";
 
 @Injectable()
 export class AdvertisingFeature {
@@ -19,6 +22,7 @@ export class AdvertisingFeature {
         private readonly companyRepo: CompanyRepo,
         private readonly r2Service: R2Service,
         private readonly advertisingRepo: AdvertisingRepo,
+        private readonly advertisingViewRepo: AdvertisingViewRepo,
     ) {}
 
     async createAdvertising(accountDtm: AccountDtm, context: CreateAdvertisingContext, file?: Express.Multer.File): Promise<ApiResponse<AdvertisingDtm>> {
@@ -138,6 +142,53 @@ export class AdvertisingFeature {
             advertising.is_active = false;
             await this.advertisingRepo.save(advertising);
             return ApiResponseUtil.ok(AdvertisingDtm.fromAdvertisingDtm(advertising), '', 'Advertising deleted .');
+        } catch (e) {
+            return ApiResponseUtil.error('Erreur interne', 'Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
+        }
+    }
+
+    async recordView(accountId: string, advertisingId: string): Promise<ApiResponse<{ advertising_id: string; views_count: number }>> {
+        try {
+            const advertising = await this.advertisingRepo.findById(advertisingId);
+            if (!advertising) {
+                return ApiResponseUtil.error('', 'Publicité introuvable .', 'not_found');
+            }
+
+            await this.advertisingViewRepo.save({
+                id             : uuidv4(),
+                advertising_id : advertisingId,
+                account_id     : accountId,
+            });
+
+            const views_count = await this.advertisingViewRepo.countByAdvertisingId(advertisingId);
+
+            return ApiResponseUtil.ok(
+                { advertising_id: advertisingId, views_count },
+                '',
+                'Vue enregistrée .',
+            );
+        } catch (e) {
+            return ApiResponseUtil.error('Erreur interne', 'Une erreur inattendue est survenue .', 'internal_error');
+        }
+    }
+
+    async listingAllByCompany(): Promise<ApiResponse<CompanyAdvertisingsDtm[]>> {
+        try {
+            const allAds = await this.advertisingRepo.findAll();
+
+            // Groupement par entreprise en préservant l'ordre d'apparition
+            const grouped = new Map<string, { company: CompanyModel; ads: AdvertisingModel[] }>();
+            for (const ad of allAds) {
+                if (!grouped.has(ad.company.id)) {
+                    grouped.set(ad.company.id, { company: ad.company, ads: [] });
+                }
+                grouped.get(ad.company.id)!.ads.push(ad);
+            }
+
+            const result = Array.from(grouped.values())
+                .map(({ company, ads }) => CompanyAdvertisingsDtm.fromGroup(company, ads));
+
+            return ApiResponseUtil.ok(result, '', 'Publicités groupées par entreprise 🎉 .');
         } catch (e) {
             return ApiResponseUtil.error('Erreur interne', 'Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }

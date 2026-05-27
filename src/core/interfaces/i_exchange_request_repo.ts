@@ -5,4 +5,5 @@ export interface IExchangeRequestRepo {
     findByRecipient(recipient_id : string) : Promise<ExchangeRequestModel[]>;
     save(exchangeRequest : ExchangeRequestModel) : Promise<ExchangeRequestModel>;
     findById(id : string) : Promise<ExchangeRequestModel | null>;
+    findRequest(sender , recipient) : Promise<ExchangeRequestModel | null>;
 }

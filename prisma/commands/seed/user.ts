@@ -20,19 +20,10 @@ export default async function UserSeeder() {
         {
             id: uuidv4(),
             civility: 'Mr',
-            name: 'Djie',
-            surname: 'Fabrice',
-            number: '0779312475',
-            login : 'louisfabrice1@gmail.com',
-            password : 'Maaleek@2024!'
-        },
-        {
-            id: uuidv4(),
-            civility: 'Mr',
             name: 'Ofaby',
             surname: 'Oscar',
-            number: '0777002625',
-            login : 'fabriceo.kouame@gmail.com',
+            number: '0000000000',
+            login : 'oscar.maaleek@console.com',
             password : 'Maaleek@2024!'
         }
     ]

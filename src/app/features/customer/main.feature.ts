@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ExchangeRequestStatus, NotificationType } from "@prisma/client";
-import { ExchangeRequestContext, ExchangeResponseContext, RefreshTokenContext } from "src/app/context/main.context";
+import { ExchangeRequestContext, ExchangeResponseContext, RefreshTokenContext, TouchBusinessCardContext } from "src/app/context/main.context";
 import { AccountRepo } from "src/app/repo/account_repo";
 import { BusinessCardRepo } from "src/app/repo/business_card_repo";
 import { ExchangeRequestRepo } from "src/app/repo/exchange_request_repo";
@@ -20,6 +20,7 @@ import { CompanyKPIDtm } from "src/core/domain/dtms/company_kpi.dtm";
 import { CompanyDtm } from "src/core/domain/dtms/company.dtm";
 import { SubscriberRepo } from "src/app/repo/subscriber_repo";
 import { CompanyModel } from "src/core/domain/models/company.model";
+import { BusinessCardViewRepo } from "src/app/repo/business_card_view_repo";
 
 @Injectable()
 export class MainFeature {
@@ -33,6 +34,7 @@ export class MainFeature {
         private readonly businessCardRepo: BusinessCardRepo,
         private readonly companyRepo: CompanyRepo,
         private readonly subscriberRepo: SubscriberRepo,
+        private readonly businessCardViewRepo: BusinessCardViewRepo,
     ) {}
 
     async userNotifications(account: AccountDtm): Promise<ApiResponse<NotificationDtm[]>> {
@@ -57,6 +59,23 @@ export class MainFeature {
         }
     }
 
+    async readedNotification(account: AccountDtm, notificationId: string): Promise<ApiResponse<String>> {
+        try {
+            const notification = await this.notificationRepo.findById(notificationId, account.id);
+
+            if (notification == null) {
+                return ApiResponseUtil.error('Notification inexistante', 'Désolé, cette notification semble ne pas exister, merci de bien vouloir réessayer .', 'not_found');
+            }
+
+            await this.notificationRepo.readed(notification);
+
+            return ApiResponseUtil.ok("", 'Notification lue', 'Votre notification a bien été marquée comme lue .');
+
+        } catch (e) {
+            return ApiResponseUtil.error('Erreur interne', 'Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
+        }
+    }
+
     async exchangeRequest(context: ExchangeRequestContext): Promise<ApiResponse<AccountDtm>> {
         try {
             const [sender, recipient] = await Promise.all([
@@ -72,7 +91,15 @@ export class MainFeature {
                 return ApiResponseUtil.error('Même Identité', 'Désolé, vous ne pouvez pas envoyer une demande de carte à vous-même .', 'conflict');
             }
 
-            // if(recipient != null && sender != null && recipient.status =){
+            const existingRequest : ExchangeRequestModel | null = await this.exchangeRequestRepo.findRequest(sender, recipient);
+
+            console.log("############ EXISTING REQUEST ############")
+            console.log(existingRequest)
+            console.log("############ EXISTING REQUEST ############")
+
+            if(existingRequest != null && existingRequest.status == ExchangeRequestStatus.WAITING){
+                return ApiResponseUtil.error('Demande déjà envoyé', 'Désolé, vous avez déjà envoyé une demande de carte à cette personne .', 'conflict');
+            }
 
             const exchange: ExchangeRequestModel = {
                 id: uuidv4(),
@@ -136,6 +163,7 @@ export class MainFeature {
             exchangeRequest.status = context.response ? ExchangeRequestStatus.ACCEPTED : ExchangeRequestStatus.REJECTED;
 
             const recipient: AccountModel = await this.accountRepo.findById(exchangeRequest.recipient.id) as AccountModel;
+            const sender: AccountModel = await this.accountRepo.findById(exchangeRequest.sender.id) as AccountModel;
 
             await this.prisma.$transaction(async (tx) => {
                 await this.exchangeRequestRepo.save(exchangeRequest, tx);
@@ -149,6 +177,25 @@ export class MainFeature {
                     type: context.response ? NotificationType.APPROVAL : NotificationType.REJECTED,
                 }, tx);
             });
+
+            if(context.response){
+                const tracking_recipient = await this.firebaseService.get('business_card_trackings', recipient.document_id!);
+                if(tracking_recipient != null){
+                    await this.firebaseService.update('business_card_trackings', recipient.document_id!, {
+                            ...tracking_recipient,
+                            // business_card          : (tracking_recipient.setup.business_card          ?? 0) - 1,
+                            business_card_received : (tracking_recipient.business_card_received ?? 0) + 1,
+                    });
+                }
+                const tracking_sender = await this.firebaseService.get('business_card_trackings', sender.document_id!);
+                if(tracking_sender != null){
+                    await this.firebaseService.update('business_card_trackings', sender.document_id!, {
+                            ...tracking_sender,
+                            business_card          : (tracking_sender.business_card          ?? 0) - 1,
+                            // business_card_received : (tracking_sender.setup.business_card_received ?? 0) + 1,
+                    });
+                }
+            }
 
             await this.firebaseService.toPush(recipient.fcm_token, context.response ? 'Carte reçue 📇' : 'Carte refusée ❌', context.response ? 'Vous avez reçu une nouvelle carte de visite dans votre réseau .' : 'Votre demande d\'accès à une carte de visite n\'a pas abouti.');
             await this.firebaseService.toDelete('exchange_requests', context.document_id);
@@ -180,6 +227,64 @@ export class MainFeature {
         }
     }
 
+
+    async touchBusinessCard(toucher: AccountDtm, context: TouchBusinessCardContext): Promise<ApiResponse<string>> {
+        try {
+            // On évite qu'un utilisateur se notifie lui-même
+            if (toucher.user.id === context.card_owner_account_id) {
+                return ApiResponseUtil.ok('', '', 'Carte consultée .');
+            }
+
+            const cardOwner: AccountModel | null = await this.accountRepo.findByUserId(context.card_owner_account_id);
+
+            if (cardOwner == null) {
+                return ApiResponseUtil.error('Compte introuvable', 'Le propriétaire de la carte est introuvable .', 'not_found');
+            }
+
+            const title   = 'Carte consultée 👀';
+            const message = `${toucher.user.civility} ${toucher.user.name} ${toucher.user.surname} vient de consulter votre carte de visite .`;
+
+            // Récupération de la business card du propriétaire pour l'enregistrement de la vue
+            const businessCard = await this.businessCardRepo.findByUserId(cardOwner.user.id);
+
+            // Notification DB + push FCM + vue en base en parallèle
+            await Promise.all([
+                this.notificationRepo.save({
+                    id      : uuidv4(),
+                    account : cardOwner,
+                    title,
+                    message,
+                    type    : NotificationType.OTHER,
+                }),
+                this.firebaseService.toPush(cardOwner.fcm_token, title, message),
+                ...(businessCard ? [
+                    this.businessCardViewRepo.save({
+                        id              : uuidv4(),
+                        viewer_id       : toucher.id,
+                        business_card_id: businessCard.id,
+                    }),
+                ] : []),
+            ]);
+
+            // Incrément du compteur Firebase
+            if (cardOwner.document_id) {
+                const tracking = await this.firebaseService.get('business_card_trackings', cardOwner.document_id);
+                if (tracking != null) {
+                    await this.firebaseService.update('business_card_trackings', cardOwner.document_id, {
+                        setup: {
+                            ...tracking.setup,
+                            business_card_touched: (tracking.setup.business_card_touched ?? 0) + 1,
+                        },
+                    });
+                }
+            }
+
+            return ApiResponseUtil.ok('', '', 'Carte consultée, notification envoyée .');
+
+        } catch (e) {
+            return ApiResponseUtil.error('Erreur interne', 'Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
+        }
+    }
 
     async companyListing(account: AccountDtm): Promise<ApiResponse<CompanyKPIDtm[]>> {
         const companies = await this.companyRepo.findAllCompanies();
