@@ -100,6 +100,8 @@ export class AuthentificationFeature {
 
             const find_user = await this.userRepo.findByNumber(context.login);
 
+            console.log('find_user', find_user)
+
             if(find_user != null && account == null){
                 const by_email = await this.accountRepo.fetchByIdentifiant(find_user.email!);
                 if(by_email != null){
@@ -147,6 +149,7 @@ export class AuthentificationFeature {
             if (otp) {
                 await this.otpRepo.remove(otp);
             }
+            console.log(e)
             return ApiResponseUtil.error('Erreur interne', 'Une erreur inattendue est survenue, merci de bien vouloir réessayer .', 'internal_error');
         }
     }
